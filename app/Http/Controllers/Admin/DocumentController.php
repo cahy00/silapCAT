@@ -101,7 +101,7 @@ class DocumentController extends Controller
 						$name = $request->name;
 						$extension = $file->getClientOriginalExtension();
 						$slug = Str::slug($request->name);
-						$newName = 'document/' . date('YmdHis').".".$extension;
+						$newName = 'document/' . $slug .date('dmY').".".$extension;
 						$uploadPath = env('UPLOAD_PATH')."/document";
 						$request->file('file')->move($uploadPath, $newName);
 						// $data['file'] = $newName;
