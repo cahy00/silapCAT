@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Type;
 use App\Models\User;
 use App\Models\Document;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -94,11 +95,19 @@ class DocumentController extends Controller
 				// 	return redirect()->back()->withErrors($validator)->withInput();
 				// }
 
-				$file = $request->file('file');
-				$name = $request->name;
-				$extension = $file->getClientOriginalExtension();
-				$newName = $name . "." . $extension;
-				$uploads = Storage::putFileAs('public/file', $request->file('file'), $newName);
+				if($request->file('file')->isValid())
+					{
+						$file = $request->file('file');
+						$name = $request->name;
+						$extension = $file->getClientOriginalExtension();
+						$slug = Str::slug($request->name);
+						$newName = 'document/' . date('YmdHis').".".$extension;
+						$uploadPath = env('UPLOAD_PATH')."/document";
+						$request->file('file')->move($uploadPath, $newName);
+						// $data['file'] = $newName;
+						// $newName = $name . "." . $extension;
+						// $uploads = Storage::putFileAs('public/file', $request->file('file'), $newName);
+					}
 
 				if(Auth::user()->role = 'inka'){
 					if($request->id == 1){
@@ -108,7 +117,7 @@ class DocumentController extends Controller
 							'name' => $request->name,
 							'date' => $request->date,
 							'number' => $request->number,
-							'file' => 'storage/file/' . $newName,
+							'file' => $newName,
 							'jenis_surat' => 'surat_masuk',
 							'tgl_distribusi' => $request->tgl_distribusi,
 							'asal' => $request->asal,
@@ -123,7 +132,7 @@ class DocumentController extends Controller
 							'name' => $request->name,
 							'date' => $request->date,
 							'number' => $request->number,
-							'file' => 'storage/file/' . $newName,
+							'file' => $newName,
 							'jenis_surat' => 'surat_keluar',
 							'tgl_distribusi' => $request->tgl_distribusi,
 							'asal' => 'surat_keluar',
@@ -140,7 +149,7 @@ class DocumentController extends Controller
 							'name' => $request->name,
 							'date' => $request->date,
 							'number' => $request->number,
-							'file' => 'storage/file/' . $newName,
+							'file' => $newName,
 							'jenis_surat' => 'surat_masuk',
 							'tgl_distribusi' => $request->tgl_distribusi,
 							'asal' => $request->asal,
@@ -155,7 +164,7 @@ class DocumentController extends Controller
 							'name' => $request->name,
 							'date' => $request->date,
 							'number' => $request->number,
-							'file' => 'storage/file/' . $newName,
+							'file' => $newName,
 							'jenis_surat' => 'surat_keluar',
 							'tgl_distribusi' => $request->tgl_distribusi,
 							'asal' => 'surat_keluar',

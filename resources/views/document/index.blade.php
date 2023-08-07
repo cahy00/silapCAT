@@ -229,7 +229,7 @@
 									<td>{{$item->type->title}}</td>
 									<td>{{$item->number}}</td>
 									<td>
-										<a href="{{asset($item->file)}}">{{$item->name}}</a>
+										<a href="{{asset('public/uploads/'.$item->file)}}">{{$item->name}}</a>
 									</td>
 									<td>{{$item->tgl_distribusi}}</td>
 									<td>
