@@ -7,9 +7,11 @@ use App\Models\User;
 use App\Models\Document;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class DocumentController extends Controller
 {
@@ -84,16 +86,22 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
-        // $validator = $request->validate([
-				// 	'type_id' => 'required',
-				// 	'number' => 'required'
-				// ], [
-				// 	'number.required' => 'Nomor Dokumen Masih Kosong'
-				// ]);
+        $validator = Validator::make($request->all(),[
+					'type_id' => 'required',
+					'number' => 'required|unique:documents',
+					'name' => 'required',
+					'date' => 'required|date',
+					'tgl_distribusi' => 'required|date',
+					'sifat' => 'required',
+					'disposisi' => 'required'
+				], [
+					'number.required' => 'Nomor Dokumen Masih Kosong',
+					'number.unique' => 'Nomor Dokumen sudah ada'
+				]);
 
-				// if($validator){
-				// 	return redirect()->back()->withErrors($validator)->withInput();
-				// }
+				if($validator->fails()){
+					return redirect()->back()->withErrors($validator)->withInput();
+				}
 
 				if($request->file('file')->isValid())
 					{
@@ -101,7 +109,7 @@ class DocumentController extends Controller
 						$name = $request->name;
 						$extension = $file->getClientOriginalExtension();
 						$slug = Str::slug($request->name);
-						$newName = 'document/' . $slug .date('dmY').".".$extension;
+						$newName = 'document/' . $slug . "-" . date('d-m-Y').".".$extension;
 						$uploadPath = env('UPLOAD_PATH')."/document";
 						$request->file('file')->move($uploadPath, $newName);
 						// $data['file'] = $newName;
@@ -115,11 +123,13 @@ class DocumentController extends Controller
 							'user_id' => Auth::user()->id,
 							'type_id' => $request->type_id,
 							'name' => $request->name,
-							'date' => $request->date,
+							'date' => Carbon::createFromFormat('m/d/Y', $request->date)
+							->format('d-m-Y'),
 							'number' => $request->number,
 							'file' => $newName,
 							'jenis_surat' => 'surat_masuk',
-							'tgl_distribusi' => $request->tgl_distribusi,
+							'tgl_distribusi' => Carbon::createFromFormat('m/d/Y', $request->tgl_distribusi)
+							->format('d-m-Y'),
 							'asal' => $request->asal,
 							'disposisi' => $request->disposisi,
 							'unit' => 'inka',

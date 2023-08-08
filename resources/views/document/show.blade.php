@@ -51,7 +51,7 @@
 								<tr>
 									<td>File Dokumen</td>
 									<td>
-										<a href="../../../{{$data->file}}">{{$data->name}}</a>
+										<a href="{{asset('public/uploads/'.$data->file)}}">{{$data->name}}</a>
 										<i class="fa fa-download" aria-hidden="true"></i>
 									</td>
 								</tr>

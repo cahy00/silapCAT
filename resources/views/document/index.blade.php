@@ -63,6 +63,7 @@
 											id="exampleInputEmail1"
 											name="number"
 											placeholder="Nomor Dokumen"
+											required
 										/>
 										<span class="error invalid-feedback">{{$errors->first('number')}}</span>
 									</div>
@@ -76,6 +77,7 @@
 											id="exampleInputEmail1"
 											name="name"
 											placeholder="Perihal Dokumen"
+											required
 										/>
 									</div>
 								</div>
@@ -84,7 +86,8 @@
 										<label>Tanggal Dokumen</label>
 											<div class="input-group date" id="reservationdate" data-target-input="nearest">
 													<input type="text" name="date" class="form-control datetimepicker-input" data-target="#reservationdate"
-													placeholder="Tanggal Dokumen"/>
+													placeholder="Tanggal Dokumen"
+													required/>
 													<div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
 															<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 													</div>
@@ -99,7 +102,8 @@
 										<label>Tanggal @if($title == 'Surat Keluar') Keluar @else Masuk @endif</label>
 											<div class="input-group date" id="tgl_masuk" data-target-input="nearest">
 													<input type="text" name="tgl_distribusi" class="form-control datetimepicker-input" data-target="#tgl_masuk"
-													placeholder="Tanggal @if($title == 'Surat Keluar') Keluar @else Masuk @endif"/>
+													placeholder="Tanggal @if($title == 'Surat Keluar') Keluar @else Masuk @endif"
+													required/>
 													<div class="input-group-append" data-target="#tgl_masuk" data-toggle="datetimepicker">
 															<div class="input-group-text"><i class="fa fa-calendar"></i></div>
 													</div>
@@ -115,6 +119,7 @@
 											id="disposisi"
 											name="disposisi"
 											placeholder="Disposisi"
+											required
 										/>
 										<span class="error invalid-feedback">{{$errors->first('disposisi')}}</span>
 									</div>
@@ -135,7 +140,7 @@
 								<div class="col-2">
 									<div class="form-select">
 										<label for="exampleInputEmail1">Sifat Dokumen</label>
-										<select name="sifat" id="" class="form-control" style="text-transform: uppercase;">
+										<select name="sifat" id="" class="form-control" style="text-transform: uppercase;" required>
 											<option value="biasa">Biasa</option>
 											<option value="penting">Penting</option>
 											<option value="rahasia">Rahasia</option>
@@ -152,6 +157,7 @@
 													name="file"
 													class="form-control"
 													id="exampleInputFile"
+													required
 												/>
 										</div>
 									</div>
