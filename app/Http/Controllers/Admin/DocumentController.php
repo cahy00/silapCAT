@@ -9,7 +9,9 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\Controller;
+use App\Models\Action;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -28,18 +30,30 @@ class DocumentController extends Controller
 			if(Auth::user()->role == 'inka'){
 				if(decrypt($id) == 1){
 					$title = 'Surat Masuk';
-					$document = Document::with(['user', 'type'])
-					->orderBy('created_at', 'ASC')
+					$document = Document::with(['user', 'type', 'action'])
+					->orderBy('created_at', 'DESC')
+					// ->selectRaw('DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:00")')
+					// ->orderBy('tgl_distribusi', [
+					// 	Carbon::now()->startOfMonth(),
+					// 	Carbon::now()->endOfMonth()
+					// ])
 					->where('jenis_surat', 'surat_masuk')
 					->where('unit', Auth::user()->role)
 					->get();
+
+				// 	$document = Document::orderBy('tgl_distribusi')
+				// 	->get()
+				// 	->groupBy(function($data) {
+        //     return \Carbon\Carbon::parse($data->created_at)->format('F');
+        // });
+					
 					$user = User::orderBy('name', 'ASC')
 					->where('role', Auth::user()->role)
 					->get();
 					// $document = User::with(['document'])->get();
 				}else{
 					$title = 'Surat Keluar';
-					$document = Document::with(['user', 'type'])
+					$document = Document::with(['user', 'type', 'action'])
 					->orderBy('created_at', 'ASC')
 					->where('jenis_surat', 'surat_keluar')
 					->get();
@@ -48,7 +62,9 @@ class DocumentController extends Controller
 				if(decrypt($id) == 1){
 					$title = 'Surat Masuk';
 					$document = Document::with(['user', 'type'])
-					->orderBy('created_at', 'ASC')
+					->orderByRaw('SUBSTRING(tgl_distribusi, 4, 5) DESC')
+					->orderByRaw('SUBSTRING(tgl_distribusi, 1, 2) DESC')
+					// orderByRaw('DAY(tgl_distribusi) ASC')
 					->where('jenis_surat', 'surat_masuk')
 					->get();
 					$user = User::orderBy('name', 'ASC')
@@ -92,8 +108,7 @@ class DocumentController extends Controller
 					'name' => 'required',
 					'date' => 'required|date',
 					'tgl_distribusi' => 'required|date',
-					'sifat' => 'required',
-					'disposisi' => 'required'
+					'sifat' => 'required', 
 				], [
 					'number.required' => 'Nomor Dokumen Masih Kosong',
 					'number.unique' => 'Nomor Dokumen sudah ada'
@@ -140,11 +155,13 @@ class DocumentController extends Controller
 							'user_id' => Auth::user()->id,
 							'type_id' => $request->type_id,
 							'name' => $request->name,
-							'date' => $request->date,
+							'date' => Carbon::createFromFormat('m/d/Y', $request->date)
+							->format('d-m-Y'),
 							'number' => $request->number,
 							'file' => $newName,
 							'jenis_surat' => 'surat_keluar',
-							'tgl_distribusi' => $request->tgl_distribusi,
+							'tgl_distribusi' => Carbon::createFromFormat('m/d/Y', $request->tgl_distribusi)
+							->format('d-m-Y'),
 							'asal' => 'surat_keluar',
 							'disposisi' => 'surat_keluar',
 							'unit' => 'inka',
@@ -157,11 +174,11 @@ class DocumentController extends Controller
 							'user_id' => Auth::user()->id,
 							'type_id' => $request->type_id,
 							'name' => $request->name,
-							'date' => $request->date,
+							'date' => Carbon::parse($request->date),
 							'number' => $request->number,
 							'file' => $newName,
 							'jenis_surat' => 'surat_masuk',
-							'tgl_distribusi' => $request->tgl_distribusi,
+							'tgl_distribusi' => Carbon::parse($request->tgl_distribusi),
 							'asal' => $request->asal,
 							'disposisi' => $request->disposisi,
 							'unit' => 'admin',
@@ -172,11 +189,13 @@ class DocumentController extends Controller
 							'user_id' => Auth::user()->id,
 							'type_id' => $request->type_id,
 							'name' => $request->name,
-							'date' => $request->date,
+							'date' => Carbon::createFromFormat('m/d/Y', $request->date)
+							->format('d-m-Y'),
 							'number' => $request->number,
 							'file' => $newName,
 							'jenis_surat' => 'surat_keluar',
-							'tgl_distribusi' => $request->tgl_distribusi,
+							'tgl_distribusi' => Carbon::createFromFormat('m/d/Y', $request->tgl_distribusi)
+							->format('d-m-Y'),
 							'asal' => 'surat_keluar',
 							'disposisi' => 'surat_keluar',
 							'unit' => 'admin',
@@ -198,8 +217,22 @@ class DocumentController extends Controller
     public function show($id)
     {
         $data = Document::findOrFail(decrypt($id));
-				return view('document.show', compact('data'));
+				$action = Action::orderBy('created_at', 'DESC')->where('document_id', decrypt($id))
+				->get();
+				return view('document.show', compact('data', 'action'));
     }
+
+		public function action(Request $request)
+		{
+				Action::create([
+					'document_id' => $request->document_id,
+					'followup' => $request->followup,
+					'description' => $request->description
+				]);
+
+				return back()->with('success', 'Data Berhasil Diinput');
+
+		}
 
     /**
      * Show the form for editing the specified resource.

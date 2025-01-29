@@ -73,13 +73,10 @@
 								/>
 							</div>
 							<div class="form-select">
-								<label for="role">Unit Kerja</label>
+								<label for="role">Role</label>
 								<select name="role" id="role" class="form-control">
-									<option value="inka">Bidang Informasi Kepegawaian</option>
-									<option value="pdsk">Bidang Pengembangan dan Supervisi Kepegawaian</option>
-									<option value="mutasi">Bidang Mutasi dan Status Kepegawaian</option>
-									<option value="pensiun">Bidang Pengangkatan dan Pensiun</option>
-									<option value="tu">Bagian Tata Usaha</option>
+									<option value="repo_cat">Admin Repo CAT</option>
+									<option value="arsip_digital">Admin Arsip Digital</option>
 								</select>
 							</div>
 						</div>

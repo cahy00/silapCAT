@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
 					'name' => 'Sulistyo Cahyo G',
 					'email' => 'cgumilang48@gmail.com',
 					'nip' => '199806162022031006',
-					'password' => bcrypt('12345678'),
+					'password' => bcrypt('12'),
 					'remember_token' => Str::random(10),
 					'email_verified_at' => now(),
 					'role' => 'admin',
@@ -63,7 +63,7 @@ class UserSeeder extends Seeder
 					'password' => bcrypt('199003252022032003'),
 					'remember_token' => Str::random(10),
 					'email_verified_at' => now(),
-					'role' => 'inka',
+					'role' => 'arsip_digital',
 				]);
     }
 }

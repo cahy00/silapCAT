@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Arsip Digital Kantor Regional XIV BKN</title>
-  <link href="{{asset("assets/bkn/icon-garuda.ico")}}" rel="icon">
+  <link href="{{asset("assets/bkn/logo_bkn.png")}}" rel="icon">
 
 
   <!-- Google Font: Source Sans Pro -->
@@ -12,7 +12,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{{asset('assets/plugins/fontawesome-free/css/all.min.css')}}">
   <!-- Ionicons -->
-  <link rel="stylesheet" href="{{asset('assets/https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css')}}">
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- Tempusdominus Bootstrap 4 -->
   <link rel="stylesheet" href="{{asset('assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css')}}">
   <!-- iCheck -->
@@ -31,6 +31,8 @@
 	<link rel="stylesheet" href="{{asset('assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css')}}">
   <link rel="stylesheet" href="{{asset('assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css')}}">
   <link rel="stylesheet" href="{{asset('assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css')}}">
+  <link rel="stylesheet" href="{{asset('assets/plugins/select2/css/select2.min.css')}}">
+
 	@yield('style')
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -38,7 +40,7 @@
 
   <!-- Preloader -->
   <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="{{asset('assets/bkn/icon-garuda.ico')}}" alt="AdminLTELogo" height="60" width="60">
+    <img class="animation__shake" src="{{asset('assets/bkn/logo_bkn.png')}}" alt="AdminLTELogo" height="60" width="60">
   </div>
 
   <!-- Navbar -->
@@ -94,7 +96,7 @@
 <!-- overlayScrollbars -->
 <script src="{{asset('assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js')}}"></script>
 <!-- AdminLTE App -->
-<script src="{{asset('assets/dist/js/adminlte.js')}}"></script>
+<script src="{{asset('assets/dist/js/adminlte.min.js')}}"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="{{asset('assets/dist/js/demo.js')}}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
@@ -111,6 +113,9 @@
 <script src="{{asset('assets/plugins/datatables-buttons/js/buttons.html5.min.js')}}"></script>
 <script src="{{asset('assets/plugins/datatables-buttons/js/buttons.print.min.js')}}"></script>
 <script src="{{asset('assets/plugins/datatables-buttons/js/buttons.colVis.min.js')}}"></script>
+<script src="{{asset('assets/plugins/select2/js/select2.full.min.js')}}"></script>
+
+
 @yield('script')
 <script>
   $(function () {
@@ -127,13 +132,20 @@
       "autoWidth": false,
       "responsive": true,
     });
+    $('.select2bs4').select2({
+      theme: 'bootstrap4'
+    });
 		$('#reservationdate').datetimepicker({
+        format: 'L'
+    });
+    $('#start_date_event').datetimepicker({
         format: 'L'
     });
 		$('#tgl_masuk').datetimepicker({
         format: 'L'
     });
 		$('#reservationdatetime').datetimepicker({ icons: { time: 'far fa-clock' } });
+    $('#reservation').daterangepicker()
   });
 </script>
 @yield('script')

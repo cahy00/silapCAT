@@ -20,7 +20,7 @@ return new class extends Migration
 						$table->string('nip')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-						$table->enum('role', ['admin', 'inka', 'pdsk', 'mutasi', 'pensiun', 'tu']);
+						$table->enum('role', ['admin', 'repo_cat', 'arsip_digital']);
             $table->rememberToken();
             $table->timestamps();
         });

@@ -34,8 +34,8 @@ class LoginController extends Controller
 						return redirect('/dashboard');
 					}elseif(Auth::user()->role == 'pdsk'){
 						return redirect('/pdsk');
-					}elseif(Auth::user()->role == 'inka'){
-						return redirect('/inka');
+					}elseif(Auth::user()->role == 'repo_cat'){
+						return redirect('/event');
 					}
 					exit();
 				}

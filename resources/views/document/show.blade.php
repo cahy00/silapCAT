@@ -63,10 +63,6 @@
 			</div>
 			<div class="col-md-6">
 				<div class="card">
-					{{-- <div class="card-header">
-						<h3 class="card-title">Data Dokumen</h3>
-					</div> --}}
-					<!-- /.card-header -->
 					<div class="card-body p-0">
 						<table class="table">
 							<tbody>
@@ -98,13 +94,89 @@
 							</tbody>
 						</table>
 					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-12">
+				<div class="card card-primary">
+					<div class="card-header">
+						<h3 class="card-title">Tindak Lanjut Dokumen</h3>
+					</div>
+					<!-- /.card-header -->
+					<div class="card-body">
+						<form action="/document/inka/show/{id}" method="POST">
+							@csrf
+							<input type="hidden" name="document_id" value="{{$data->id}}">
+							<div class="row">
+								<div class="col-6">
+									<div class="form-group">
+										<label for="followup">Tindak Lanjut</label>
+										<select name="followup" id="followup" class="form-control">
+											<option value="0">Belum Diproses</option>
+											<option value="1">Sedang Diproses</option>
+											<option value="2">Sudah Selesai</option>
+										</select>
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="form-group">
+										<label for="description">Deskripsi</label>
+										<textarea name="description" id="description" cols="30" rows="5" class="form-control"></textarea>
+									</div>
+								</div>
+							</div>
+							<button type="submit" class="btn btn-primary">Simpan</button>
+						</form>
+					</div>
 					<!-- /.card-body -->
 				</div>
 			</div>
-			{{-- <div class="col">
-				<a href="/document/inka/{{}}" class="btn btn-success">Kembali</a>
-			</div> --}}
 		</div>
 	</div>
+</section>
+<section class="content">
+	<div class="container-fluid">
+
+		<!-- Timelime example  -->
+		<div class="row">
+			<div class="col-md-12">
+				<div class="timeline">
+					@foreach ($action as $item)
+							
+					<div class="time-label">
+						<span class="">{{$item->created_at->format('d M Y')}}</span>
+					</div>
+					<div>
+						<i class="fas fa-envelope bg-blue"></i>
+						<div class="timeline-item">
+							<span class="time"><i class="fas fa-clock"></i> {{$item->created_at->format('H:i')}}</span>
+							<h3 class="timeline-header"><a href="#">{{$item->document->user->name}}</a> sent an inbox</h3>
+
+							<div class="timeline-body">
+								{{$item->description}}
+							</div>
+							<div class="timeline-footer">
+								@if ($item->followup == 0)
+								<a class="btn btn-danger btn-sm">Belum Ditindaklanjuti</a>
+								@elseif($item->followup == 1)
+								<a class="btn btn-warning btn-sm">Sedang Diproses</a>
+								@else
+								<a class="btn btn-success btn-sm">Sudah Selesai</a>
+								@endif
+							</div>
+						</div>
+					</div>
+					@endforeach
+					<div>
+						<i class="fas fa-clock bg-gray"></i>
+					</div>
+				</div>
+			</div>
+			<!-- /.col -->
+		</div>
+	</div>
+	<!-- /.timeline -->
+
 </section>
 @endsection

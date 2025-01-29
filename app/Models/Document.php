@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,5 +33,15 @@ class Document extends Model
 		public function type()
 		{
 			return $this->belongsTo(Type::class);
+		}
+
+		public function action()
+		{
+			return $this->hasMany(Action::class);
+		}
+
+		public function setTanggalSuratAttribute($value)
+		{
+			$this->attributes['tgl_distribusi'] = Carbon::parse($value);
 		}
 }

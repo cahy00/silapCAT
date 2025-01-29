@@ -34,7 +34,7 @@
 					@endif --}}
 					<!-- /.card-header -->
 					<!-- form start -->
-					<form action="/document/inka" method="POST" enctype="multipart/form-data">
+					<form action="/document" method="POST" enctype="multipart/form-data">
 						@csrf()
 						<input hidden name="id" value="{{decrypt($id)}}">
 						<div class="card-body">
@@ -119,7 +119,6 @@
 											id="disposisi"
 											name="disposisi"
 											placeholder="Disposisi"
-											required
 										/>
 										<span class="error invalid-feedback">{{$errors->first('disposisi')}}</span>
 									</div>
@@ -221,7 +220,7 @@
 							<thead>
 							<tr>
 								<th>NO</th>
-								<th>TIPE DOKUMEN</th>
+								<th>ASAL DOKUMEN</th>
 								<th>NO DOKUMEN</th>
 								<th>PERIHAL DOKUMEN</th>
 								<th>TANGGAL MASUK</th>
@@ -232,7 +231,7 @@
 								@foreach ($document as $no => $item)
 								<tr>
 									<td>{{$no+1}}</td>
-									<td>{{$item->type->title}}</td>
+									<td>{{$item->asal}}</td>
 									<td>{{$item->number}}</td>
 									<td>
 										<a href="{{asset('public/uploads/'.$item->file)}}">{{$item->name}}</a>
@@ -251,7 +250,7 @@
 							<tfoot>
 							<tr>
 								<th>NO</th>
-								<th>TIPE DOKUMEN</th>
+								<th>ASAL DOKUMEN</th>
 								<th>NO DOKUMEN</th>
 								<th>PERIHAL DOKUMEN</th>
 								<th>TANGGAL MASUK</th>
