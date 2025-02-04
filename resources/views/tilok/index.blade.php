@@ -38,7 +38,18 @@
 						@csrf()
 						<div class="card-body">
 							<div class="row">
-								<div class="col-3">
+								<div class="col-4">
+									<div class="form-group">
+										<label for="name">Nama Event</label>
+										<select name="event_id" id="" class="form-control form-select">
+											@foreach ($event as $item)
+												<option value="{{$item->id}}">{{$item->name}}</option>
+											@endforeach
+										</select>
+										<span class="error invalid-feedback">{{$errors->first('name')}}</span>
+									</div>
+								</div>
+								<div class="col-4">
 									<div class="form-group">
 										<label for="name">Nama Tilok</label>
 										<input
@@ -52,7 +63,7 @@
 										<span class="error invalid-feedback">{{$errors->first('name')}}</span>
 									</div>
 								</div>
-								<div class="col-3">
+								<div class="col-4">
 									<div class="form-group">
 										<label for="name">Alamat</label>
 										<select name="address" id="" class="form-control select2bs3">
@@ -61,7 +72,9 @@
 										<span class="error invalid-feedback">{{$errors->first('name')}}</span>
 									</div>
 								</div>
-								<div class="col-3">
+							</div>
+							<div class="row">
+								<div class="col-6">
 									<div class="form-group">
 										<label>Tanggal Mulai</label>
 											<div class="input-group date" id="start_date_event" data-target-input="nearest">
@@ -74,7 +87,7 @@
 											</div>
 									</div>
 								</div>
-								<div class="col-3">
+								<div class="col-6">
 									<div class="form-group">
 										<label>Tanggal Selesai</label>
 											<div class="input-group date" id="reservationdate" data-target-input="nearest">

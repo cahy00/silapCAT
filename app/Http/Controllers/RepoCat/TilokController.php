@@ -42,7 +42,8 @@ class TilokController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|unique:events',
+            'event_id' => 'required|exists:events,id',
+            'name' => 'required|string|unique:tiloks,name',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             // 'year' => 'required|numeric'
@@ -54,6 +55,10 @@ class TilokController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
         ]);
+
+        $data->events()->attach($request->event_id);
+
+        
 
         // $event_tilok = EventTilok::create([
         //     'event_id' => $request->event
