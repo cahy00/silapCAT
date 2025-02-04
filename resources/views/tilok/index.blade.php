@@ -121,18 +121,20 @@
 							<tr>
 								<th>NO</th>
 								<th>NAMA EVENT</th>
+								<th>TITIK LOKASI</th>
 								<th>TANGGAL MULAI</th>
 								<th>TANGGAL SELESAI</th>
 								<th>AKSI</th>
 							</tr>
 							</thead>
 							<tbody>
-								@foreach ($data as $no => $item)
+								@foreach ($eventTilok as $no => $item)
 								<tr>
 									<td>{{$no+1}}</td>
-									<td>{{$item->name}}</td>
-									<td>{{$item->start_date}}</td>
-									<td>{{$item->end_date}}</td>
+									<td>{{$item->event->name}}</td>
+									<td>{{$item->tilok->name}}</td>
+									<td>{{$item->tilok->start_date}}</td>
+									<td>{{$item->tilok->end_date}}</td>
 									<td>
 										<a href="/document/inka/show/{{encrypt($item->id)}}" class="text-center btn btn-primary"><i class="fa fa-eye" aria-hidden="true"></i></a>
 										@if (Auth::user()->role == 'admin')
@@ -147,6 +149,7 @@
 							<tr>
 								<th>NO</th>
 								<th>NAMA EVENT</th>
+								<th>TITIK LOKASI</th>
 								<th>TANGGAL MULAI</th>
 								<th>TANGGAL SELESAI</th>
 								<th>AKSI</th>

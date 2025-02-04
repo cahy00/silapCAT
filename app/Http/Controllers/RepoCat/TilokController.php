@@ -20,7 +20,8 @@ class TilokController extends Controller
         $title = 'Halaman Event';
         $data = Tilok::all();
         $event = Event::all();
-        return view('tilok.index', compact('title', 'data', 'event'));
+        $eventTilok = EventTilok::all();
+        return view('tilok.index', compact('title', 'data', 'eventTilok', 'event'));
     }
 
     /**
