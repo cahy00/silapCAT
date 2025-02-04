@@ -46,7 +46,7 @@ Route::middleware(['auth'])->group(function(){
 		Route::post('/document/inka/show/{id}', [DocumentController::class, 'action'])->name('document.inka.action');
 	});
 	
-	Route::middleware(['userAkses:admin'])->group(function(){
+	Route::middleware(['role:admin'])->group(function(){
 		Route::get('/dashboard', [DashboardController::class, 'index']);
 		Route::get('/user', [UserController::class, 'index']);
 		Route::post('/user', [UserController::class, 'store']);
@@ -106,5 +106,12 @@ Route::middleware(['auth'])->group(function(){
 		Route::post('/detail-tilok/store', [DetailTilokController::class, 'store']);
 	});
 
+
+
 	
 });
+
+// Route::middleware(['role:admin'])->group(function(){
+
+// });
+		

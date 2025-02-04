@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
 					'password' => bcrypt('12'),
 					'remember_token' => Str::random(10),
 					'email_verified_at' => now(),
-					'role' => 'admin',
+					// 'role' => 'admin',
 				]);
 
 				// User::create([
@@ -56,14 +56,14 @@ class UserSeeder extends Seeder
 				// 	'role' => 'inka',
 				// ]);
 
-				User::create([
-					'name' => 'Dian Violora Nainggolan',
-					'email' => 'dianviolora32@gmail.com',
-					'nip' => '199003252022032003',
-					'password' => bcrypt('199003252022032003'),
-					'remember_token' => Str::random(10),
-					'email_verified_at' => now(),
-					'role' => 'arsip_digital',
-				]);
+				// User::create([
+				// 	'name' => 'Dian Violora Nainggolan',
+				// 	'email' => 'dianviolora32@gmail.com',
+				// 	'nip' => '199003252022032003',
+				// 	'password' => bcrypt('199003252022032003'),
+				// 	'remember_token' => Str::random(10),
+				// 	'email_verified_at' => now(),
+				// 	'role' => 'arsip_digital',
+				// ]);
     }
 }

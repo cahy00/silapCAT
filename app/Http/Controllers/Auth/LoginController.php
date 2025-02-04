@@ -30,15 +30,23 @@ class LoginController extends Controller
 				];
 				
 				if(Auth::attempt($infoLogin)){
-					if(Auth::user()->role == 'admin'){
+					if(Auth::user()->hasRole('admin')){
 						return redirect('/dashboard');
-					}elseif(Auth::user()->role == 'pdsk'){
-						return redirect('/pdsk');
-					}elseif(Auth::user()->role == 'repo_cat'){
-						return redirect('/event');
+					// }elseif(Auth::user()->role == 'pdsk'){
+					// 	return redirect('/pdsk');
+					// }elseif(Auth::user()->role == 'repo_cat'){
+					// 	return redirect('/event');
 					}
 					exit();
 				}
+
+				// if(Auth::attempt($infoLogin)){
+				// 	$user = Auth::user();
+
+				// 	if($user->hasRole('admin')){
+				// 		return redirect(('/dashboard'));
+				// 	}
+				// }
 
 				return back()->with('withErrors', 'Email atau Password Salah');
 		}
