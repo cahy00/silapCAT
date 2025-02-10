@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\RepoCat;
 
 use App\Http\Controllers\Controller;
-use App\Models\Event;
 use App\Models\EventTilok;
-use App\Models\Tilok;
+use App\Models\User;
 use Illuminate\Http\Request;
 
-class TilokController extends Controller
+class DelegasiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,10 +17,9 @@ class TilokController extends Controller
     public function index()
     {
         $title = 'Halaman Event';
-        $data = Tilok::all();
-        $event = Event::all();
+        $user = User::all();
         $eventTilok = EventTilok::all();
-        return view('tilok.index', compact('title', 'data', 'eventTilok', 'event'));
+        return view('delegasi.index', compact('title', 'user', 'eventTilok'));
     }
 
     /**
@@ -43,30 +41,14 @@ class TilokController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'event_id' => 'required|exists:events,id',
-            'name' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            // 'year' => 'required|numeric'
+            'user_id' => 'required|exists:users,id',
+            'event_tilok_id' => 'required|exists:event_tiloks,id',
         ]);
 
-        $data = Tilok::create([
-            'name' => $request->name,
-            'address' => $request->address,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-        ]);
+        $user = User::find($request->user_id);
+        $user->eventTiloks()->attach($request->event_tilok_id);
 
-        $data->events()->attach($request->event_id);
-
-        
-
-        // $event_tilok = EventTilok::create([
-        //     'event_id' => $request->event
-        // ])
-
-        return back()->with('success', 'Event Berhasil Diinput');
-
+        return redirect('/delegasi')->with('success', 'User berhasil ditambahkan ke Event-Tilok.');
     }
 
     /**

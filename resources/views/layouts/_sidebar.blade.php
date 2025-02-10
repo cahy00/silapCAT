@@ -75,6 +75,12 @@
 					<p>Detail Event</p>
 				</a>
 			</li>
+			<li class="nav-item">
+				<a href="/delegasi" class="nav-link">
+					<i class="nav-icon fas fa-user"></i>
+					<p>Delegasi</p>
+				</a>
+			</li>
 			<li class="nav-header">Module Laporan</li>
 			<li class="nav-item">
 				<a href="/recap" class="nav-link">

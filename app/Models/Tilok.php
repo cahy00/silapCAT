@@ -31,4 +31,6 @@ class Tilok extends Model
     {
         return $this->hasMany(TilokDocument::class);
     }
+
+    
 }

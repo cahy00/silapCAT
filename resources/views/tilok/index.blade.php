@@ -136,7 +136,8 @@
 									<td>{{$item->tilok->start_date}}</td>
 									<td>{{$item->tilok->end_date}}</td>
 									<td>
-										<a href="/document/inka/show/{{encrypt($item->id)}}" class="text-center btn btn-primary"><i class="fa fa-eye" aria-hidden="true"></i></a>
+										<a href="/report/create/{{$item->id}}" class="text-center btn btn-primary"><i class="fa fa-eye" aria-hidden="true"></i></a>
+										{{-- <a href="/document/inka/show/{{encrypt($item->id)}}" class="text-center btn btn-primary"><i class="fa fa-eye" aria-hidden="true"></i></a> --}}
 										@if (Auth::user()->role == 'admin')
 										<a href="/event/edit/{{encrypt($item->id)}}" class="btn btn-success"><i class="fa fa-pencil-alt" aria-hidden="true"></i></a>
 										<a href="/event/destroy/{{encrypt($item->id)}}" class="text-center btn btn-danger" onclick="return confirm('Delete this data??')"><i class="fa fa-trash" aria-hidden="true"></i></a>

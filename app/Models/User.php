@@ -45,13 +45,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-		public function document()
-		{
-			return $this->hasMany(Document::class);
-		}
+    public function document()
+    {
+        return $this->hasMany(Document::class);
+    }
 
-		public function type()
-		{
-			return $this->hasMany(Type::class);
-		}
+    public function type()
+    {
+        return $this->hasMany(Type::class);
+    }
+
+    public function eventTiloks()
+    {
+        return $this->belongsToMany(EventTilok::class, 'event_tilok_users');
+    }
 }

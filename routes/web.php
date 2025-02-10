@@ -11,6 +11,7 @@ use App\Http\Controllers\RepoCat\TilokController;
 use App\Http\Controllers\Admin\DocumentController;
 use App\Http\Controllers\RepoCat\ReportController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\RepoCat\DelegasiController;
 use App\Http\Controllers\RepoCat\EventTilokController;
 use App\Http\Controllers\RepoCat\DetailEventController;
 use App\Http\Controllers\RepoCat\DetailTilokController;
@@ -92,6 +93,14 @@ Route::middleware(['auth'])->group(function(){
 		Route::get('/report/edit/{id}', [ReportController::class, 'edit']);
 		Route::put('/report/edit/{id}', [ReportController::class, 'update']);
 		Route::get('/report/destroy/{id}', [ReportController::class, 'destroy']);
+
+		Route::get('/delegasi', [DelegasiController::class, 'index']);
+		Route::get('/delegasi/create/{id}', [DelegasiController::class, 'create']);
+		Route::post('/delegasi/store', [DelegasiController::class, 'store']);
+		Route::post('/delegasi/upload-dokumen', [DelegasiController::class, 'uploadDokumen']);
+		Route::get('/delegasi/edit/{id}', [DelegasiController::class, 'edit']);
+		Route::put('/delegasi/edit/{id}', [DelegasiController::class, 'update']);
+		Route::get('/delegasi/destroy/{id}', [DelegasiController::class, 'destroy']);
 
 		//RECAP ROUTE
 		Route::get('/recap', [RecapController::class, 'index']);
