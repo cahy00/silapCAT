@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\RepoCat;
 
-use App\Http\Controllers\Controller;
-use App\Models\EventTilok;
 use App\Models\User;
+use App\Models\EventTilok;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Models\EventTilokUser;
 
 class DelegasiController extends Controller
 {
@@ -19,7 +21,8 @@ class DelegasiController extends Controller
         $title = 'Halaman Event';
         $user = User::all();
         $eventTilok = EventTilok::all();
-        return view('delegasi.index', compact('title', 'user', 'eventTilok'));
+        $data = EventTilokUser::get();
+        return view('delegasi.index', compact('title', 'data','user', 'eventTilok'));
     }
 
     /**

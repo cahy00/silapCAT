@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\RepoCat;
 
 use App\Http\Controllers\Controller;
-use App\Models\DetailTilok;
 use Illuminate\Http\Request;
 
 class DetailTilokController extends Controller

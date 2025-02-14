@@ -32,8 +32,8 @@ class LoginController extends Controller
 				if(Auth::attempt($infoLogin)){
 					if(Auth::user()->hasRole('admin')){
 						return redirect('/dashboard');
-					// }elseif(Auth::user()->role == 'pdsk'){
-					// 	return redirect('/pdsk');
+					}elseif(Auth::user()->hasRole('operator')){
+						return redirect('/event-tilok-operator');
 					// }elseif(Auth::user()->role == 'repo_cat'){
 					// 	return redirect('/event');
 					}

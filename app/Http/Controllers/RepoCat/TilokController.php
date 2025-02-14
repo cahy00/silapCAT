@@ -17,7 +17,7 @@ class TilokController extends Controller
      */
     public function index()
     {
-        $title = 'Halaman Event';
+        $title = 'Halaman Tilok';
         $data = Tilok::all();
         $event = Event::all();
         $eventTilok = EventTilok::all();

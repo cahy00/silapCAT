@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -16,7 +17,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('user.index');
+        $role = Role::all();
+        return view('user.index', compact('role'));
     }
 
     /**
@@ -51,10 +53,11 @@ class UserController extends Controller
 					'name' => $request->name,
 					'nip' => $request->nip,
 					'password' => bcrypt($request->password),
-					'role' => $request->role,
 					'remember_token' => Str::random(10),
 					'email_verified_at' => now(),
 				]);
+
+                $user->assignRole($request->role_name);
 
 				return redirect('/user')->with('success', 'User Berhasil Ditambahkan');
 

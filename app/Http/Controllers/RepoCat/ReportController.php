@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\TilokDocument;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
@@ -37,14 +38,20 @@ class ReportController extends Controller
         ->orderBy('created_at', 'ASC')
         ->get();
 
+        $user = Auth::user();
 
-        $detail_tilok = Report::with(['event', 'tilok'])->where('tilok_id', $id)->get();
-        $hadir_tilok = Report::where('tilok_id', $id)->sum('participant_present');
-        $tidak_hadir_tilok = Report::where('tilok_id', $id)->sum('participant_absent');
-        $tertinggi_tilok = Report::where('tilok_id', $id)->max('highest_score');
-        $terendah_tilok = Report::where('tilok_id', $id)->min('lowest_score');
-        $sesi = Report::where('tilok_id', $id)->count('session');
-        $jumlah = Report::where('tilok_id', $id)->sum('participant_total');
+
+        $detail_tilok = Report::with(['event', 'tilok'])->where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->get();
+        // $detail_tilok = Report::with(['event', 'tilok'])->whereIn('tilok_id', $user->eventTiloks->pluck('tilok_id'))->get();
+        // $detail_tilok = Report::whereHas('eventTilok', function ($query) use ($user) {
+        //     $query->whereIn('id', $user->eventTiloks->pluck('id'));
+        // })->with(['eventTilok.event', 'eventTilok.tilok'])->get();
+        $hadir_tilok = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->sum('participant_present');
+        $tidak_hadir_tilok = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->sum('participant_absent');
+        $tertinggi_tilok = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->max('highest_score');
+        $terendah_tilok = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->min('lowest_score');
+        $sesi = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->count('session');
+        $jumlah = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->sum('participant_total');
         return view('report.create', 
         compact('title', 'data','detail_tilok', 
         'hadir_tilok', 'tidak_hadir_tilok', 'jumlah', 
@@ -153,5 +160,55 @@ class ReportController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function createOperator($id)
+    {
+        $title = 'Halaman Report';
+        $data = EventTilok::findOrFail($id);
+
+        $document = TilokDocument::with(['event', 'tilok'])
+        ->where('tilok_id', $id)
+        // ->where('event_id', $id)
+        ->orderBy('created_at', 'ASC')
+        ->get();
+
+
+        $detail_tilok = Report::with(['event', 'tilok'])->where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->get();
+        $hadir_tilok = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->sum('participant_present');
+        $tidak_hadir_tilok = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->sum('participant_absent');
+        $tertinggi_tilok = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->max('highest_score');
+        $terendah_tilok = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->min('lowest_score');
+        $sesi = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->count('session');
+        $jumlah = Report::where('tilok_id', $data->tilok_id)->where('event_id', $data->event_id)->sum('participant_total');
+        return view('report.create', 
+        compact('title', 'data','detail_tilok', 
+        'hadir_tilok', 'tidak_hadir_tilok', 'jumlah', 
+        'tertinggi_tilok', 'terendah_tilok', 'sesi', 
+        'document'));
+    }
+
+    public function storeOperator(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'tilok_id' => 'required|exists:tiloks,id',
+        ]);
+
+        $data = Report::create([
+            'event_id' => $request->event_id,
+            'tilok_id' => $request->tilok_id,
+            'instansi_name' => $request->instansi_name,
+            'exam_date' => $request->exam_date,
+            'session' => $request->session,
+            'participant_total' => $request->participant_total,
+            'participant_present' => $request->participant_present,
+            'participant_absent' => $request->participant_absent,
+            'highest_score' => $request->highest_score,
+            'lowest_score' => $request->lowest_score,
+            'average_score' => $request->lowest_score + $request->lowest_score/2,
+        ]);
+
+        return back()->with('success', 'Data Berhasil Di input');
     }
 }

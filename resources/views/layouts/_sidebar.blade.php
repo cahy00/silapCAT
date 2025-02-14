@@ -95,36 +95,24 @@
 					<p>User</p>
 				</a>
 			</li>
-			@endif
-			@if (Auth::user()->role == 'arsip_digital')
-			<li class="nav-header">Dashboard</li>
 			<li class="nav-item">
-				<a href="/dashboard/inka" class="nav-link">
+				<a href="/role" class="nav-link">
+					<i class="nav-icon fas fa-archive"></i>
+					<p>Role Permission</p>
+				</a>
+			</li>
+			@endif
+			@if (Auth::user()->hasRole('operator'))
+			<li class="nav-header">Report</li>
+			<li class="nav-item">
+				<a href="/event-tilok-operator" class="nav-link">
 					<i class="nav-icon fas fa-tachometer-alt"></i>
 					<p>
-						Dashboard
+						Rekapitulasi Tilok
 					</p>
 				</a>
 			</li>
-			<li class="nav-header">Module Aplikasi Arsip</li>
-			<li class="nav-item">
-				<a href="/document/inka/{{encrypt(1)}}" class="nav-link">
-					<i class="nav-icon fas fa-share"></i>
-					<p>Surat Masuk</p>
-				</a>
-			</li>
-			<li class="nav-item">
-				<a href="/document/inka/{{encrypt(2)}}" class="nav-link">
-					<i class="nav-icon fas fa-reply"></i>
-					<p>Surat Keluar</p>
-				</a>
-			</li>
-			{{-- <li class="nav-item">
-				<a href="/type" class="nav-link">
-					<i class="nav-icon fas fa-plus-square"></i>
-					<p>Tipe Dokumen</p>
-				</a>
-			</li> --}}
+			
 			
 			@endif
 

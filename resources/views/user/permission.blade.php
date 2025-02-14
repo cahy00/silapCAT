@@ -72,12 +72,11 @@
 									placeholder="Password"
 								/>
 							</div>
-							<div class="form-group">
-								<label for="exampleInputEmail1">Role</label>
-								<select name="role_name" id="" class="form-control form-select">
-									@foreach ($role as $role)
-									<option value="{{$role->name}}">{{$role->name}}</option>
-									@endforeach
+							<div class="form-select">
+								<label for="role">Role</label>
+								<select name="role" id="role" class="form-control">
+									<option value="repo_cat">Admin Repo CAT</option>
+									<option value="arsip_digital">Admin Arsip Digital</option>
 								</select>
 							</div>
 						</div>

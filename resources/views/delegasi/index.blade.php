@@ -82,20 +82,27 @@
 								<th>NO</th>
 								<th>NAMA EVENT</th>
 								<th>TITIK LOKASI</th>
-								<th>TANGGAL MULAI</th>
-								<th>TANGGAL SELESAI</th>
-								<th>AKSI</th>
+								<th>NAMA PETUGAS</th>
 							</tr>
 							</thead>
-							
+							<tbody>
+								@foreach ($data as $no => $item)
+								<tr>
+									<td>{{$no+1}}</td>
+									<td>{{$item->eventTilok->event->name}}</td>
+									<td>{{$item->eventTilok->tilok->name}}</td>
+									<td>{{$item->user->name}}</td>
+									{{-- <td>{{$item->jadwal}}</td> --}}
+									
+								</tr>
+								@endforeach
+							</tbody>
 							<tfoot>
 							<tr>
 								<th>NO</th>
 								<th>NAMA EVENT</th>
 								<th>TITIK LOKASI</th>
-								<th>TANGGAL MULAI</th>
-								<th>TANGGAL SELESAI</th>
-								<th>AKSI</th>
+								<th>NAMA PETUGAS</th>
 							</tr>
 							</tfoot>
 						</table>

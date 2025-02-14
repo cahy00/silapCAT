@@ -5,7 +5,7 @@
 	<div class="container-fluid">
 		<div class="row mb-2">
 			<div class="col-sm-6">
-				<h1>User</h1>
+				<h1>Manajemen Role & Permission</h1>
 			</div>
 			<div class="col-sm-6">
 				<ol class="breadcrumb float-sm-right">
@@ -20,12 +20,11 @@
 <section class="content">
 	<div class="container-fluid">
 		<div class="row">
-			<!-- left column -->
 			<div class="col-md-6">
 				<!-- general form elements -->
 				<div class="card card-primary">
 					<div class="card-header">
-						<h3 class="card-title">Form Tambah User</h3>
+						<h3 class="card-title">Form Tambah Role</h3>
 					</div>
 					<!-- /.card-header -->
 					<!-- form start -->
@@ -33,7 +32,7 @@
 						@csrf
 						<div class="card-body">
 							<div class="form-group">
-								<label for="exampleInputEmail1">Email</label>
+								<label for="exampleInputEmail1">Role</label>
 								<input
 									type="email"
 									name="email"
@@ -42,43 +41,38 @@
 									placeholder="Enter email"
 								/>
 							</div>
+						</div>
+						<!-- /.card-body -->
+
+						<div class="card-footer">
+							<button type="submit" class="btn btn-primary">
+								Submit
+							</button>
+						</div>
+					</form>
+				</div>
+
+			</div>
+			<div class="col-md-6">
+				<!-- general form elements -->
+				<div class="card card-primary">
+					<div class="card-header">
+						<h3 class="card-title">Form Tambah Permission</h3>
+					</div>
+					<!-- /.card-header -->
+					<!-- form start -->
+					<form method="POST" action="/user">
+						@csrf
+						<div class="card-body">
 							<div class="form-group">
-								<label for="name">Nama Lengkap</label>
+								<label for="exampleInputEmail1">Permission</label>
 								<input
-									type="text"
+									type="email"
+									name="email"
 									class="form-control"
-									id="name"
-									name="name"
-									placeholder="Nama Lengkap"
+									id="exampleInputEmail1"
+									placeholder="Enter email"
 								/>
-							</div>
-							<div class="form-group">
-								<label for="NIP">NIP</label>
-								<input
-									type="text"
-									class="form-control"
-									id="NIP"
-									name="nip"
-									placeholder="NIP"
-								/>
-							</div>
-							<div class="form-group">
-								<label for="exampleInputPassword1">Password</label>
-								<input
-									type="password"
-									class="form-control"
-									name="password"
-									id="exampleInputPassword1"
-									placeholder="Password"
-								/>
-							</div>
-							<div class="form-group">
-								<label for="exampleInputEmail1">Role</label>
-								<select name="role_name" id="" class="form-control form-select">
-									@foreach ($role as $role)
-									<option value="{{$role->name}}">{{$role->name}}</option>
-									@endforeach
-								</select>
 							</div>
 						</div>
 						<!-- /.card-body -->

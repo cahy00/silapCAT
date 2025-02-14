@@ -15,6 +15,7 @@ use App\Http\Controllers\RepoCat\DelegasiController;
 use App\Http\Controllers\RepoCat\EventTilokController;
 use App\Http\Controllers\RepoCat\DetailEventController;
 use App\Http\Controllers\RepoCat\DetailTilokController;
+use App\Http\Controllers\RoleController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -102,6 +103,9 @@ Route::middleware(['auth'])->group(function(){
 		Route::put('/delegasi/edit/{id}', [DelegasiController::class, 'update']);
 		Route::get('/delegasi/destroy/{id}', [DelegasiController::class, 'destroy']);
 
+		//ROLE ROUTE
+		Route::get('/role', [RoleController::class, 'index']);
+
 		//RECAP ROUTE
 		Route::get('/recap', [RecapController::class, 'index']);
 		Route::get('/recap/filter', [RecapController::class, 'index']);
@@ -120,7 +124,15 @@ Route::middleware(['auth'])->group(function(){
 	
 });
 
-// Route::middleware(['role:admin'])->group(function(){
+Route::middleware(['role:operator'])->group(function(){
+	Route::get('/event-tilok-operator', [EventTilokController::class, 'index']);
+	Route::get('/event-tilok-operator/create', [EventTilokController::class, 'create']);
+	Route::post('/event-tilok-operator/store', [EventTilokController::class, 'store']);
+	Route::get('/event-tilok-operator/edit/{id}', [EventTilokController::class, 'edit']);
+	Route::put('/event-tilok-operator/edit/{id}', [EventTilokController::class, 'update']);
+	Route::get('/event-tilok-operator/destroy/{id}', [EventTilokController::class, 'destroy']);
 
-// });
+	Route::get('/report-operator/create/{id}', [ReportController::class, 'createOperator']);
+	Route::post('/report-operator/store', [ReportController::class, 'storeOperator']);
+});
 		

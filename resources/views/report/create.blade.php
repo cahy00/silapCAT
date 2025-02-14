@@ -62,7 +62,7 @@
 									@endif --}}
 									<!-- /.card-header -->
 									<!-- form start -->
-									<form action="/report/store" method="POST" enctype="multipart/form-data">
+									<form action="{{ Auth::user()->hasRole('admin') ? '/report/store' : '/report-operator/store' }}" method="POST" enctype="multipart/form-data">
 										@csrf()
 										<input type="hidden" name="event_id" value="{{$data->event->id}}">
 										<input type="hidden" name="tilok_id" value="{{$data->tilok->id}}">

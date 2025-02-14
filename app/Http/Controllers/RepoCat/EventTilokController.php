@@ -7,6 +7,7 @@ use App\Models\Tilok;
 use App\Models\EventTilok;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class EventTilokController extends Controller
 {
@@ -17,7 +18,15 @@ class EventTilokController extends Controller
      */
     public function index()
     {
-        //
+        $title = 'Test';
+        if(Auth::user()->hasRole('admin')){
+            $event_tilok = EventTilok::with(['event', 'tilok'])->get();
+            
+        }else{
+            $event_tilok = Auth::user()->eventTiloks()->with(['event', 'tilok'])->get();
+
+        }
+        return view('event_tilok.index', compact('title', 'event_tilok'));
     }
 
     /**
@@ -31,7 +40,14 @@ class EventTilokController extends Controller
         $event = Event::all();
         $tilok = Tilok::all();
 
-        $event_tilok = EventTilok::with(['event', 'tilok'])->get();
+
+        if(Auth::user()->hasRole('admin')){
+            $event_tilok = EventTilok::with(['event', 'tilok'])->get();
+            
+        }else{
+            $event_tilok = Auth::user()->eventTiloks()->with(['event', 'tilok'])->get();
+
+        }
         return view('event_tilok.index', compact('event', 'tilok', 'title', 'event_tilok'));
     }
 
