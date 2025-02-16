@@ -438,6 +438,7 @@
 							<thead>
 							<tr>
 								<th>NO</th>
+								<th>TANGGAL PELAKSANAAN</th>
 								<th>TILOK</th>
 								<th>INSTANSI</th>
 								<th>SESI</th>
@@ -453,6 +454,7 @@
 								@foreach ($detail_tilok as $no => $item)
 								<tr>
 									<td>{{$no+1}}</td>
+									<td>{{$item->exam_date}}</td>
 									<td>{{$item->tilok->name}}</td>
 									<td>{{$item->instansi_name}}</td>
 									<td>{{$item->session}}</td>
