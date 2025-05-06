@@ -116,7 +116,7 @@
 <script src="{{asset('assets/plugins/select2/js/select2.full.min.js')}}"></script>
 
 
-@yield('script')
+@stack('script')
 <script>
   $(function () {
     $("#example1").DataTable({
@@ -148,6 +148,6 @@
     $('#reservation').daterangepicker()
   });
 </script>
-@yield('script')
+{{-- @yield('script') --}}
 </body>
 </html>

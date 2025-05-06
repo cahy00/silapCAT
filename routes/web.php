@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Admin\TypeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
@@ -15,7 +16,7 @@ use App\Http\Controllers\RepoCat\DelegasiController;
 use App\Http\Controllers\RepoCat\EventTilokController;
 use App\Http\Controllers\RepoCat\DetailEventController;
 use App\Http\Controllers\RepoCat\DetailTilokController;
-use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RepoCat\ImportReportController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -124,6 +125,9 @@ Route::middleware(['auth'])->group(function(){
 
 		//ROUTE DETAIL TILOK
 		Route::post('/detail-tilok/store', [DetailTilokController::class, 'store']);
+
+		//ROUTE IMPORT REPORT
+		Route::post('/import-report', [ImportReportController::class, 'import']);
 	});
 
 

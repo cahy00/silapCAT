@@ -72,19 +72,32 @@ class ReportController extends Controller
             'tilok_id' => 'required|exists:tiloks,id',
         ]);
 
-        $data = Report::create([
-            'event_id' => $request->event_id,
-            'tilok_id' => $request->tilok_id,
-            'instansi_name' => $request->instansi_name,
-            'exam_date' => $request->exam_date,
-            'session' => $request->session,
-            'participant_total' => $request->participant_total,
-            'participant_present' => $request->participant_present,
-            'participant_absent' => $request->participant_absent,
-            'highest_score' => $request->highest_score,
-            'lowest_score' => $request->lowest_score,
-            'average_score' => $request->lowest_score + $request->lowest_score/2,
-        ]);
+        // $data = Report::create([
+        //     'event_id' => $request->event_id,
+        //     'tilok_id' => $request->tilok_id,
+        //     'instansi_name' => $request->instansi_name,
+        //     'exam_date' => $request->exam_date,
+        //     'session' => $request->session,
+        //     'participant_total' => $request->participant_total,
+        //     'participant_present' => $request->participant_present,
+        //     'participant_absent' => $request->participant_absent,
+        //     'highest_score' => $request->highest_score,
+        //     'lowest_score' => $request->lowest_score,
+        //     'average_score' => $request->lowest_score + $request->lowest_score/2,
+        // ]);
+
+        $common = [
+            'event_id'   => $request->event_id,
+            'tilok_id'   => $request->tilok_id,
+            'instansi_name'=> $request->instansi_name,
+            'exam_date'  => $request->exam_date,
+        ];
+
+        foreach ($request->reports as $data) {
+            // gabungkan exam_date dari atas form
+            $data['exam_date'] = $request->exam_date;
+            Report::create(array_merge($common, $data));
+        }
 
         return back()->with('success', 'Data Berhasil Di input');
     }
