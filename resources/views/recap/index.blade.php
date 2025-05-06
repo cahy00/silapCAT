@@ -110,7 +110,7 @@
 					</div>
 					<!-- /.card-header -->
 					<div class="card-body">
-						<form action="recap/filter" method="GET">
+						<form action="" method="GET">
 							<div class="row">
 									<div class="col-md-3">
 											<select name="event_id" id="event_id" class="form-control">
@@ -133,20 +133,39 @@
 										</select>
 									</div>
 									<div class="col-md-3">
-										
+										<input
+											type="date"
+											name="from_date"
+											class="form-control"
+											value="{{ request('from_date') }}"
+											{{-- onchange="this.form.submit()" --}}
+										>
 									</div>
-									<div class="col-md-2 d-flex align-items-end">
-											<button type="submit" class="btn btn-primary">Filter</button>
+									<div class="col-md-3">
+										<input
+											type="date"
+											name="to_date"
+											class="form-control"
+											value="{{ request('to_date') }}"
+											{{-- onchange="this.form.submit()" --}}
+										>
 									</div>
+									
 							</div>
-					</form>
+							<div class="row">
+								<div class="col-md-2 d-flex align-items-end">
+									<button type="submit" class="btn btn-primary">Filter</button>
+							</div>
+							</div>
+						</form>
+						<br>
 						<table id="example1" class="table table-bordered table-striped">
 							<thead>
 							<tr>
 								<th>NO</th>
 								<th>NAMA EVENT</th>
 								<th>TITIK LOKASI</th>
-								{{-- <th>INSTANSI</th> --}}
+								<th>INSTANSI</th>
 								<th>JUMLAH PESERTA</th>
 								<th>PESERTA HADIR</th>
 								<th>PESERTA TIDAK HADIR</th>
@@ -162,6 +181,7 @@
 									<td>{{$no+1}}</td>
 									<td>{{$item->event->name}}</td>
 									<td>{{$item->tilok->name}}</td>
+									<td>{{$item->instansi_list}}</td>
 									<td>{{$item->total_participant}}</td>
 									<td>{{$item->total_present}}</td>
 									<td>{{$item->total_absent}}</td>
@@ -194,7 +214,7 @@
 								<th>NO</th>
 								<th>NAMA EVENT</th>
 								<th>TITIK LOKASI</th>
-								{{-- <th>INSTANSI</th> --}}
+								<th>INSTANSI</th>
 								<th>JUMLAH PESERTA</th>
 								<th>PESERTA HADIR</th>
 								<th>PESERTA TIDAK HADIR</th>

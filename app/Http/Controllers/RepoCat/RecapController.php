@@ -13,7 +13,8 @@ class RecapController extends Controller
 {
     public function index(Request $request)
     {
-        $detail_tilok = Report::with(['event', 'tilok'])->get();
+        // $detail_tilok = Report::with(['event', 'tilok'])->get();
+        
         $hadir_tilok = Report::sum('participant_present');
         $tidak_hadir_tilok = Report::sum('participant_absent');
         $tertinggi_tilok = Report::max('highest_score');
@@ -23,8 +24,9 @@ class RecapController extends Controller
 
         $eventId = $request->input('event_id'); //ambil request dari form filter
         $tilokId = $request->input('tilok_id'); //ambil request dari form filter
-
-
+        $fromDate = $request->input('from_date'); //ambil request dari form filter
+        $toDate = $request->input('to_date'); //ambil request dari form filter
+        
         $event = Event::with(['tiloks'])->orderBy('created_at', 'ASC')->get();
         $tilok = Tilok::with(['events'])->orderBy('created_at', 'ASC')->get();
         $title = 'Halaman Rekapitulasi';
@@ -35,20 +37,37 @@ class RecapController extends Controller
             ->when($tilokId, function ($query, $tilokId) {
                 $query->where('tilok_id', $tilokId);
             })
-            ->selectRaw('event_id, tilok_id, SUM(participant_total) as total_participant, SUM(participant_present) as total_present, SUM(participant_absent) as total_absent, MAX(highest_score) as highest_score, MIN(lowest_score) as lowest_score')
+            ->when($fromDate && $toDate, function ($query) use ($fromDate, $toDate) {
+                $query->whereBetween('exam_date', [$fromDate, $toDate]);
+            })
+            ->when($fromDate && !$toDate, function ($query, $fromDate) {
+                $query->whereDate('exam_date','>=', $fromDate);
+            })
+            ->when($toDate && !$fromDate, function ($query, $toDate) {
+                $query->whereDate('exam_date','>=', $toDate);
+            })
+            ->selectRaw(
+                <<<SQL
+                    event_id,
+                    tilok_id,
+                    GROUP_CONCAT(DISTINCT instansi_name SEPARATOR ', ') AS instansi_list,
+                    SUM(participant_total)   AS total_participant,
+                    SUM(participant_present) AS total_present,
+                    SUM(participant_absent)  AS total_absent,
+                    MAX(highest_score)       AS highest_score,
+                    MIN(lowest_score)        AS lowest_score
+                SQL)
             ->groupBy('event_id', 'tilok_id')
             ->get()
             ->map(function ($report) {
                 // Hitung status kelengkapan dokumen
                 $requiredDocuments = ['Laporan Pelaksanaan'];
-
                 if(!$report->tilok){
                     $report->is_complete = false;
                     return $report;
                 }
-
                 $uploadedDocuments = $report->tilok->documents->pluck('document_name')->toArray();
-    
+
                 $report->is_complete = count(array_diff($requiredDocuments, $uploadedDocuments)) === 0;
                 return $report;
             });
@@ -63,7 +82,7 @@ class RecapController extends Controller
             'event',
             'title', 
             'reports',
-            'detail_tilok', 
+            // 'detail_tilok', 
             'hadir_tilok', 
             'tidak_hadir_tilok', 
             'jumlah', 
@@ -73,6 +92,7 @@ class RecapController extends Controller
             'eventId',
             'tilok',
             'tilokId',
+            // 'query'
             // 'document'
 
         ));

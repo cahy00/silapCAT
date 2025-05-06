@@ -297,7 +297,7 @@
 												<div class="col-3">
 													<div class="form-group">
 														<label for="instansi">Instansi</label>
-														<select name="instansi_name" id="" class="form-control form-select">
+														<select name="instansi_name" id="" class="form-control select2bs4" style="width: 100%;">
 															<option value="Pemerintah Kab Manokwari">Pemerintah Kab Manokwari</option>
 															<option value="Pemerintah Kab Manokwari Selatan">Pemerintah Kab Manokwari Selatan</option>
 															<option value="Pemerintah Kab Fakfak">Pemerintah Kab Fakfak</option>
@@ -313,6 +313,10 @@
 															<option value="Pemerintah Kota Sorong">Pemerintah Kota Sorong</option>
 															<option value="Pemerintah Provinsi Papua Barat Daya">Pemerintah Provinsi Papua Barat Daya</option>
 															<option value="Pemerintah Provinsi Papua Barat">Pemerintah Provinsi Papua Barat</option>
+															<option value="#">Setjen Komisi Pemilihan Umum</option>
+															<option value="#">Badan Nasional Penanggulangan Bencana</option>
+															<option value="#">Badan Meteorologi, Klimatologi dan Geofisika</option>
+															<option value="#">Badan Pengawas Pemilihan Umum</option>
 															{{-- <option value="Instansi Vertikal">Instansi Vertikal</option>
 															<option value="lain-lain">lain-lain</option> --}}
 														</select>
@@ -328,20 +332,22 @@
 														<div class="col-2">
 															<div class="form-group">
 																<label for="sesi">Sesi</label>
-																{{-- <input
-																	type="text"
+																<input
+																	type="number"
 																	class="form-control session"
 																	id="session"
 																	name="reports[0][session]"
-																	placeholder="Sesi"
+																	placeholder="1-4"
 																	required
-																/> --}}
-																<select name="reports[0][session]" id="session" class="form-control session">
+																	min="1"
+																	max="4"
+																/>
+																{{-- <select name="reports[0][session]" id="session[0]" class="form-control session">
 																	<option value="1">1</option>
 																	<option value="2">2</option>
 																	<option value="3">3</option>
 																	<option value="4">4</option>
-																</select>
+																</select> --}}
 																<span class="error invalid-feedback">{{$errors->first('session')}}</span>
 															</div>
 															<div class="col-md-9 text-left">
@@ -358,6 +364,9 @@
 																	name="reports[0][participant_present]"
 																	placeholder="Peserta Hadir"
 																	required
+																	maxlength="3"
+																	min="1"
+																	max="500"
 																/>
 																<span class="error invalid-feedback">{{$errors->first('participant_present')}}</span>
 															</div>
@@ -386,7 +395,6 @@
 																	name="reports[0][participant_total]"
 																	placeholder="Peserta Keseluruhan"
 																	required
-																	readonly
 																/>
 																<span class="error invalid-feedback">{{$errors->first('hadir')}}</span>
 															</div>

@@ -32,6 +32,7 @@
   <link rel="stylesheet" href="{{asset('assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css')}}">
   <link rel="stylesheet" href="{{asset('assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css')}}">
   <link rel="stylesheet" href="{{asset('assets/plugins/select2/css/select2.min.css')}}">
+  <link rel="stylesheet" href="{{asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css')}}">
 
 	@yield('style')
 </head>
@@ -119,6 +120,10 @@
 @stack('script')
 <script>
   $(function () {
+    $('.select2').select2()
+    $('.select2bs4').select2({
+      theme: 'bootstrap4'
+    })
     $("#example1").DataTable({
       "responsive": true, "lengthChange": false, "autoWidth": false,
       "buttons": ["copy", "csv", "excel", "pdf", "print"]
