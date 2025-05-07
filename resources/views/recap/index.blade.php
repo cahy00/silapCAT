@@ -166,6 +166,7 @@
 								<th>NAMA EVENT</th>
 								<th>TITIK LOKASI</th>
 								<th>INSTANSI</th>
+								<th>PELAKSANAAN</th>
 								<th>JUMLAH PESERTA</th>
 								<th>PESERTA HADIR</th>
 								<th>PESERTA TIDAK HADIR</th>
@@ -182,6 +183,9 @@
 									<td>{{$item->event->name}}</td>
 									<td>{{$item->tilok->name}}</td>
 									<td>{{$item->instansi_list}}</td>
+									<td>{{ \Carbon\Carbon::parse($item->tilok->start_date)->format('d-m-Y') }}
+										s/d
+										{{ \Carbon\Carbon::parse($item->tilok->end_date)->format('d-m-Y') }}</td>
 									<td>{{$item->total_participant}}</td>
 									<td>{{$item->total_present}}</td>
 									<td>{{$item->total_absent}}</td>
@@ -215,6 +219,7 @@
 								<th>NAMA EVENT</th>
 								<th>TITIK LOKASI</th>
 								<th>INSTANSI</th>
+								<th>PELAKSANAAN</th>
 								<th>JUMLAH PESERTA</th>
 								<th>PESERTA HADIR</th>
 								<th>PESERTA TIDAK HADIR</th>
