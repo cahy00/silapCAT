@@ -17,8 +17,15 @@ use Filament\Tables\Table;
 class LocationSurveyResource extends Resource
 {
     protected static ?string $model = LocationSurvey::class;
+    
+    protected static ?string $modelLabel = 'Survey Lokasi';
+    protected static ?string $pluralModelLabel = 'Survey Lokasi';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Kegiatan';
+
+    protected static ?int $navigationSort = 2;
 
     protected static bool $shouldRegisterNavigation = false;
 

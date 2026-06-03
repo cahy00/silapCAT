@@ -26,9 +26,20 @@ class LocationSurveysTable
                     ->searchable(),
                 TextColumn::make('surveyor_name')
                     ->searchable(),
-                TextColumn::make('survey_date')
-                    ->date()
-                    ->sortable(),
+                TextColumn::make('jadwal_survey')
+                    ->label('JADWAL SURVEY')
+                    ->html()
+                    ->getStateUsing(fn ($record) => $record->id)
+                    ->formatStateUsing(function ($record) {
+                        $start = $record->survey_start_date ? \Carbon\Carbon::parse($record->survey_start_date)->translatedFormat('d M Y') : '-';
+                        $end = $record->survey_end_date ? \Carbon\Carbon::parse($record->survey_end_date)->translatedFormat('d M Y') : '-';
+                        
+                        return new \Illuminate\Support\HtmlString("
+                            <div class='flex flex-col'>
+                                <span class='text-sm font-semibold text-gray-900 dark:text-white leading-tight'>{$start} &mdash; {$end}</span>
+                            </div>
+                        ");
+                    }),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

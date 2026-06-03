@@ -24,8 +24,25 @@ use Filament\Tables\Table;
 class EventResource extends Resource
 {
     protected static ?string $model = Event::class;
+    
+    protected static ?string $modelLabel = 'Kegiatan';
+    protected static ?string $pluralModelLabel = 'Kegiatan';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Kegiatan';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::where('status', 'active')->count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'success';
+    }
 
     public static function form(Schema $schema): Schema
     {

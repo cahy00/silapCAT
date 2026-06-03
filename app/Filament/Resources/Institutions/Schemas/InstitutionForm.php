@@ -14,42 +14,50 @@ class InstitutionForm
         return $schema
             ->columns(12)
             ->components([
-                Section::make('Informasi Institusi')
-                    ->description('Masukkan detail informasi tentang institusi.')
-                    ->aside()
+                \Filament\Schemas\Components\Group::make()
                     ->schema([
-                        Grid::make(2)->schema([
-                            TextInput::make('name')
-                                ->label('Nama Institusi')
-                                ->required()
-                                ->maxLength(255),
-                            TextInput::make('code')
-                                ->label('Kode Institusi')
-                                ->maxLength(50)
-                                ->default(null),
-                        ]),
-                        TextInput::make('address')
-                            ->label('Alamat')
-                            ->maxLength(255)
-                            ->default(null)
-                            ->columnSpanFull(),
-                        Grid::make(3)->schema([
-                            TextInput::make('contact_person')
-                                ->label('Kontak Person')
-                                ->maxLength(255)
-                                ->default(null),
-                            TextInput::make('phone')
-                                ->label('Telepon')
-                                ->tel()
-                                ->maxLength(20)
-                                ->default(null),
-                            TextInput::make('email')
-                                ->label('Email')
-                                ->email()
-                                ->maxLength(255)
-                                ->default(null),
-                        ]),
-                    ])->columnSpan(12),
+                        Section::make('Identitas Utama')
+                            ->description('Detail dasar identitas institusi.')
+                            ->icon('heroicon-o-building-office')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Nama Institusi')
+                                    ->required()
+                                    ->placeholder('Contoh: Kantor Wilayah BKN')
+                                    ->prefixIcon('heroicon-m-building-office-2')
+                                    ->columnSpan(2),
+                                TextInput::make('code')
+                                    ->label('Kode Institusi')
+                                    ->placeholder('ID-XXXX')
+                                    ->prefixIcon('heroicon-m-qr-code')
+                                    ->columnSpan(1),
+                                \Filament\Forms\Components\Textarea::make('address')
+                                    ->label('Alamat Lengkap')
+                                    ->placeholder('Jl. Contoh No. 123...')
+                                    ->rows(3)
+                                    ->columnSpanFull(),
+                            ])->columns(3),
+                    ])->columnSpan(['lg' => 8]),
+
+                \Filament\Schemas\Components\Group::make()
+                    ->schema([
+                        Section::make('Informasi Kontak')
+                            ->description('Penanggung jawab institusi.')
+                            ->icon('heroicon-o-phone')
+                            ->schema([
+                                TextInput::make('contact_person')
+                                    ->label('Nama CP')
+                                    ->prefixIcon('heroicon-m-user'),
+                                TextInput::make('phone')
+                                    ->label('No. Telepon')
+                                    ->tel()
+                                    ->prefixIcon('heroicon-m-phone'),
+                                TextInput::make('email')
+                                    ->label('Email Resmi')
+                                    ->email()
+                                    ->prefixIcon('heroicon-m-envelope'),
+                            ]),
+                    ])->columnSpan(['lg' => 4]),
             ]);
     }
 }

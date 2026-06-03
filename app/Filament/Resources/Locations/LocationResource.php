@@ -25,8 +25,25 @@ use Filament\Tables\Table;
 class LocationResource extends Resource
 {
     protected static ?string $model = Location::class;
+    
+    protected static ?string $modelLabel = 'Lokasi Ujian';
+    protected static ?string $pluralModelLabel = 'Lokasi Ujian';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-map-pin';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Master Data';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -99,8 +116,12 @@ class LocationResource extends Resource
                                         'conditional' => 'BERSYARAT',
                                         default => 'BELUM SURVEY',
                                     }),
-                                TextEntry::make('locationSurvey.survey_date')
-                                    ->label('Tgl Terakhir Survey')
+                                TextEntry::make('locationSurvey.survey_start_date')
+                                    ->label('Mulai Survey')
+                                    ->date()
+                                    ->icon('heroicon-o-calendar'),
+                                TextEntry::make('locationSurvey.survey_end_date')
+                                    ->label('Selesai Survey')
                                     ->date()
                                     ->icon('heroicon-o-calendar'),
                             ])

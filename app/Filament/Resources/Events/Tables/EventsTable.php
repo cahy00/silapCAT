@@ -21,7 +21,7 @@ class EventsTable
             ->defaultSort('created_at', 'desc')
             ->emptyStateHeading('Belum Ada Kegiatan')
             ->emptyStateDescription('Daftar kegiatan yang Anda buat akan muncul di sini.')
-            ->emptyStateIcon('heroicon-o-calendar-days')
+            ->emptyStateIcon(null)
             ->columns([
                 TextColumn::make('name')
                     ->label('INFORMASI KEGIATAN')
@@ -30,7 +30,6 @@ class EventsTable
                     ->html()
                     ->formatStateUsing(function (Event $record): HtmlString {
                         $name = $record->name;
-                        $year = $record->formation_year ? " <span class='ml-2 inline-flex items-center rounded-full bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-600/20 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/30'>{$record->formation_year}</span>" : "";
                         
                         $institutions = $record->eventInstitutions->map(fn($ei) => 
                             "<div class='flex items-center gap-2 py-0.5'>
@@ -41,58 +40,111 @@ class EventsTable
 
                         $locations = $record->eventLocations->map(fn($el) => 
                             "<div class='flex items-center gap-2 py-0.5 mt-0.5'>
-                                <span class='text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider'>Titik Lokasi: " . e($el->location?->name ?? '-') . "</span>
+                                <span class='text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded'>LOKASI: " . e($el->location?->name ?? '-') . "</span>
                             </div>"
                         )->join('');
                         
                         return new HtmlString("
                             <div class='flex flex-col py-3 gap-2'>
-                                <div class='flex items-center'>
-                                    <h3 class='font-black text-lg text-gray-900 dark:text-white uppercase tracking-tighter leading-tight'>{$name}</h3>
+                                <div>
+                                    <h3 class='font-black text-base text-gray-900 dark:text-white uppercase tracking-tighter leading-tight'>{$name}</h3>
+                                    <div class='mt-1 text-[10px] font-bold text-primary-600 uppercase tracking-widest'>TAHUN FORMASI: " . ($record->formation_year ?? '-') . "</div>
                                 </div>
-                                <div class='flex flex-col gap-0.5 pl-1'>
+                                <div class='flex flex-col gap-0.5'>
                                     {$institutions}
-                                    {$locations}
+                                    <div class='flex flex-wrap gap-1 mt-1'>{$locations}</div>
                                 </div>
                             </div>
                         ");
                     }),
 
-                TextColumn::make('id_jadwal')
+                TextColumn::make('jadwal_pelaksanaan')
                     ->label('JADWAL')
                     ->html()
                     ->getStateUsing(fn (Event $record) => $record->id)
                     ->formatStateUsing(function (Event $record): HtmlString {
-                        $startDate = $record->eventInstitutions->min('start_date');
-                        $endDate = $record->eventInstitutions->max('end_date');
+                        $locations = $record->eventLocations;
                         
-                        $start = $startDate instanceof \Carbon\Carbon ? $startDate->translatedFormat('d M Y') : ($startDate ?? '-');
-                        $end = $endDate instanceof \Carbon\Carbon ? $endDate->translatedFormat('d M Y') : ($endDate ?? '-');
-                        
-                        $duration = 0;
-                        if ($startDate instanceof \Carbon\Carbon && $endDate instanceof \Carbon\Carbon) {
-                            $duration = $startDate->diffInDays($endDate) + 1;
+                        if ($locations->isEmpty() || !$locations->first()->start_date) {
+                            return new HtmlString("<span class='text-xs italic text-gray-400'>Belum dijadwalkan</span>");
                         }
 
+                        $startDate = $locations->min('start_date');
+                        $endDate = $locations->max('end_date');
+                        
+                        $start = $startDate ? $startDate->translatedFormat('d M Y') : '-';
+                        $end = $endDate ? $endDate->translatedFormat('d M Y') : '-';
+                        
+                        $duration = ($startDate && $endDate) ? $startDate->diffInDays($endDate) + 1 : 0;
+
                         return new HtmlString("
-                            <div class='flex flex-col py-3 gap-1'>
-                                <span class='text-sm font-black text-gray-900 dark:text-white leading-tight'>{$start} — {$end}</span>
-                            </div>
-                            <div class='flex flex-col py-3 gap-1'>
-                                <span class='text-[10px] font-bold text-gray-400 uppercase tracking-widest'>{$duration} HARI PELAKSANAAN</span>
+                            <div class='flex flex-col py-2 gap-1'>
+                                <div class='text-sm font-bold text-gray-900 dark:text-white leading-tight'>{$start} &mdash; {$end}</div>
+                                <div class='text-[10px] font-black text-primary-600 dark:text-primary-400 tracking-wider uppercase'>{$duration} Hari Kerja / Pelaksanaan</div>
                             </div>
                         ");
                     }),
 
-                TextColumn::make('participants_count')
+                TextColumn::make('total_peserta')
                     ->label('PESERTA')
                     ->html()
-                    ->getStateUsing(fn(Event $record) => $record->eventInstitutions->sum('participants_count'))
+                    ->getStateUsing(fn(Event $record) => $record->eventLocations->sum('participants_count'))
                     ->formatStateUsing(function ($state): HtmlString {
+                        $count = (int) $state;
+                        if ($count === 0) {
+                            return new HtmlString("<span class='text-xs italic text-gray-400'>Belum ada data</span>");
+                        }
+                        
                         return new HtmlString("
                             <div class='flex flex-col py-3'>
-                                <span class='text-lg font-black text-primary-600 dark:text-primary-400 leading-none'>" . number_format($state) . "</span>
-                                <span class='text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1'>PESERTA</span>
+                                <div class='flex items-baseline gap-1'>
+                                    <span class='text-xl font-black text-primary-600 dark:text-primary-400 leading-none'>" . number_format($count) . "</span>
+                                    <span class='text-[10px] font-bold text-gray-400 uppercase tracking-widest'>Peserta</span>
+                                </div>
+                            </div>
+                        ");
+                    })
+                    ->sortable(),
+
+                 TextColumn::make('status_dokumen')
+                    ->label('DOKUMEN')
+                    ->html()
+                    ->getStateUsing(function (Event $record): int {
+                        $docs = [
+                            $record->doc_implementation_report,
+                            $record->doc_team_decree,
+                            $record->doc_ba_catos,
+                            $record->doc_institution_announcement,
+                        ];
+                        
+                        return collect($docs)->filter(fn($doc) => !empty($doc))->count();
+                    })
+                    ->formatStateUsing(function (Event $record, $state): HtmlString {
+                        $total = 4;
+                        $uploadedCount = (int) $state;
+                        
+                        if ($uploadedCount === $total) {
+                            return new HtmlString("
+                                <div class='flex flex-col py-3 gap-1'>
+                                    <span class='inline-flex items-center w-fit px-2 py-0.5 rounded-md text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 tracking-wider uppercase'>Lengkap</span>
+                                    <span class='text-[10px] font-bold text-gray-500 dark:text-gray-400'>{$uploadedCount}/{$total} Dokumen</span>
+                                </div>
+                            ");
+                        }
+                        
+                        if ($uploadedCount === 0) {
+                            return new HtmlString("
+                                <div class='flex flex-col py-3 gap-1'>
+                                    <span class='inline-flex items-center w-fit px-2 py-0.5 rounded-md text-xs font-black bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-gray-400 tracking-wider uppercase'>Belum Ada</span>
+                                    <span class='text-[10px] font-bold text-gray-500 dark:text-gray-400'>0/{$total} Dokumen</span>
+                                </div>
+                            ");
+                        }
+                        
+                        return new HtmlString("
+                            <div class='flex flex-col py-3 gap-1'>
+                                <span class='inline-flex items-center w-fit px-2 py-0.5 rounded-md text-xs font-black bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400 tracking-wider uppercase'>Belum Lengkap</span>
+                                <span class='text-[10px] font-bold text-gray-500 dark:text-gray-400'>{$uploadedCount}/{$total} Dokumen</span>
                             </div>
                         ");
                     })
@@ -111,6 +163,16 @@ class EventsTable
                     }),
             ])
             ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('procurement_category')
+                    ->label('Kategori Pengadaan')
+                    ->options(\App\Models\ProcurementCategory::pluck('name', 'id'))
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
+                        if (!empty($data['value'])) {
+                            $query->whereHas('procurementType', function ($q) use ($data) {
+                                $q->where('procurement_category_id', $data['value']);
+                            });
+                        }
+                    }),
                 \Filament\Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'draft' => 'DRAFT',
@@ -125,12 +187,26 @@ class EventsTable
             ->actions([
                 \Filament\Actions\ActionGroup::make([
                     \Filament\Actions\ViewAction::make()
+                        ->label('Lihat')
+                        ->icon(null)
                         ->color('info'),
+                    \Filament\Actions\Action::make('download_pdf')
+                        ->label('Cetak PDF')
+                        ->icon(null)
+                        ->color('success')
+                        ->url(fn (Event $record) => route('events.pdf', $record))
+                        ->openUrlInNewTab(),
                     \Filament\Actions\EditAction::make()
+                        ->label('Ubah')
+                        ->icon(null)
                         ->color('primary'),
-                    \Filament\Actions\DeleteAction::make(),
+                    \Filament\Actions\DeleteAction::make()
+                        ->label('Hapus')
+                        ->icon(null),
                 ])
-                ->icon('heroicon-m-ellipsis-vertical')
+                ->label('Aksi')
+                ->icon(null)
+                ->button()
             ])
             ->bulkActions([
                 BulkActionGroup::make([

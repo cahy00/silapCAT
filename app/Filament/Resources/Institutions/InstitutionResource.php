@@ -17,8 +17,25 @@ use Filament\Tables\Table;
 class InstitutionResource extends Resource
 {
     protected static ?string $model = Institution::class;
+    
+    protected static ?string $modelLabel = 'Instansi';
+    protected static ?string $pluralModelLabel = 'Instansi';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
+
+    protected static \UnitEnum|string|null $navigationGroup = 'Master Data';
+
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'info';
+    }
 
     public static function form(Schema $schema): Schema
     {

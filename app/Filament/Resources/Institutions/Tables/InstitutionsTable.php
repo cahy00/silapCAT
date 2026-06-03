@@ -15,14 +15,33 @@ class InstitutionsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('code')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Nama Institusi')
+                    ->searchable()
                     ->sortable()
+                    ->weight('bold'),
+                TextColumn::make('code')
+                    ->label('Kode')
+                    ->searchable()
+                    ->badge()
+                    ->color('gray'),
+                TextColumn::make('contact_person')
+                    ->label('Nama CP')
+                    ->searchable(),
+                TextColumn::make('phone')
+                    ->label('No. Telepon')
+                    ->searchable()
+                    ->icon('heroicon-m-phone'),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->icon('heroicon-m-envelope')
+                    ->toggleable(),
+                TextColumn::make('address')
+                    ->label('Alamat')
+                    ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                TextColumn::make('created_at')
+                    ->label('Dibuat')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

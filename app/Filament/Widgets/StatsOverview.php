@@ -12,6 +12,8 @@ use App\Models\Institution;
 
 class StatsOverview extends StatsOverviewWidget
 {
+    protected static ?int $sort = 2;
+
     protected function getStats(): array
     {
         $activeEventsCount = Event::where('status', 'active')->count();

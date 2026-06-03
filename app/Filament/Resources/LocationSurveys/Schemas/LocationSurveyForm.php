@@ -24,10 +24,15 @@ class LocationSurveyForm
                         Select::make('location_id')
                             ->relationship('location', 'name')
                             ->required(),
-                        Grid::make(2)->schema([
+                        Grid::make(3)->schema([
                             TextInput::make('surveyor_name')
                                 ->default(null),
-                            DatePicker::make('survey_date'),
+                            DatePicker::make('survey_start_date')
+                                ->label('Mulai Survey')
+                                ->required(),
+                            DatePicker::make('survey_end_date')
+                                ->label('Selesai Survey')
+                                ->required(),
                         ]),
                     ])->columnSpan(12),
                     

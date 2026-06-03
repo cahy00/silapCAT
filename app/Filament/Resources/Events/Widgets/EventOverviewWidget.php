@@ -14,7 +14,7 @@ class EventOverviewWidget extends StatsOverviewWidget
     {
         $totalEvents = Event::count();
         $activeEvents = Event::where('status', 'active')->count();
-        $totalParticipants = EventInstitution::sum('participants_count');
+        $totalParticipants = EventLocation::sum('participants_count');
         $locationsCount = EventLocation::distinct('location_id')->count('location_id');
 
         return [

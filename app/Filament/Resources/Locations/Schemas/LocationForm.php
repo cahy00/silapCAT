@@ -43,7 +43,7 @@ class LocationForm
                                         ->required()
                                         ->columnSpan(1),
                                 ]),
-                                Grid::make(2)->schema([
+                                Grid::make(3)->schema([
                                     TextInput::make('city')
                                         ->label('Kota/Kabupaten')
                                         ->placeholder('Contoh: Jakarta Pusat')
@@ -66,14 +66,14 @@ class LocationForm
                                         Group::make()
                                             ->relationship('locationSurvey')
                                             ->schema([
-                                                Grid::make(2)->schema([
+                                                Grid::make(3)->schema([
                                                     Select::make('surveyor_name')
                                                         ->label('Tim Surveyor')
                                                         ->options(\App\Models\Employee::all()->mapWithKeys(function ($employee) {
                                                             $roles = collect($employee->status)->map(fn ($r) => match($r) {
-                                                                'coordinator' => 'Koordinator',
+                                                                'Koordinator' => 'Koordinator',
                                                                 'IT' => 'IT',
-                                                                'supervisor' => 'Pengawas',
+                                                                'Pengawas' => 'Pengawas',
                                                                 default => $r
                                                             })->join(', ');
                                                             return [$employee->name => "{$employee->name} [{$roles}]"];
@@ -83,15 +83,20 @@ class LocationForm
                                                         ->placeholder('Pilih petugas survey')
                                                         ->prefixIcon('heroicon-o-user-group')
                                                         ->default(null),
-                                                    DatePicker::make('survey_date')
-                                                        ->label('Tanggal Survey')
-                                                        ->prefixIcon('heroicon-o-calendar'),
+                                                    DatePicker::make('survey_start_date')
+                                                         ->label('Mulai Survey')
+                                                         ->prefixIcon('heroicon-o-calendar')
+                                                         ->required(),
+                                                     DatePicker::make('survey_end_date')
+                                                         ->label('Selesai Survey')
+                                                         ->prefixIcon('heroicon-o-calendar')
+                                                         ->required(),
                                                 ]),
                                                 
                                                 \Filament\Schemas\Components\Section::make('Kapasitas Infrastruktur')
                                                     ->description('Jumlah perangkat yang tersedia di lokasi.')
                                                     ->schema([
-                                                        Grid::make(2)->schema([
+                                                        Grid::make(3)->schema([
                                                             TextInput::make('pc_count')
                                                                 ->label('Jumlah PC Keseluruhan')
                                                                 ->numeric()

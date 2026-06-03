@@ -17,10 +17,15 @@ use Filament\Tables\Table;
 class ProcurementTypeResource extends Resource
 {
     protected static ?string $model = ProcurementType::class;
+    
+    protected static ?string $modelLabel = 'Jenis Pengadaan';
+    protected static ?string $pluralModelLabel = 'Jenis Pengadaan';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Recruitment';
+    protected static \UnitEnum|string|null $navigationGroup = 'Master Data';
+
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $recordTitleAttribute = 'name';
 

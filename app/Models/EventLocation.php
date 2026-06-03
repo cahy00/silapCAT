@@ -9,6 +9,13 @@ class EventLocation extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'holiday_dates' => 'array',
+        'has_opening_day' => 'boolean',
+    ];
+
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);

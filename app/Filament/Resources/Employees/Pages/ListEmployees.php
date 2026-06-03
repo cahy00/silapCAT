@@ -8,6 +8,7 @@ use Filament\Resources\Pages\ListRecords;
 
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Employee;
 
 class ListEmployees extends ListRecords
 {
@@ -23,16 +24,16 @@ class ListEmployees extends ListRecords
     public function getTabs(): array
     {
         return [
-            'all' => Tab::make('Semua'),
-            'coordinator' => Tab::make('Koordinator')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'coordinator'))
-                ->icon('heroicon-m-user-group'),
-            'IT' => Tab::make('IT')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'IT'))
-                ->icon('heroicon-m-cpu-chip'),
-            'supervisor' => Tab::make('Pengawas')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'supervisor'))
-                ->icon('heroicon-m-eye'),
+            'all' => Tab::make('Semua Pegawai'),
+            'Koordinator' => Tab::make('Koordinator')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'like', '%Koordinator%'))
+                ->badge(Employee::where('status', 'like', '%Koordinator%')->count()),
+            'IT' => Tab::make('Tim IT')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'like', '%IT%'))
+                ->badge(Employee::where('status', 'like', '%IT%')->count()),
+            'Pengawas' => Tab::make('Pengawas')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'like', '%Pengawas%'))
+                ->badge(Employee::where('status', 'like', '%Pengawas%')->count()),
         ];
     }
 }
