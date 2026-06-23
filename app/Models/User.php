@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -34,6 +35,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'institution_id',
     ];
 
     /**
@@ -57,5 +59,18 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the user's institution.
+     */
+    public function institution(): BelongsTo
+    {
+        return $this->belongsTo(Institution::class);
+    }
+
+    public function eventDelegations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(EventDelegation::class);
     }
 }

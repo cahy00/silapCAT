@@ -23,8 +23,22 @@ class Report extends Model
     }
     protected $guarded = [];
 
+    protected $casts = [
+        'report_date' => 'date',
+    ];
+
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function eventLocation(): BelongsTo
+    {
+        return $this->belongsTo(EventLocation::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

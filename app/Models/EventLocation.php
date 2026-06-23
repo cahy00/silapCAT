@@ -25,4 +25,14 @@ class EventLocation extends Model
     {
         return $this->belongsTo(Location::class);
     }
+
+    public function eventLocationInstitutions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(EventLocationInstitution::class);
+    }
+
+    public function getTotalParticipantsAttribute(): int
+    {
+        return $this->eventLocationInstitutions()->sum('participants_count');
+    }
 }

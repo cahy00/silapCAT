@@ -27,6 +27,12 @@ class ExamScoreForm
                                 $query->whereHas('procurementType', function ($q) {
                                     $q->whereIn('name', ['UD', 'UPKP', 'UD/UPKP']);
                                 });
+                                $user = auth()->user();
+                                if ($user && $user->hasRole('admin_instansi')) {
+                                    $query->whereHas('eventLocations.eventLocationInstitutions', function ($q) use ($user) {
+                                        $q->where('institution_id', $user->institution_id);
+                                    });
+                                }
                             })
                             ->label('Pilih Event / Kegiatan')
                             ->placeholder('Pilih Event untuk Seluruh Data Excel')
@@ -56,6 +62,12 @@ class ExamScoreForm
                                         $query->whereHas('procurementType', function ($q) {
                                             $q->whereIn('name', ['UD', 'UPKP', 'UD/UPKP']);
                                         });
+                                        $user = auth()->user();
+                                        if ($user && $user->hasRole('admin_instansi')) {
+                                            $query->whereHas('eventLocations.eventLocationInstitutions', function ($q) use ($user) {
+                                                $q->where('institution_id', $user->institution_id);
+                                            });
+                                        }
                                     })
                                     ->label('Event / Kegiatan')
                                     ->placeholder('Pilih Event')
@@ -79,7 +91,18 @@ class ExamScoreForm
                                 TextInput::make('institution')
                                     ->label('Instansi / Unit Kerja')
                                     ->placeholder('Contoh: Badan Kepegawaian Negara')
-                                    ->prefixIcon('heroicon-m-building-office'),
+                                    ->prefixIcon('heroicon-m-building-office')
+                                    ->default(function () {
+                                        /** @var \App\Models\User $user */
+                                        $user = auth()->user();
+                                        return ($user && $user->hasRole('admin_instansi') && $user->institution) ? $user->institution->name : null;
+                                    })
+                                    ->disabled(function () {
+                                        /** @var \App\Models\User $user */
+                                        $user = auth()->user();
+                                        return $user && $user->hasRole('admin_instansi');
+                                    })
+                                    ->dehydrated(),
                             ])->columns(2),
 
                         Section::make('Hasil Penilaian & Kelulusan')

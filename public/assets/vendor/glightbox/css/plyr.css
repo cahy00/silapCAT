@@ -865,7 +865,7 @@ a.plyr__control:before {
 }
 
 .plyr__time + .plyr__time:before {
-  content: 'Ã¢Ââ€ž';
+  content: '⁄';
   margin-right: 10px;
   margin-right: 10px;
   margin-right: var(--plyr-control-spacing, 10px);

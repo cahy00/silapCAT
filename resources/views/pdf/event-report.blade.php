@@ -167,6 +167,44 @@
         </table>
     </div>
 
+    <div class="section">
+        <div class="section-title">Laporan Harian (Rekapitulasi Kehadiran & Nilai)</div>
+        @if($event->reports->count() > 0)
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Lokasi</th>
+                    <th>Tanggal</th>
+                    <th>Sesi</th>
+                    <th>Peserta</th>
+                    <th>Hadir</th>
+                    <th>Tdk Hadir</th>
+                    <th>Nilai Tertinggi</th>
+                    <th>Nilai Terendah</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($event->reports->sortBy('report_date') as $report)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $report->eventLocation->location->name ?? '-' }}</td>
+                    <td>{{ $report->report_date ? $report->report_date->format('d/m/Y') : '-' }}</td>
+                    <td>{{ $report->session_name }}</td>
+                    <td>{{ $report->total_participants }}</td>
+                    <td>{{ $report->present_count }}</td>
+                    <td>{{ $report->absent_count }}</td>
+                    <td>{{ $report->highest_score ?? '-' }}</td>
+                    <td>{{ $report->lowest_score ?? '-' }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        @else
+        <p><em>Belum ada data laporan harian untuk kegiatan ini.</em></p>
+        @endif
+    </div>
+
     <div class="footer">
         Dicetak pada: {{ now()->translatedFormat('l, d F Y H:i') }} WIB<br>
         Oleh: {{ auth()->user()->name }}

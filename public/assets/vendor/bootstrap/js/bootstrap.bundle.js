@@ -2828,7 +2828,7 @@
     }
 
     if (makeFallbackChecks) {
-      // `2` may be desired in some cases Ã¢â‚¬â€œ research later
+      // `2` may be desired in some cases – research later
       var numberOfChecks = flipVariations ? 3 : 1;
 
       var _loop = function _loop(_i) {
@@ -3348,7 +3348,7 @@
           runModifierEffects();
           return instance.update();
         },
-        // Sync update Ã¢â‚¬â€œ it will always be executed, even if not necessary. This
+        // Sync update – it will always be executed, even if not necessary. This
         // is useful for low frequency updates where sync behavior simplifies the
         // logic.
         // For high frequency updates (e.g. `resize` and `scroll` events), always
@@ -3410,7 +3410,7 @@
             }
           }
         },
-        // Async and optimistically optimized update Ã¢â‚¬â€œ it will not be executed if
+        // Async and optimistically optimized update – it will not be executed if
         // not necessary (debounced to run at most once-per-tick)
         update: debounce(function () {
           return new Promise(function (resolve) {

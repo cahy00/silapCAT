@@ -26,6 +26,8 @@ class Event extends Model
 
     protected $casts = [
         'status' => 'string',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function eventInstitutions(): HasMany
@@ -53,8 +55,14 @@ class Event extends Model
         return $this->belongsTo(ProcurementType::class);
     }
 
+
     public function examScores(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(ExamScore::class);
+    }
+
+    public function delegations(): HasMany
+    {
+        return $this->hasMany(EventDelegation::class);
     }
 }

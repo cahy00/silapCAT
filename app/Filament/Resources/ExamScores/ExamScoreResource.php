@@ -12,6 +12,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ExamScoreResource extends Resource
 {
@@ -60,5 +61,18 @@ class ExamScoreResource extends Resource
             'create' => CreateExamScore::route('/create'),
             'edit' => EditExamScore::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        if ($user && $user->hasRole('admin_instansi')) {
+            $query->whereHas('event.eventLocations.eventLocationInstitutions', function ($q) use ($user) {
+                $q->where('institution_id', $user->institution_id);
+            });
+        }
+        return $query;
     }
 }

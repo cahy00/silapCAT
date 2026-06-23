@@ -4,14 +4,34 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\CertificateController;
 
-Route::get('/', function () {
-    return redirect('/admin');
-});
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\Website\AnnouncementController;
+use App\Http\Controllers\Website\LandingController;
+use App\Http\Controllers\Website\NewsController;
+
+// Public Website Routes
+Route::redirect('/', '/admin/login')->name('home');
+Route::get('/berita/{slug}', [LandingController::class, 'show'])->name('detail-post');
+Route::get('/semua-berita', [NewsController::class, 'allNews'])->name('all-news');
+Route::get('/semua-artikel', [NewsController::class, 'allArticle'])->name('all-artikel');
+Route::get('/pengumuman', [AnnouncementController::class, 'index'])->name('announcement');
+Route::get('/pengumuman/{id}', [AnnouncementController::class, 'show'])->name('detail-announcement');
+
+// Konsultasi Routes
+Route::get('/konsultasi', [QuestionController::class, 'index'])->name('konsultasi');
+Route::post('/konsultasi', [QuestionController::class, 'store'])->name('konsultasi.store');
+Route::get('/konsultasi/all', [QuestionController::class, 'all'])->name('konsultasi.all');
+Route::get('/konsultasi/kategori/{id}', [QuestionController::class, 'allCategory'])->name('konsultasi.category');
+Route::get('/konsultasi/kota/{id}', [QuestionController::class, 'allCity'])->name('konsultasi.city');
 
 Route::get('/events/{event}/pdf', function (\App\Models\Event $event) {
     $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.event-report', ['event' => $event]);
     return $pdf->stream("Laporan_Kegiatan_{$event->id}.pdf");
 })->name('events.pdf')->middleware(['auth']);
+
+Route::get('/reports/{report}/pdf', [\App\Http\Controllers\ReportExportController::class, 'download'])
+    ->name('reports.pdf')
+    ->middleware(['auth']);
 
 // Public Certificate Routes
 Route::get('/sertifikat', [CertificateController::class, 'index'])->name('certificate.index');
@@ -130,3 +150,298 @@ Route::get('/template/exam-score-import', function () {
     ]);
 })->name('template.exam-score-import')->middleware(['auth']);
 
+// Excel Import Template Download - Employee
+Route::get('/template/employee-import', function () {
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Template Import Pegawai');
+
+    // Headers (Row 1)
+    $headers = ['NIP', 'Nama', 'Jabatan', 'Status'];
+    foreach ($headers as $col => $header) {
+        $colString = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
+        $sheet->setCellValue($colString . '1', $header);
+    }
+
+    // Style header row
+    $headerStyle = [
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+        'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]],
+    ];
+    $sheet->getStyle('A1:D1')->applyFromArray($headerStyle);
+    $sheet->getRowDimension(1)->setRowHeight(25);
+
+    // Sample data (Row 2)
+    $sampleData = ['198001012005011001', 'Budi Santoso, S.Kom', 'Analis Kepegawaian Ahli Pertama', 'Koordinator, IT'];
+    foreach ($sampleData as $col => $value) {
+        $colString = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
+        $sheet->setCellValue($colString . '2', $value);
+    }
+
+    // Style sample row
+    $sampleStyle = [
+        'font' => ['italic' => true, 'color' => ['rgb' => '6B7280']],
+        'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'E5E7EB']]],
+    ];
+    $sheet->getStyle('A2:D2')->applyFromArray($sampleStyle);
+
+    // Auto-size columns
+    foreach (range('A', 'D') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Add instructions sheet
+    $instrSheet = $spreadsheet->createSheet();
+    $instrSheet->setTitle('Petunjuk Pengisian');
+    $instructions = [
+        ['PETUNJUK PENGISIAN TEMPLATE IMPORT PEGAWAI'],
+        [''],
+        ['Kolom', 'Keterangan', 'Wajib?', 'Contoh'],
+        ['A - NIP', 'NIP / Nomor Identitas Pegawai', 'Ya', '198001012005011001'],
+        ['B - Nama', 'Nama Lengkap beserta Gelar', 'Ya', 'Budi Santoso, S.Kom'],
+        ['C - Jabatan', 'Jabatan Fungsional / Struktural', 'Tidak', 'Analis Kepegawaian Ahli Pertama'],
+        ['D - Status', 'Status/Kompetensi: Koordinator / IT / Pengawas', 'Tidak', 'Koordinator, IT'],
+        [''],
+        ['CATATAN PENTING:'],
+        ['1. Hapus baris contoh (baris 2) sebelum mengimpor data asli.'],
+        ['2. Kolom Status dapat diisi lebih dari satu dengan dipisahkan tanda koma (contoh: Koordinator, IT).'],
+        ['3. Status yang valid hanya: Koordinator, IT, Pengawas.'],
+    ];
+    foreach ($instructions as $rowIdx => $rowData) {
+        foreach ($rowData as $colIdx => $value) {
+            $colString = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
+            $instrSheet->setCellValue($colString . ($rowIdx + 1), $value);
+        }
+    }
+    // Style instruction sheet
+    $instrSheet->getStyle('A1')->applyFromArray(['font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => '1E3A8A']]]);
+    $instrSheet->mergeCells('A1:D1');
+    $instrSheet->getStyle('A3:D3')->applyFromArray([
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+    ]);
+    $instrSheet->getStyle('A9')->applyFromArray(['font' => ['bold' => true, 'color' => ['rgb' => 'DC2626']]]);
+    foreach (range('A', 'D') as $col) {
+        $instrSheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Set active sheet back to template
+    $spreadsheet->setActiveSheetIndex(0);
+
+    // Output
+    $fileName = 'Template_Import_Pegawai.xlsx';
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+    return response()->streamDownload(function () use ($writer) {
+        $writer->save('php://output');
+    }, $fileName, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ]);
+})->name('template.employee-import')->middleware(['auth']);
+
+// Excel Import Template Download - Location & Survey
+Route::get('/template/location-import', function () {
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Template Import Lokasi');
+
+    // Headers (Row 1)
+    $headers = [
+        'Nama Lokasi', 'Tipe', 'Kota', 'Alamat', 
+        'Jumlah PC', 'Jumlah Ruangan', 'Status Kelayakan', 
+        'Nama Surveyor', 'Tgl Mulai Survei (YYYY-MM-DD)', 
+        'Tgl Selesai Survei (YYYY-MM-DD)', 'Catatan Survei'
+    ];
+    foreach ($headers as $col => $header) {
+        $colString = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
+        $sheet->setCellValue($colString . '1', $header);
+    }
+
+    // Style header row
+    $headerStyle = [
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+        'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]],
+    ];
+    $sheet->getStyle('A1:K1')->applyFromArray($headerStyle);
+    $sheet->getRowDimension(1)->setRowHeight(25);
+
+    // Sample data (Row 2)
+    $sampleData = [
+        'Kanreg I BKN Yogyakarta', 'bkn', 'Yogyakarta', 'Jl. Magelang',
+        '100', '2', 'feasible',
+        'Budi, Santoso', '2026-06-01', '2026-06-02', 'Siap digunakan'
+    ];
+    foreach ($sampleData as $col => $value) {
+        $colString = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
+        $sheet->setCellValue($colString . '2', $value);
+    }
+
+    // Style sample row
+    $sampleStyle = [
+        'font' => ['italic' => true, 'color' => ['rgb' => '6B7280']],
+        'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'E5E7EB']]],
+    ];
+    $sheet->getStyle('A2:K2')->applyFromArray($sampleStyle);
+
+    // Auto-size columns
+    foreach (range('A', 'K') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Add instructions sheet
+    $instrSheet = $spreadsheet->createSheet();
+    $instrSheet->setTitle('Petunjuk Pengisian');
+    $instructions = [
+        ['PETUNJUK PENGISIAN TEMPLATE IMPORT LOKASI & SURVEI'],
+        [''],
+        ['Kolom', 'Keterangan', 'Wajib?', 'Contoh'],
+        ['A - Nama Lokasi', 'Nama lokasi ujian', 'Ya', 'Kanreg I BKN Yogyakarta'],
+        ['B - Tipe', 'Tipe: bkn / mandiri_bkn / mandiri_instansi', 'Ya', 'bkn'],
+        ['C - Kota', 'Kota lokasi', 'Tidak', 'Yogyakarta'],
+        ['D - Alamat', 'Alamat lengkap', 'Tidak', 'Jl. Magelang Km. 7.5'],
+        ['E - Jumlah PC', 'Jumlah PC yang tersedia (Angka)', 'Tidak', '100'],
+        ['F - Jumlah Ruangan', 'Jumlah Ruangan (Angka)', 'Tidak', '2'],
+        ['G - Status Kelayakan', 'Status: feasible / not_feasible / conditional', 'Tidak', 'feasible'],
+        ['H - Nama Surveyor', 'Nama surveyor (pisahkan koma jika lebih dr 1)', 'Tidak', 'Andi, Budi'],
+        ['I - Tgl Mulai Survei', 'Format YYYY-MM-DD', 'Tidak', '2026-06-01'],
+        ['J - Tgl Selesai Survei', 'Format YYYY-MM-DD', 'Tidak', '2026-06-02'],
+        ['K - Catatan Survei', 'Catatan tambahan', 'Tidak', 'AC dingin, jaringan stabil'],
+        [''],
+        ['CATATAN PENTING:'],
+        ['1. Hapus baris contoh (baris 2) sebelum mengimpor data asli.'],
+        ['2. Pastikan penulisan Tipe dan Status Kelayakan persis seperti contoh di atas.'],
+        ['3. Data lokasi akan diperbarui jika Nama Lokasi sudah ada di database.'],
+    ];
+    foreach ($instructions as $rowIdx => $rowData) {
+        foreach ($rowData as $colIdx => $value) {
+            $colString = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
+            $instrSheet->setCellValue($colString . ($rowIdx + 1), $value);
+        }
+    }
+    // Style instruction sheet
+    $instrSheet->getStyle('A1')->applyFromArray(['font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => '1E3A8A']]]);
+    $instrSheet->mergeCells('A1:D1');
+    $instrSheet->getStyle('A3:D3')->applyFromArray([
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+    ]);
+    $instrSheet->getStyle('A16')->applyFromArray(['font' => ['bold' => true, 'color' => ['rgb' => 'DC2626']]]);
+    foreach (range('A', 'D') as $col) {
+        $instrSheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Set active sheet back to template
+    $spreadsheet->setActiveSheetIndex(0);
+
+    // Output
+    $fileName = 'Template_Import_Lokasi.xlsx';
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+    return response()->streamDownload(function () use ($writer) {
+        $writer->save('php://output');
+    }, $fileName, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ]);
+})->name('template.location-import')->middleware(['auth']);
+
+// Excel Import Template Download - Institution
+Route::get('/template/institution-import', function () {
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Template Import Instansi');
+
+    // Headers (Row 1)
+    $headers = [
+        'Nama Instansi', 'Kode Instansi', 'Alamat', 
+        'Contact Person', 'No. HP', 'Email'
+    ];
+    foreach ($headers as $col => $header) {
+        $colString = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
+        $sheet->setCellValue($colString . '1', $header);
+    }
+
+    // Style header row
+    $headerStyle = [
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+        'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]],
+    ];
+    $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
+    $sheet->getRowDimension(1)->setRowHeight(25);
+
+    // Sample data (Row 2)
+    $sampleData = [
+        'Kementerian Komunikasi dan Informatika', 'KOMINFO', 'Jl. Medan Merdeka Barat No. 9',
+        'Budi Santoso', '081234567890', 'budi@kominfo.go.id'
+    ];
+    foreach ($sampleData as $col => $value) {
+        $colString = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1);
+        $sheet->setCellValue($colString . '2', $value);
+    }
+
+    // Style sample row
+    $sampleStyle = [
+        'font' => ['italic' => true, 'color' => ['rgb' => '6B7280']],
+        'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'E5E7EB']]],
+    ];
+    $sheet->getStyle('A2:F2')->applyFromArray($sampleStyle);
+
+    // Auto-size columns
+    foreach (range('A', 'F') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Add instructions sheet
+    $instrSheet = $spreadsheet->createSheet();
+    $instrSheet->setTitle('Petunjuk Pengisian');
+    $instructions = [
+        ['PETUNJUK PENGISIAN TEMPLATE IMPORT INSTANSI'],
+        [''],
+        ['Kolom', 'Keterangan', 'Wajib?', 'Contoh'],
+        ['A - Nama Instansi', 'Nama instansi / lembaga', 'Ya', 'Kementerian Komunikasi dan Informatika'],
+        ['B - Kode Instansi', 'Kode singkatan / ID unik', 'Tidak', 'KOMINFO'],
+        ['C - Alamat', 'Alamat lengkap instansi', 'Tidak', 'Jl. Medan Merdeka Barat No. 9'],
+        ['D - Contact Person', 'Nama narahubung PIC instansi', 'Tidak', 'Budi Santoso'],
+        ['E - No. HP', 'Nomor HP/Telepon', 'Tidak', '081234567890'],
+        ['F - Email', 'Email resmi', 'Tidak', 'budi@kominfo.go.id'],
+        [''],
+        ['CATATAN PENTING:'],
+        ['1. Hapus baris contoh (baris 2) sebelum mengimpor data asli.'],
+        ['2. Data instansi akan diperbarui jika Nama Instansi sudah ada di database.'],
+    ];
+    foreach ($instructions as $rowIdx => $rowData) {
+        foreach ($rowData as $colIdx => $value) {
+            $colString = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
+            $instrSheet->setCellValue($colString . ($rowIdx + 1), $value);
+        }
+    }
+    // Style instruction sheet
+    $instrSheet->getStyle('A1')->applyFromArray(['font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => '1E3A8A']]]);
+    $instrSheet->mergeCells('A1:D1');
+    $instrSheet->getStyle('A3:D3')->applyFromArray([
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+    ]);
+    $instrSheet->getStyle('A11')->applyFromArray(['font' => ['bold' => true, 'color' => ['rgb' => 'DC2626']]]);
+    foreach (range('A', 'D') as $col) {
+        $instrSheet->getColumnDimension($col)->setAutoSize(true);
+    }
+
+    // Set active sheet back to template
+    $spreadsheet->setActiveSheetIndex(0);
+
+    // Output
+    $fileName = 'Template_Import_Instansi.xlsx';
+    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+    return response()->streamDownload(function () use ($writer) {
+        $writer->save('php://output');
+    }, $fileName, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ]);
+})->name('template.institution-import')->middleware(['auth']);

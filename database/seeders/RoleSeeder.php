@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Institution;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +16,7 @@ class RoleSeeder extends Seeder
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $operatorRole = Role::firstOrCreate(['name' => 'operator']);
         $pimpinanRole = Role::firstOrCreate(['name' => 'pimpinan']);
+        $adminInstansiRole = Role::firstOrCreate(['name' => 'admin_instansi']);
 
         // Create initial Admin User
         $admin = User::firstOrCreate(
@@ -46,5 +48,17 @@ class RoleSeeder extends Seeder
             ]
         );
         $pimpinan->assignRole($pimpinanRole);
+
+        // Create initial Admin Instansi
+        $firstInstitution = Institution::first();
+        $adminInstansi = User::firstOrCreate(
+            ['email' => 'admin_instansi@silapcat.com'],
+            [
+                'name' => 'Admin Instansi',
+                'password' => Hash::make('password'),
+                'institution_id' => $firstInstitution ? $firstInstitution->id : null,
+            ]
+        );
+        $adminInstansi->assignRole($adminInstansiRole);
     }
 }

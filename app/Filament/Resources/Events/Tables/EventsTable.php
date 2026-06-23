@@ -31,12 +31,15 @@ class EventsTable
                     ->formatStateUsing(function (Event $record): HtmlString {
                         $name = $record->name;
                         
-                        $institutions = $record->eventInstitutions->map(fn($ei) => 
-                            "<div class='flex items-center gap-2 py-0.5'>
-                                <div class='w-1 h-1 rounded-full bg-primary-400'></div>
-                                <span class='text-sm text-gray-700 dark:text-gray-300 font-medium'>" . e($ei->institution?->name ?? '-') . "</span>
-                            </div>"
-                        )->join('');
+                        $institutions = $record->eventLocations->flatMap(fn($loc) => $loc->eventLocationInstitutions)
+                            ->map(fn($ei) => $ei->institution)
+                            ->unique('id')
+                            ->map(fn($inst) => 
+                                "<div class='flex items-center gap-2 py-0.5'>
+                                    <div class='w-1 h-1 rounded-full bg-primary-400'></div>
+                                    <span class='text-sm text-gray-700 dark:text-gray-300 font-medium'>" . e($inst?->name ?? '-') . "</span>
+                                </div>"
+                            )->join('');
 
                         $locations = $record->eventLocations->map(fn($el) => 
                             "<div class='flex items-center gap-2 py-0.5 mt-0.5'>
@@ -63,24 +66,22 @@ class EventsTable
                     ->html()
                     ->getStateUsing(fn (Event $record) => $record->id)
                     ->formatStateUsing(function (Event $record): HtmlString {
-                        $locations = $record->eventLocations;
+                        $startDate = $record->start_date ? \Carbon\Carbon::parse($record->start_date) : null;
+                        $endDate = $record->end_date ? \Carbon\Carbon::parse($record->end_date) : null;
                         
-                        if ($locations->isEmpty() || !$locations->first()->start_date) {
+                        if (!$startDate || !$endDate) {
                             return new HtmlString("<span class='text-xs italic text-gray-400'>Belum dijadwalkan</span>");
                         }
 
-                        $startDate = $locations->min('start_date');
-                        $endDate = $locations->max('end_date');
+                        $start = $startDate->translatedFormat('d M Y');
+                        $end = $endDate->translatedFormat('d M Y');
                         
-                        $start = $startDate ? $startDate->translatedFormat('d M Y') : '-';
-                        $end = $endDate ? $endDate->translatedFormat('d M Y') : '-';
-                        
-                        $duration = ($startDate && $endDate) ? $startDate->diffInDays($endDate) + 1 : 0;
+                        $duration = $startDate->diffInDays($endDate) + 1;
 
                         return new HtmlString("
                             <div class='flex flex-col py-2 gap-1'>
                                 <div class='text-sm font-bold text-gray-900 dark:text-white leading-tight'>{$start} &mdash; {$end}</div>
-                                <div class='text-[10px] font-black text-primary-600 dark:text-primary-400 tracking-wider uppercase'>{$duration} Hari Kerja / Pelaksanaan</div>
+                                <div class='text-[10px] font-black text-primary-600 dark:text-primary-400 tracking-wider uppercase'>{$duration} Hari Range Global</div>
                             </div>
                         ");
                     }),
@@ -88,7 +89,7 @@ class EventsTable
                 TextColumn::make('total_peserta')
                     ->label('PESERTA')
                     ->html()
-                    ->getStateUsing(fn(Event $record) => $record->eventLocations->sum('participants_count'))
+                    ->getStateUsing(fn(Event $record) => $record->eventLocations->flatMap(fn($l) => $l->eventLocationInstitutions)->sum('participants_count'))
                     ->formatStateUsing(function ($state): HtmlString {
                         $count = (int) $state;
                         if ($count === 0) {
@@ -196,6 +197,74 @@ class EventsTable
                         ->color('success')
                         ->url(fn (Event $record) => route('events.pdf', $record))
                         ->openUrlInNewTab(),
+                    \Filament\Actions\Action::make('upload_dokumen')
+                        ->label('Upload Dokumen')
+                        ->icon(null)
+                        ->color('warning')
+                        ->form([
+                            \Filament\Schemas\Components\Grid::make(2)->schema([
+                                \Filament\Forms\Components\FileUpload::make('doc_implementation_report')
+                                    ->label('Laporan Pelaksanaan')
+                                    ->directory('events/documents')
+                                    ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+                                    ->maxSize(5120)
+                                    ->downloadable()
+                                    ->openable()
+                                    ->previewable(false),
+                                \Filament\Forms\Components\FileUpload::make('doc_team_decree')
+                                    ->label('SK Tim Pelaksana')
+                                    ->directory('events/documents')
+                                    ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+                                    ->maxSize(5120)
+                                    ->downloadable()
+                                    ->openable()
+                                    ->previewable(false),
+                                \Filament\Forms\Components\FileUpload::make('doc_ba_catos')
+                                    ->label('BA CATOS')
+                                    ->directory('events/documents')
+                                    ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+                                    ->maxSize(5120)
+                                    ->downloadable()
+                                    ->openable()
+                                    ->previewable(false),
+                                \Filament\Forms\Components\FileUpload::make('doc_institution_announcement')
+                                    ->label('Pengumuman Instansi')
+                                    ->directory('events/documents')
+                                    ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+                                    ->maxSize(5120)
+                                    ->downloadable()
+                                    ->openable()
+                                    ->previewable(false),
+                            ]),
+                        ])
+                        ->mountUsing(fn ($form, Event $record) => $form->fill([
+                            'doc_implementation_report' => $record->doc_implementation_report,
+                            'doc_team_decree' => $record->doc_team_decree,
+                            'doc_ba_catos' => $record->doc_ba_catos,
+                            'doc_institution_announcement' => $record->doc_institution_announcement,
+                        ]))
+                        ->action(function (Event $record, array $data): void {
+                            $record->update([
+                                'doc_implementation_report' => $data['doc_implementation_report'] ?? $record->doc_implementation_report,
+                                'doc_team_decree' => $data['doc_team_decree'] ?? $record->doc_team_decree,
+                                'doc_ba_catos' => $data['doc_ba_catos'] ?? $record->doc_ba_catos,
+                                'doc_institution_announcement' => $data['doc_institution_announcement'] ?? $record->doc_institution_announcement,
+                            ]);
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->title('Dokumen berhasil diupload')
+                                ->success()
+                                ->send();
+                        })
+                        ->visible(function (Event $record): bool {
+                            $docs = [
+                                $record->doc_implementation_report,
+                                $record->doc_team_decree,
+                                $record->doc_ba_catos,
+                                $record->doc_institution_announcement,
+                            ];
+                            return collect($docs)->filter(fn($doc) => !empty($doc))->count() < 4;
+                        }),
                     \Filament\Actions\EditAction::make()
                         ->label('Ubah')
                         ->icon(null)
@@ -209,8 +278,8 @@ class EventsTable
                 ->button()
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

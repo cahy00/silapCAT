@@ -19,6 +19,9 @@ class ReportPolicy
 
     public function view(AuthUser $authUser, Report $report): bool
     {
+        if ($authUser->hasRole('operator') && $report->user_id !== $authUser->id) {
+            return false;
+        }
         return $authUser->can('View:Report');
     }
 
@@ -29,11 +32,17 @@ class ReportPolicy
 
     public function update(AuthUser $authUser, Report $report): bool
     {
+        if ($authUser->hasRole('operator') && $report->user_id !== $authUser->id) {
+            return false;
+        }
         return $authUser->can('Update:Report');
     }
 
     public function delete(AuthUser $authUser, Report $report): bool
     {
+        if ($authUser->hasRole('operator') && $report->user_id !== $authUser->id) {
+            return false;
+        }
         return $authUser->can('Delete:Report');
     }
 

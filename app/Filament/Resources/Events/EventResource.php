@@ -97,6 +97,14 @@ class EventResource extends Resource
                                 TextEntry::make('formation_year')
                                     ->label('Tahun Formasi')
                                     ->icon('heroicon-o-calendar-days'),
+                                TextEntry::make('start_date')
+                                    ->label('Tanggal Mulai')
+                                    ->date()
+                                    ->icon('heroicon-o-play-circle'),
+                                TextEntry::make('end_date')
+                                    ->label('Tanggal Selesai')
+                                    ->date()
+                                    ->icon('heroicon-o-stop-circle'),
                             ])
                             ->columnSpan(4),
                     ])
@@ -104,121 +112,151 @@ class EventResource extends Resource
 
                 SchemaTabs::make('Manajemen Detil')
                     ->tabs([
-                        SchemaTab::make('Institusi Terlibat')
-                            ->icon('heroicon-o-building-office-2')
-                            ->schema([
-                                RepeatableEntry::make('eventInstitutions')
-                                    ->label(null)
-                                    ->schema([
-                                        SchemaGrid::make(4)->schema([
-                                            TextEntry::make('institution.name')
-                                                ->label('Institusi')
-                                                ->weight('bold')
-                                                ->icon('heroicon-o-building-library'),
-                                            TextEntry::make('participants_count')
-                                                ->label('Kuota Peserta')
-                                                ->numeric()
-                                                ->icon('heroicon-o-users')
-                                                ->suffix(' Peserta'),
-                                            TextEntry::make('start_date')
-                                                ->label('Mulai Pelaksanaan')
-                                                ->date()
-                                                ->icon('heroicon-o-play-circle'),
-                                            TextEntry::make('end_date')
-                                                ->label('Selesai Pelaksanaan')
-                                                ->date()
-                                                ->icon('heroicon-o-stop-circle'),
-                                        ]),
-                                    ]),
-                            ]),
-
-                        SchemaTab::make('Lokasi Ujian')
+                        SchemaTab::make('Distribusi Lokasi & Instansi')
                             ->icon('heroicon-o-map-pin')
                             ->schema([
-                                RepeatableEntry::make('eventLocations')
-                                    ->label(null)
-                                    ->schema([
-                                        SchemaGrid::make(3)->schema([
-                                            SchemaGroup::make()->schema([
-                                                TextEntry::make('location.name')
-                                                    ->label('Titik Lokasi')
-                                                    ->weight('bold')
-                                                    ->icon('heroicon-o-map'),
-                                                TextEntry::make('location.city')
-                                                    ->label('Kota/Kabupaten')
-                                                    ->size(\Filament\Support\Enums\TextSize::Small),
-                                            ]),
-                                            TextEntry::make('location.address')
-                                                ->label('Alamat Lengkap')
-                                                ->icon('heroicon-o-home')
-                                                ->limit(100),
-                                            TextEntry::make('location.type')
-                                                ->label('Tipe Lokasi')
-                                                ->badge()
-                                                ->color('warning')
-                                                ->formatStateUsing(fn ($state) => match ($state) {
-                                                    'mandiri_bkn' => 'Mandiri BKN',
-                                                    'mandiri_instansi' => 'Mandiri Instansi',
-                                                    'bkn' => 'BKN',
-                                                    default => $state,
-                                                }),
-                                        ]),
-                                        
-                                        SchemaSection::make('Hasil Survey Lokasi')
-                                            ->compact()
-                                            ->schema([
-                                                SchemaGrid::make(3)->schema([
-                                                    TextEntry::make('location.locationSurvey.feasibility_status')
-                                                        ->label('Kelayakan')
-                                                        ->badge()
-                                                        ->color(fn ($state) => match ($state) {
-                                                            'feasible' => 'success',
-                                                            'not_feasible' => 'danger',
-                                                            'conditional' => 'warning',
-                                                            default => 'gray',
-                                                        })
-                                                        ->formatStateUsing(fn ($state) => match ($state) {
-                                                            'feasible' => 'LAYAK',
-                                                            'not_feasible' => 'TIDAK LAYAK',
-                                                            'conditional' => 'BERSYARAT',
-                                                            default => 'BELUM SURVEY',
-                                                        }),
-                                                    TextEntry::make('location.locationSurvey.pc_count')
-                                                        ->label('Kapasitas PC')
-                                                        ->icon('heroicon-o-computer-desktop')
-                                                        ->suffix(' Unit'),
-                                                    TextEntry::make('location.locationSurvey.room_count')
-                                                        ->label('Jumlah Ruangan')
-                                                        ->icon('heroicon-o-home-modern')
-                                                        ->suffix(' Ruang'),
-                                                ]),
-                                            ])
-                                            ->visible(fn ($record) => $record->location?->locationSurvey !== null),
-                                    ]),
+                                TextEntry::make('dashboard_lokasi')
+                                    ->hiddenLabel()
+                                    ->html()
+                                    ->state(function (Event $record) {
+                                        $locations = $record->eventLocations;
+                                        if ($locations->isEmpty()) {
+                                            return new \Illuminate\Support\HtmlString("<div style='text-align: center; padding: 24px; color: #9ca3af; font-style: italic; font-size: 13px;'>Belum ada lokasi yang ditambahkan.</div>");
+                                        }
+
+                                        $grandTotal = 0;
+                                        $cards = '';
+
+                                        foreach ($locations as $loc) {
+                                            $name = e($loc->location?->name ?? 'Unknown');
+                                            $start = $loc->start_date ? \Carbon\Carbon::parse($loc->start_date)->translatedFormat('d M Y') : '-';
+                                            $end = $loc->end_date ? \Carbon\Carbon::parse($loc->end_date)->translatedFormat('d M Y') : '-';
+                                            $institutions = $loc->eventLocationInstitutions;
+                                            $locTotal = $institutions->sum('participants_count');
+                                            $grandTotal += $locTotal;
+
+                                            $instRows = '';
+                                            if ($institutions->isEmpty()) {
+                                                $instRows = "<tr><td colspan='2' style='padding: 12px 14px; font-size: 13px; color: #9ca3af; font-style: italic; text-align: center;'>Belum ada instansi</td></tr>";
+                                            } else {
+                                                $no = 1;
+                                                foreach ($institutions as $inst) {
+                                                    $instName = e($inst->institution?->name ?? '-');
+                                                    $count = (int) $inst->participants_count;
+                                                    $bgColor = $no % 2 === 0 ? 'background-color: #f9fafb;' : '';
+                                                    $instRows .= "
+                                                        <tr style='border-bottom: 1px solid #e5e7eb; {$bgColor}'>
+                                                            <td style='padding: 10px 14px; font-size: 13px; color: #374151;'>
+                                                                <div style='display: flex; align-items: center; gap: 8px;'>
+                                                                    <div style='width: 6px; height: 6px; border-radius: 50%; background: #6366f1; flex-shrink: 0;'></div>
+                                                                    <span style='white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;'>{$instName}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td style='padding: 10px 14px; font-size: 13px; font-weight: 700; color: #111827; text-align: right;'>{$count}</td>
+                                                        </tr>";
+                                                    $no++;
+                                                }
+                                            }
+
+                                            $cards .= "
+                                                <div style='flex: 1; min-width: 320px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;'>
+                                                    <div style='padding: 14px 16px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;'>
+                                                        <div style='min-width: 0;'>
+                                                            <div style='font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'>{$name}</div>
+                                                            <div style='font-size: 11px; font-weight: 500; color: #6b7280; display: flex; align-items: center; gap: 6px;'>
+                                                                <svg style='width: 14px; height: 14px;' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'></path></svg>
+                                                                {$start} &mdash; {$end}
+                                                            </div>
+                                                        </div>
+                                                        <span style='display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; background: #ecfdf5; color: #047857; letter-spacing: 0.05em; flex-shrink: 0;'>" . number_format($locTotal) . " PAX</span>
+                                                    </div>
+                                                    <div style='max-height: 250px; overflow-y: auto;'>
+                                                        <table style='width: 100%; border-collapse: collapse;'>
+                                                            <tbody>{$instRows}</tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>";
+                                        }
+
+                                        $grandTotalFormatted = number_format($grandTotal);
+                                        $locCount = $locations->count();
+                                        $footer = "
+                                            <div style='margin-top: 16px; padding: 16px 20px; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; display: flex; align-items: center; justify-content: space-between;'>
+                                                <div>
+                                                    <div style='font-size: 12px; font-weight: 800; color: #4338ca; text-transform: uppercase; letter-spacing: 0.05em;'>Total Keseluruhan</div>
+                                                    <div style='font-size: 13px; color: #6b7280; margin-top: 2px;'>{$locCount} Lokasi</div>
+                                                </div>
+                                                <div style='text-align: right;'>
+                                                    <span style='font-size: 28px; font-weight: 900; color: #4338ca;'>{$grandTotalFormatted}</span>
+                                                    <span style='font-size: 13px; font-weight: 700; color: #6366f1; margin-left: 6px;'>Peserta</span>
+                                                </div>
+                                            </div>";
+
+                                        return new \Illuminate\Support\HtmlString("<div style='display: flex; gap: 16px; flex-wrap: wrap;'>{$cards}</div>{$footer}");
+                                    }),
                             ]),
 
                         SchemaTab::make('Tim Pelaksana')
-                            ->icon('heroicon-o-user-group')
+                            ->icon('heroicon-o-users')
                             ->schema([
-                                RepeatableEntry::make('eventEmployees')
-                                    ->label(null)
-                                    ->schema([
-                                        SchemaGrid::make(3)->schema([
-                                            TextEntry::make('employee.name')
-                                                ->label('Nama Pegawai')
-                                                ->weight('bold')
-                                                ->icon('heroicon-o-user'),
-                                            TextEntry::make('employee.employee_number')
-                                                ->label('NIP/Identitas')
-                                                ->copyable()
-                                                ->icon('heroicon-o-identification'),
-                                            TextEntry::make('role')
-                                                ->label('Penugasan')
-                                                ->badge()
-                                                ->color('success')
-                                                ->separator(', '),
-                                        ]),
-                                    ]),
+                                TextEntry::make('dashboard_tim')
+                                    ->hiddenLabel()
+                                    ->html()
+                                    ->state(function (Event $record) {
+                                        $employees = $record->eventEmployees()->with('employee')->get();
+                                        
+                                        $roleFieldMap = [
+                                            'Koordinator' => ['icon' => '👤', 'color' => '#6366f1', 'bg' => '#eef2ff', 'badgeText' => '#4338ca'],
+                                            'IT' => ['icon' => '💻', 'color' => '#0ea5e9', 'bg' => '#f0f9ff', 'badgeText' => '#0369a1'],
+                                            'Pengawas' => ['icon' => '🛡️', 'color' => '#10b981', 'bg' => '#ecfdf5', 'badgeText' => '#047857'],
+                                        ];
+
+                                        if ($employees->isEmpty()) {
+                                            return new \Illuminate\Support\HtmlString("<div style='text-align: center; padding: 24px; color: #9ca3af; font-style: italic; font-size: 13px;'>Belum ada pegawai yang ditugaskan.</div>");
+                                        }
+
+                                        $columns = '';
+                                        foreach ($roleFieldMap as $roleName => $config) {
+                                            $roleEmps = $employees->filter(function ($ee) use ($roleName) {
+                                                $roles = is_array($ee->role) ? $ee->role : (is_string($ee->role) ? json_decode($ee->role, true) ?? [$ee->role] : []);
+                                                return in_array($roleName, $roles);
+                                            });
+                                            $count = $roleEmps->count();
+
+                                            $items = '';
+                                            if ($roleEmps->isEmpty()) {
+                                                $items = "<div style='padding: 12px 16px; font-size: 13px; color: #9ca3af; font-style: italic;'>Belum ada</div>";
+                                            } else {
+                                                foreach ($roleEmps as $empRel) {
+                                                    $emp = $empRel->employee;
+                                                    if (!$emp) continue;
+                                                    $initial = strtoupper(mb_substr($emp->name, 0, 1));
+                                                    $items .= "
+                                                        <div style='padding: 10px 16px; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 12px;'>
+                                                            <div style='width: 32px; height: 32px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: {$config['color']}; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid {$config['color']}20;'>{$initial}</div>
+                                                            <div style='min-width: 0;'>
+                                                                <div style='font-size: 13px; font-weight: 600; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'>" . e($emp->name) . "</div>
+                                                                <div style='font-size: 11px; color: #6b7280; font-family: monospace;'>NIP. {$emp->employee_number}</div>
+                                                            </div>
+                                                        </div>";
+                                                }
+                                            }
+
+                                            $columns .= "
+                                                <div style='flex: 1; min-width: 250px; background: #ffffff; border: 1px solid {$config['color']}30; border-radius: 12px; overflow: hidden;'>
+                                                    <div style='padding: 12px 16px; background: {$config['bg']}; border-bottom: 1px solid {$config['color']}20; display: flex; align-items: center; justify-content: space-between;'>
+                                                        <div style='display: flex; align-items: center; gap: 8px;'>
+                                                            <span style='font-size: 16px;'>{$config['icon']}</span>
+                                                            <span style='font-size: 13px; font-weight: 700; color: {$config['color']};'>{$roleName}</span>
+                                                        </div>
+                                                        <span style='display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; background: #ffffff; color: {$config['badgeText']}; box-shadow: 0 1px 2px rgba(0,0,0,0.05);'>{$count} orang</span>
+                                                    </div>
+                                                    <div style='max-height: 300px; overflow-y: auto; background: #fafafa;'>{$items}</div>
+                                                </div>";
+                                        }
+
+                                        return new \Illuminate\Support\HtmlString("<div style='display: flex; gap: 16px; flex-wrap: wrap;'>{$columns}</div>");
+                                    }),
                             ]),
 
                         SchemaTab::make('Kelengkapan Dokumen')

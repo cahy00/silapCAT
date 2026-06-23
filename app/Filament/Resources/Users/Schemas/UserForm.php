@@ -61,6 +61,26 @@ class UserForm
                                     ->multiple()
                                     ->preload()
                                     ->searchable()
+                                    ->live(),
+                                \Filament\Forms\Components\Select::make('institution_id')
+                                    ->label('Instansi / Unit Kerja')
+                                    ->relationship('institution', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->nullable()
+                                    ->helperText('Pilih instansi jika pengguna ini merupakan Admin Instansi.')
+                                    ->visible(function (callable $get) {
+                                        $roleIds = $get('roles') ?? [];
+                                        if (empty($roleIds)) {
+                                            return false;
+                                        }
+                                        if (in_array('admin_instansi', $roleIds, true) || in_array('admin_instansi', $roleIds, false)) {
+                                            return true;
+                                        }
+                                        return \Spatie\Permission\Models\Role::whereIn('id', $roleIds)
+                                            ->where('name', 'admin_instansi')
+                                            ->exists();
+                                    })
                             ]),
                     ])
                     ->columnSpan(['sm' => 12, 'md' => 4]),

@@ -14,8 +14,26 @@ class ReportsTable
     {
         return $table
             ->columns([
-                TextColumn::make('eventLocation.id')
-                    ->searchable(),
+                TextColumn::make('event.name')
+                    ->label('Kegiatan')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('eventLocation.location.name')
+                    ->label('Lokasi')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('report_date')
+                    ->label('Tanggal Laporan')
+                    ->date('d M Y')
+                    ->sortable(),
+                TextColumn::make('session_name')
+                    ->label('Sesi')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('user.name')
+                    ->label('Diinput oleh')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('total_participants')
                     ->numeric()
                     ->sortable(),
@@ -44,6 +62,12 @@ class ReportsTable
                 //
             ])
             ->recordActions([
+                \Filament\Actions\Action::make('pdf')
+                    ->label('PDF')
+                    ->color('success')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->url(fn (\App\Models\Report $record) => route('reports.pdf', $record))
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([
