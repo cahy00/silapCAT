@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Events\Widgets;
 use App\Models\Event;
 use App\Models\EventInstitution;
 use App\Models\EventLocation;
+use App\Models\EventLocationInstitution;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -14,7 +15,7 @@ class EventOverviewWidget extends StatsOverviewWidget
     {
         $totalEvents = Event::count();
         $activeEvents = Event::where('status', 'active')->count();
-        $totalParticipants = EventLocation::sum('participants_count');
+        $totalParticipants = EventLocationInstitution::sum('participants_count');
         $locationsCount = EventLocation::distinct('location_id')->count('location_id');
 
         return [
