@@ -37,7 +37,18 @@ class EventDelegationsTable
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('event_id')
                     ->label('Kegiatan')
-                    ->relationship('event', 'name'),
+                    ->relationship('event', 'name', modifyQueryUsing: function ($query) {
+                        $query->with(['eventLocations.eventLocationInstitutions.institution']);
+                    })
+                    ->getOptionLabelFromRecordUsing(function ($record) {
+                        $institutions = $record->eventLocations
+                            ->flatMap(fn($l) => $l->eventLocationInstitutions->map(fn($i) => $i->institution->name ?? ''))
+                            ->filter()
+                            ->unique()
+                            ->implode(', ');
+                        $instText = $institutions ? " - {$institutions}" : '';
+                        return "{$record->name}{$instText} ({$record->formation_year})";
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),

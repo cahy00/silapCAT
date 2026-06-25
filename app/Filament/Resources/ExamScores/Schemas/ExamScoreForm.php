@@ -24,6 +24,7 @@ class ExamScoreForm
                     ->schema([
                         Select::make('import_event_id')
                             ->relationship('event', 'name', modifyQueryUsing: function ($query) {
+                                $query->with(['eventLocations.eventLocationInstitutions.institution']);
                                 $query->whereHas('procurementType', function ($q) {
                                     $q->whereIn('name', ['UD', 'UPKP', 'UD/UPKP']);
                                 });
@@ -33,6 +34,15 @@ class ExamScoreForm
                                         $q->where('institution_id', $user->institution_id);
                                     });
                                 }
+                            })
+                            ->getOptionLabelFromRecordUsing(function ($record) {
+                                $institutions = $record->eventLocations
+                                    ->flatMap(fn($l) => $l->eventLocationInstitutions->map(fn($i) => $i->institution->name ?? ''))
+                                    ->filter()
+                                    ->unique()
+                                    ->implode(', ');
+                                $instText = $institutions ? " - {$institutions}" : '';
+                                return "{$record->name}{$instText} ({$record->formation_year})";
                             })
                             ->label('Pilih Event / Kegiatan')
                             ->placeholder('Pilih Event untuk Seluruh Data Excel')
@@ -59,6 +69,7 @@ class ExamScoreForm
                             ->schema([
                                 Select::make('event_id')
                                     ->relationship('event', 'name', modifyQueryUsing: function ($query) {
+                                        $query->with(['eventLocations.eventLocationInstitutions.institution']);
                                         $query->whereHas('procurementType', function ($q) {
                                             $q->whereIn('name', ['UD', 'UPKP', 'UD/UPKP']);
                                         });
@@ -68,6 +79,15 @@ class ExamScoreForm
                                                 $q->where('institution_id', $user->institution_id);
                                             });
                                         }
+                                    })
+                                    ->getOptionLabelFromRecordUsing(function ($record) {
+                                        $institutions = $record->eventLocations
+                                            ->flatMap(fn($l) => $l->eventLocationInstitutions->map(fn($i) => $i->institution->name ?? ''))
+                                            ->filter()
+                                            ->unique()
+                                            ->implode(', ');
+                                        $instText = $institutions ? " - {$institutions}" : '';
+                                        return "{$record->name}{$instText} ({$record->formation_year})";
                                     })
                                     ->label('Event / Kegiatan')
                                     ->placeholder('Pilih Event')
