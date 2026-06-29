@@ -37,6 +37,10 @@ Route::get('/reports/recap-pdf', [\App\Http\Controllers\ReportExportController::
     ->name('reports.recap-pdf')
     ->middleware(['auth']);
 
+Route::get('/reports/recap-excel', [\App\Http\Controllers\ReportExportController::class, 'recapExcel'])
+    ->name('reports.recap-excel')
+    ->middleware(['auth']);
+
 Route::get('/reports/{report}/pdf', [\App\Http\Controllers\ReportExportController::class, 'download'])
     ->name('reports.pdf')
     ->middleware(['auth']);

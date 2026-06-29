@@ -82,6 +82,16 @@ class ReportsTable
                             $url = route('reports.recap-pdf', ['ids' => $ids]);
                             return redirect()->to($url);
                         }),
+                    \Filament\Actions\BulkAction::make('exportBulkExcel')
+                        ->label('Ekspor Rekap Excel Terpilih')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('success')
+                        ->openUrlInNewTab()
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $ids = $records->pluck('id')->implode(',');
+                            $url = route('reports.recap-excel', ['ids' => $ids]);
+                            return redirect()->to($url);
+                        }),
                     DeleteBulkAction::make(),
                 ]),
             ]);
