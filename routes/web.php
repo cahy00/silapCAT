@@ -24,10 +24,18 @@ Route::get('/konsultasi/all', [QuestionController::class, 'all'])->name('konsult
 Route::get('/konsultasi/kategori/{id}', [QuestionController::class, 'allCategory'])->name('konsultasi.category');
 Route::get('/konsultasi/kota/{id}', [QuestionController::class, 'allCity'])->name('konsultasi.city');
 
+Route::get('/events/monthly-pdf', [\App\Http\Controllers\EventExportController::class, 'monthlyPdf'])
+    ->name('events.monthly-pdf')
+    ->middleware(['auth']);
+
 Route::get('/events/{event}/pdf', function (\App\Models\Event $event) {
     $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.event-report', ['event' => $event]);
     return $pdf->stream("Laporan_Kegiatan_{$event->id}.pdf");
 })->name('events.pdf')->middleware(['auth']);
+
+Route::get('/reports/recap-pdf', [\App\Http\Controllers\ReportExportController::class, 'recapPdf'])
+    ->name('reports.recap-pdf')
+    ->middleware(['auth']);
 
 Route::get('/reports/{report}/pdf', [\App\Http\Controllers\ReportExportController::class, 'download'])
     ->name('reports.pdf')

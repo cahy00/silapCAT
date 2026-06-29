@@ -20,7 +20,7 @@ class ActivityResource extends Resource
 {
     protected static ?string $model = \Spatie\Activitylog\Models\Activity::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-queue-list';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clock';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Pengaturan Sistem';
 
@@ -28,7 +28,7 @@ class ActivityResource extends Resource
 
     protected static ?string $pluralLabel = 'Log Aktivitas';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'description';
 

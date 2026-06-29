@@ -71,4 +71,5 @@ class ExamScorePolicy
     {
         return $authUser->can('Reorder:ExamScore');
     }
+
 }

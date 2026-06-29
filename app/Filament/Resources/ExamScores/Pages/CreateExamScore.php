@@ -29,12 +29,12 @@ class CreateExamScore extends CreateRecord
                 $permanentPath = $fileObj; // Fallback
             }
 
-            // Dispatch background job to parse and import data
-            ImportExamScoresJob::dispatch($permanentPath, $eventId, Auth::id());
+            // Dispatch job to parse and import data synchronously
+            ImportExamScoresJob::dispatchSync($permanentPath, $eventId, Auth::id());
 
             Notification::make()
-                ->title('Impor Diproses di Latar Belakang')
-                ->body('File Excel telah masuk ke antrean. Anda akan menerima notifikasi di pojok kanan atas layar (ikon lonceng) saat proses impor selesai.')
+                ->title('Proses Impor Selesai')
+                ->body('File Excel telah diproses. Silakan cek hasil akhir pada tabel di bawah atau notifikasi di pojok kanan atas layar.')
                 ->success()
                 ->send();
 

@@ -814,14 +814,19 @@ class EventForm
                                                     ->openable()
                                                     ->previewable(false),
                                                 FileUpload::make('certificate_template')
-                                                    ->label('Template Sertifikat (Latar Belakang)')
+                                                    ->label('Template Sertifikat (PDF / PPTX)')
                                                     ->directory('events/certificates')
                                                     ->disk('public')
-                                                    ->image()
-                                                    ->maxSize(5120)
+                                                    ->acceptedFileTypes([
+                                                        'application/pdf',
+                                                        'application/vnd.ms-powerpoint',
+                                                        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                                                    ])
+                                                    ->maxSize(10240)
                                                     ->downloadable()
                                                     ->openable()
-                                                    ->helperText('Upload desain sertifikat berupa gambar (JPG/PNG). Gambar ini akan menjadi latar belakang sertifikat kelulusan peserta.')
+                                                    ->previewable(false)
+                                                    ->helperText('Upload template sertifikat dalam format PDF atau PPTX. Gunakan placeholder <<name>>, <<nip>>, <<exam_type>>, <<score>>, <<status>>, <<date>> untuk data peserta.')
                                                     ->columnSpanFull(),
                                             ]),
                                         ]),
@@ -997,7 +1002,7 @@ class EventForm
                                                                     {$start} &mdash; {$end}
                                                                 </div>
                                                             </div>
-                                                            <span style='display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; background: #ecfdf5; color: #047857; letter-spacing: 0.05em; flex-shrink: 0;'>" . number_format($locTotal) . " PAX</span>
+                                                            <span style='display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; background: #ecfdf5; color: #047857; letter-spacing: 0.05em; flex-shrink: 0;'>" . number_format($locTotal) . " Peserta</span>
                                                         </div>
                                                         <div style='max-height: 250px; overflow-y: auto;'>
                                                             <table style='width: 100%; border-collapse: collapse;'>

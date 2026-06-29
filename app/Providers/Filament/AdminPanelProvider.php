@@ -21,6 +21,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
+use Filament\Navigation\NavigationGroup;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -33,6 +34,13 @@ class AdminPanelProvider extends PanelProvider
             ->login(\App\Filament\Pages\Auth\Login::class)
             ->spa()
             ->databaseNotifications()
+            ->navigationGroups([
+                NavigationGroup::make()->label('Manajemen Kegiatan'),
+                NavigationGroup::make()->label('Laporan & Nilai'),
+                NavigationGroup::make()->label('Master Data'),
+                NavigationGroup::make()->label('Manajemen Website'),
+                NavigationGroup::make()->label('Pengaturan Sistem'),
+            ])
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,
                 fn (): View => view('filament.components.navbar-clock'),

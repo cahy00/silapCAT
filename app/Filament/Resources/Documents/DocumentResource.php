@@ -18,7 +18,7 @@ class DocumentResource extends Resource
     protected static ?string $pluralModelLabel = 'Dokumen';
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document';
     protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Website';
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 6;
 
     public static function canAccess(): bool
     {

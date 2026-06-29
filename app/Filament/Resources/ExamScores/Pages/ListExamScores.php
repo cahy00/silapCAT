@@ -43,10 +43,37 @@ class ListExamScores extends ListRecords
                             $set('certificate_template', $event?->certificate_template);
                         }),
                     \Filament\Forms\Components\FileUpload::make('certificate_template')
-                        ->label('Template Sertifikat (Gambar JPG/PNG)')
-                        ->image()
+                        ->label('Template Sertifikat (PDF / PPTX)')
                         ->directory('certificate-templates')
-                        ->helperText(new \Illuminate\Support\HtmlString('Contoh: Admin instansi bisa mengupload template sertifikat kosong mereka sendiri. Nantinya sistem akan mencetak nama peserta di atas sertifikat ini sesuai dengan letak penulisan <code>&lt;&lt;name&gt;&gt;</code> jika dibutuhkan.<br><br><b>Download Contoh Template:</b><br><a href="/examples/template_sertifikat.pdf" target="_blank" style="color: blue; text-decoration: underline;">Contoh PDF</a> | <a href="/examples/template_sertifikat.pptx" target="_blank" style="color: blue; text-decoration: underline;">Contoh PPT</a>'))
+                        ->disk('public')
+                        ->acceptedFileTypes([
+                            'application/pdf',
+                            'application/vnd.ms-powerpoint',
+                            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                        ])
+                        ->maxSize(10240)
+                        ->downloadable()
+                        ->openable()
+                        ->previewable(false)
+                        ->helperText(new \Illuminate\Support\HtmlString(
+                            '<div style="margin-top:6px;">'
+                            . '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-bottom:10px;">'
+                            . '<strong style="color:#1e40af;">📥 Download Contoh Template:</strong><br>'
+                            . '<a href="/examples/template_sertifikat.pdf" target="_blank" download style="color:#2563eb;text-decoration:underline;font-weight:600;margin-right:16px;">📄 Contoh Template PDF</a>'
+                            . '<a href="/examples/template_sertifikat.pptx" target="_blank" download style="color:#2563eb;text-decoration:underline;font-weight:600;">📊 Contoh Template PPTX</a>'
+                            . '</div>'
+                            . '<strong>Format yang diterima:</strong> PDF atau PPTX (PowerPoint). Maks 10MB.<br><br>'
+                            . '<strong>Placeholder yang tersedia:</strong>'
+                            . '<table style="margin-top:4px;font-size:12px;border-collapse:collapse;width:100%;">'
+                            . '<tr style="background:#f8fafc;"><td style="padding:3px 8px;border:1px solid #e2e8f0;"><code>&lt;&lt;name&gt;&gt;</code></td><td style="padding:3px 8px;border:1px solid #e2e8f0;">Nama Peserta</td></tr>'
+                            . '<tr><td style="padding:3px 8px;border:1px solid #e2e8f0;"><code>&lt;&lt;nip&gt;&gt;</code></td><td style="padding:3px 8px;border:1px solid #e2e8f0;">NIP / Nomor Identitas</td></tr>'
+                            . '<tr style="background:#f8fafc;"><td style="padding:3px 8px;border:1px solid #e2e8f0;"><code>&lt;&lt;exam_type&gt;&gt;</code></td><td style="padding:3px 8px;border:1px solid #e2e8f0;">Jenis Ujian (UD I / UD II / UPKP)</td></tr>'
+                            . '<tr><td style="padding:3px 8px;border:1px solid #e2e8f0;"><code>&lt;&lt;score&gt;&gt;</code></td><td style="padding:3px 8px;border:1px solid #e2e8f0;">Nilai Akhir</td></tr>'
+                            . '<tr style="background:#f8fafc;"><td style="padding:3px 8px;border:1px solid #e2e8f0;"><code>&lt;&lt;status&gt;&gt;</code></td><td style="padding:3px 8px;border:1px solid #e2e8f0;">Status Kelulusan</td></tr>'
+                            . '<tr><td style="padding:3px 8px;border:1px solid #e2e8f0;"><code>&lt;&lt;date&gt;&gt;</code></td><td style="padding:3px 8px;border:1px solid #e2e8f0;">Tanggal Ujian</td></tr>'
+                            . '</table>'
+                            . '</div>'
+                        ))
                 ])
                 ->action(function (array $data) {
                     $eventId = $data['event_id'] ?? null;
@@ -55,7 +82,8 @@ class ListExamScores extends ListRecords
                         if ($event) {
                             $event->update(['certificate_template' => $data['certificate_template']]);
                             \Filament\Notifications\Notification::make()
-                                ->title('Template berhasil disimpan')
+                                ->title('Template sertifikat berhasil disimpan')
+                                ->body('Template telah diupload dan dikaitkan dengan kegiatan.')
                                 ->success()
                                 ->send();
                         }

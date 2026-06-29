@@ -24,7 +24,7 @@ class ReportResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Laporan';
+    protected static \UnitEnum|string|null $navigationGroup = 'Laporan & Nilai';
 
     protected static ?int $navigationSort = 1;
 
@@ -64,6 +64,13 @@ class ReportResource extends Resource
     {
         return [
             //
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            \App\Filament\Resources\Reports\Widgets\ReportStatsOverview::class,
         ];
     }
 

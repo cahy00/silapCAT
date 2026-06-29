@@ -21,7 +21,7 @@ class CategoryResource extends Resource
     protected static ?string $pluralModelLabel = 'Kategori Postingan';
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-queue-list';
     protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Website';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
 
     public static function canAccess(): bool
     {

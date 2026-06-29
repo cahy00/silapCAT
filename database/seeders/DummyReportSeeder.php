@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Report;
 use App\Models\Event;
-use App\Models\EventLocation;
 use App\Models\User;
 use Faker\Factory as Faker;
 use Carbon\Carbon;
@@ -19,62 +17,70 @@ class DummyReportSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create('id_ID');
-
-        // We need an event, an event location, and a user to attach these reports to.
-        $event = Event::first();
-        if (!$event) {
-            $event = Event::create([
-                'name' => 'Event Simulasi CAT Dummy',
-                'description' => 'Event Dummy untuk Testing',
-                'start_date' => Carbon::now()->subDays(30),
-                'end_date' => Carbon::now()->addDays(30),
-                'status' => 'active',
-            ]);
-        }
-
-        $eventLocation = EventLocation::first();
-        if (!$eventLocation && $event) {
-            // Need a location first
-            $location = \App\Models\Location::firstOrCreate(
-                ['name' => 'Lokasi Ujian Dummy'],
-                ['address' => 'Jl. Dummy No. 1', 'capacity' => 100]
-            );
-            $eventLocation = EventLocation::create([
-                'event_id' => $event->id,
-                'location_id' => $location->id,
-                'participants_count' => 100,
-                'session_type' => 'sesi',
-                'has_opening_day' => false,
-            ]);
-        }
-
         $user = User::first();
 
-        $reports = [];
-        for ($i = 0; $i < 100; $i++) {
-            $total = $faker->numberBetween(50, 100);
-            $present = $faker->numberBetween(40, $total);
-            $absent = $total - $present;
+        $events = Event::with('eventLocations')->get();
 
-            $reports[] = [
-                'event_id' => $event ? $event->id : null,
-                'event_location_id' => $eventLocation ? $eventLocation->id : null,
-                'user_id' => $user ? $user->id : null,
-                'report_date' => $faker->dateTimeBetween('-30 days', 'now')->format('Y-m-d'),
-                'session_name' => 'Sesi ' . $faker->numberBetween(1, 4),
-                'total_participants' => $total,
-                'present_count' => $present,
-                'absent_count' => $absent,
-                'highest_score' => $faker->randomFloat(2, 300, 500),
-                'lowest_score' => $faker->randomFloat(2, 100, 299),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+        if ($events->isEmpty()) {
+            $this->command?->warn('Tidak ada kegiatan (event) ditemukan. Buat kegiatan terlebih dahulu.');
+            return;
         }
 
-        // Insert in chunks to avoid any unique constraint collision loops directly,
-        // Actually, we need to be careful with the unique constraint: ['event_id', 'event_location_id', 'report_date', 'session_name']
-        // We can just use insertOrIgnore
-        Report::insertOrIgnore($reports);
+        $reports = [];
+
+        foreach ($events as $event) {
+            $locations = $event->eventLocations;
+            if ($locations->isEmpty()) {
+                continue;
+            }
+
+            foreach ($locations as $loc) {
+                // Determine dates for simulation
+                $startDate = $loc->start_date ?? $event->start_date ?? now()->subDays(3);
+                $endDate = $loc->end_date ?? $event->end_date ?? now();
+
+                $start = Carbon::parse($startDate);
+                $end = Carbon::parse($endDate);
+                if ($start->gt($end)) {
+                    $end = $start->copy()->addDays(3);
+                }
+
+                $days = max(1, min(5, $start->diffInDays($end) + 1));
+
+                for ($d = 0; $d < $days; $d++) {
+                    $dateStr = $start->copy()->addDays($d)->format('Y-m-d');
+
+                    // Generate 2 to 3 sessions per day
+                    $sessionsCount = rand(2, 3);
+                    for ($s = 1; $s <= $sessionsCount; $s++) {
+                        $total = rand(50, 100);
+                        $present = rand(intval($total * 0.85), $total);
+                        $absent = $total - $present;
+
+                        $reports[] = [
+                            'event_id' => $event->id,
+                            'event_location_id' => $loc->id,
+                            'user_id' => $user?->id ?? 1,
+                            'report_date' => $dateStr,
+                            'session_name' => 'Sesi ' . $s,
+                            'total_participants' => $total,
+                            'present_count' => $present,
+                            'absent_count' => $absent,
+                            'highest_score' => round($faker->randomFloat(2, 420, 495), 2),
+                            'lowest_score' => round($faker->randomFloat(2, 180, 290), 2),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+            }
+        }
+
+        if (!empty($reports)) {
+            Report::insertOrIgnore($reports);
+            $this->command?->info(count($reports) . ' data laporan sesi dummy berhasil ditambahkan untuk semua kegiatan.');
+        } else {
+            $this->command?->warn('Belum ada lokasi kegiatan yang siap disimulasikan laporannya.');
+        }
     }
 }

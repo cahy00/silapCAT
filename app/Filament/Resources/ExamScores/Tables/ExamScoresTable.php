@@ -138,6 +138,22 @@ class ExamScoresTable
                         ->icon('heroicon-o-document-arrow-down')
                         ->label('Export Excel'),
                 ]),
+            ])
+            ->defaultGroup('event.name')
+            ->groups([
+                \Filament\Tables\Grouping\Group::make('event.name')
+                    ->label('Kegiatan')
+                    ->collapsible()
+                    ->getTitleFromRecordUsing(function ($record) {
+                        if (!$record->event) return 'Tanpa Event';
+                        $institutions = $record->event->eventLocations
+                            ->flatMap(fn($l) => $l->eventLocationInstitutions->map(fn($i) => $i->institution->name ?? ''))
+                            ->filter()
+                            ->unique()
+                            ->implode(', ');
+                        $instText = $institutions ? " - {$institutions}" : '';
+                        return "{$record->event->name}{$instText} ({$record->event->formation_year})";
+                    }),
             ]);
     }
 }

@@ -40,10 +40,24 @@ class ReportForm
                         Select::make('event_id')
                             ->label('Kegiatan')
                             ->options(function () use ($isOperator, $delegatedEventIds) {
-                                if ($isOperator) {
-                                    return Event::whereIn('id', $delegatedEventIds)->pluck('name', 'id');
-                                }
-                                return Event::pluck('name', 'id');
+                                $events = Event::with(['eventLocations.location', 'eventLocations.eventLocationInstitutions.institution'])
+                                    ->when($isOperator, fn($q) => $q->whereIn('id', $delegatedEventIds))
+                                    ->get();
+
+                                return $events->mapWithKeys(function ($event) {
+                                    $institutions = $event->eventLocations->flatMap(fn($loc) => $loc->eventLocationInstitutions)
+                                        ->map(fn($ei) => $ei->institution?->name)
+                                        ->filter()
+                                        ->unique()
+                                        ->join(', ') ?: '-';
+
+                                    $locations = $event->eventLocations->map(fn($loc) => $loc->location?->name)
+                                        ->filter()
+                                        ->unique()
+                                        ->join(', ') ?: '-';
+
+                                    return [$event->id => "{$event->name} - {$institutions} - {$locations}"];
+                                })->toArray();
                             })
                             ->searchable()
                             ->required()

@@ -18,7 +18,7 @@ class StaffResource extends Resource
     protected static ?string $pluralModelLabel = 'Pejabat/Pegawai';
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-circle';
     protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Website';
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 8;
 
     public static function canAccess(): bool
     {

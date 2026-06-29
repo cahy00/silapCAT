@@ -18,7 +18,7 @@ class AnnouncementResource extends Resource
     protected static ?string $pluralModelLabel = 'Pengumuman';
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-speaker-wave';
     protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Website';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     public static function canAccess(): bool
     {

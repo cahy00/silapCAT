@@ -22,7 +22,7 @@ class EventDelegationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-group';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Kegiatan';
+    protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Kegiatan';
 
     protected static ?int $navigationSort = 3;
 

@@ -72,6 +72,16 @@ class ReportsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    \Filament\Actions\BulkAction::make('exportBulkPdf')
+                        ->label('Cetak Rekap PDF Terpilih')
+                        ->icon('heroicon-o-printer')
+                        ->color('danger')
+                        ->openUrlInNewTab()
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $ids = $records->pluck('id')->implode(',');
+                            $url = route('reports.recap-pdf', ['ids' => $ids]);
+                            return redirect()->to($url);
+                        }),
                     DeleteBulkAction::make(),
                 ]),
             ]);

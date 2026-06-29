@@ -25,9 +25,9 @@ class LocationSurveyResource extends Resource
 
     protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Kegiatan';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     public static function form(Schema $schema): Schema
     {

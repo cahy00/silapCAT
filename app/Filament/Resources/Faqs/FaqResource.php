@@ -18,7 +18,7 @@ class FaqResource extends Resource
     protected static ?string $pluralModelLabel = 'FAQ';
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
     protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Website';
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 7;
 
     public static function canAccess(): bool
     {

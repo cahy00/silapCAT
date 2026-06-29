@@ -16,6 +16,42 @@ class ListEvents extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            \Filament\Actions\Action::make('exportMonthlyPdf')
+                ->label('Cetak Kegiatan Bulanan')
+                ->icon('heroicon-m-printer')
+                ->color('success')
+                ->modalHeading('Cetak Rekapitulasi Kegiatan Bulanan')
+                ->modalDescription('Pilih bulan dan tahun kegiatan yang ingin dicetak dalam format PDF.')
+                ->modalSubmitActionLabel('Cetak PDF')
+                ->form([
+                    \Filament\Schemas\Components\Grid::make(2)->schema([
+                        \Filament\Forms\Components\Select::make('month')
+                            ->label('Bulan')
+                            ->options([
+                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                            ])
+                            ->default(now()->month)
+                            ->required(),
+                        \Filament\Forms\Components\Select::make('year')
+                            ->label('Tahun')
+                            ->options(function () {
+                                $currentYear = now()->year;
+                                $years = [];
+                                for ($y = $currentYear - 3; $y <= $currentYear + 3; $y++) {
+                                    $years[$y] = $y;
+                                }
+                                return $years;
+                            })
+                            ->default(now()->year)
+                            ->required(),
+                    ])
+                ])
+                ->action(function (array $data) {
+                    $url = route('events.monthly-pdf', ['month' => $data['month'], 'year' => $data['year']]);
+                    return redirect()->to($url);
+                }),
             CreateAction::make(),
         ];
     }

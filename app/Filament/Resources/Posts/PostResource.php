@@ -24,7 +24,7 @@ class PostResource extends Resource
 
     protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Website';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     public static function canAccess(): bool
     {

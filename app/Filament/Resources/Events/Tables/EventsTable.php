@@ -29,33 +29,38 @@ class EventsTable
                     ->sortable()
                     ->html()
                     ->formatStateUsing(function (Event $record): HtmlString {
-                        $name = $record->name;
+                        $name = e($record->name);
+                        $formationYear = e($record->formation_year ?? '-');
                         
                         $institutions = $record->eventLocations->flatMap(fn($loc) => $loc->eventLocationInstitutions)
                             ->map(fn($ei) => $ei->institution)
                             ->unique('id')
                             ->map(fn($inst) => 
-                                "<div class='flex items-center gap-2 py-0.5'>
-                                    <div class='w-1 h-1 rounded-full bg-primary-400'></div>
-                                    <span class='text-sm text-gray-700 dark:text-gray-300 font-medium'>" . e($inst?->name ?? '-') . "</span>
+                                "<div class='flex items-center gap-2 py-1'>
+                                    <div class='w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 shrink-0'></div>
+                                    <span class='text-sm text-slate-950 dark:text-white font-black tracking-tight leading-snug'>" . e($inst?->name ?? '-') . "</span>
                                 </div>"
                             )->join('');
 
                         $locations = $record->eventLocations->map(fn($el) => 
-                            "<div class='flex items-center gap-2 py-0.5 mt-0.5'>
-                                <span class='text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded'>LOKASI: " . e($el->location?->name ?? '-') . "</span>
+                            "<div class='py-0.5'>
+                                <span class='inline-flex items-center gap-1.5 text-[11px] font-black text-indigo-950 dark:text-indigo-100 bg-indigo-100 dark:bg-indigo-950/80 px-2.5 py-1 rounded-md border border-indigo-300 dark:border-indigo-700 uppercase tracking-wider shadow-2xs'>LOKASI: " . e($el->location?->name ?? '-') . "</span>
                             </div>"
                         )->join('');
                         
                         return new HtmlString("
-                            <div class='flex flex-col py-3 gap-2'>
+                            <div class='flex flex-col py-3 gap-2.5'>
                                 <div>
-                                    <h3 class='font-black text-base text-gray-900 dark:text-white uppercase tracking-tighter leading-tight'>{$name}</h3>
-                                    <div class='mt-1 text-[10px] font-bold text-primary-600 uppercase tracking-widest'>TAHUN FORMASI: " . ($record->formation_year ?? '-') . "</div>
+                                    <h3 class='font-black text-base text-slate-950 dark:text-white uppercase tracking-tighter leading-tight'>{$name}</h3>
+                                    <div class='mt-2'>
+                                        <span class='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-950 dark:bg-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-800 uppercase tracking-wider shadow-2xs'>
+                                            FORMASI: {$formationYear}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class='flex flex-col gap-0.5'>
+                                <div class='flex flex-col gap-1 mt-0.5 pt-2 border-t border-gray-200 dark:border-gray-800'>
                                     {$institutions}
-                                    <div class='flex flex-wrap gap-1 mt-1'>{$locations}</div>
+                                    <div class='flex flex-col items-start gap-1.5 mt-0.5'>{$locations}</div>
                                 </div>
                             </div>
                         ");
@@ -106,6 +111,45 @@ class EventsTable
                         ");
                     })
                     ->sortable(),
+
+                TextColumn::make('laporan_kehadiran')
+                    ->label('LAPORAN & KEHADIRAN')
+                    ->html()
+                    ->getStateUsing(fn(Event $record) => $record->reports->count())
+                    ->formatStateUsing(function (Event $record, $state): HtmlString {
+                        $sesiCount = (int) $state;
+                        if ($sesiCount === 0) {
+                            return new HtmlString("
+                                <div class='flex flex-col py-3 gap-1'>
+                                    <span class='inline-flex items-center w-fit px-2 py-0.5 rounded-md text-xs font-bold bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400'>0 Sesi Dilaporkan</span>
+                                    <span class='text-[10px] italic text-gray-400'>Belum ada rekap harian</span>
+                                </div>
+                            ");
+                        }
+                        
+                        $pesertaSesi = $record->reports->sum('total_participants');
+                        $hadir = $record->reports->sum('present_count');
+                        $absen = $record->reports->sum('absent_count');
+                        $persen = $pesertaSesi > 0 ? round(($hadir / $pesertaSesi) * 100, 1) : 0;
+                        
+                        $colorClass = $persen >= 90 
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400' 
+                            : ($persen >= 75 ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-400');
+
+                        return new HtmlString("
+                            <div class='flex flex-col py-3 gap-1.5 min-w-[150px]'>
+                                <div class='flex items-center gap-1.5'>
+                                    <span class='inline-flex items-center px-2 py-0.5 rounded text-xs font-black {$colorClass} tracking-wider'>{$persen}% HADIR</span>
+                                    <span class='text-[11px] font-bold text-gray-700 dark:text-gray-300'>({$sesiCount} Sesi)</span>
+                                </div>
+                                <div class='flex items-center gap-2 text-[11px]'>
+                                    <span class='text-emerald-600 dark:text-emerald-400 font-bold'>✔ {$hadir} Hadir</span>
+                                    <span class='text-gray-300 dark:text-gray-600'>|</span>
+                                    <span class='text-rose-600 dark:text-rose-400 font-bold'>✖ {$absen} Absen</span>
+                                </div>
+                            </div>
+                        ");
+                    }),
 
                  TextColumn::make('status_dokumen')
                     ->label('DOKUMEN')
@@ -268,6 +312,26 @@ class EventsTable
                                 $record->doc_institution_announcement,
                             ];
                             return collect($docs)->filter(fn($doc) => !empty($doc))->count() < 4;
+                        }),
+                    \Filament\Actions\ReplicateAction::make()
+                        ->label('Duplikasi Kegiatan')
+                        ->icon(null)
+                        ->color('info')
+                        ->modalHeading('Duplikasi Kegiatan Ini')
+                        ->modalDescription('Salin informasi global kegiatan ini menjadi draft baru? Anda tinggal mengubah atau menambahkan titik lokasi dan instansinya saja tanpa perlu ketik dari awal.')
+                        ->beforeReplicaSaved(function (Event $replica) {
+                            $replica->status = 'draft';
+                            $replica->doc_implementation_report = null;
+                            $replica->doc_team_decree = null;
+                            $replica->doc_ba_catos = null;
+                            $replica->doc_institution_announcement = null;
+                        })
+                        ->after(function (Event $replica) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Kegiatan berhasil diduplikasi')
+                                ->body('Salinan kegiatan baru telah dibuat dengan status DRAFT.')
+                                ->success()
+                                ->send();
                         }),
                     \Filament\Actions\EditAction::make()
                         ->label('Ubah')

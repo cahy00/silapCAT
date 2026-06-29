@@ -16,9 +16,9 @@ class ServiceResource extends Resource
     protected static ?string $model = Service::class;
     protected static ?string $modelLabel = 'Layanan';
     protected static ?string $pluralModelLabel = 'Layanan';
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-briefcase';
     protected static \UnitEnum|string|null $navigationGroup = 'Manajemen Website';
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 5;
 
     public static function canAccess(): bool
     {

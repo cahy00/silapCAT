@@ -23,9 +23,9 @@ class ExamScoreResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Pengolahan Nilai';
+    protected static \UnitEnum|string|null $navigationGroup = 'Laporan & Nilai';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationBadge(): ?string
     {
