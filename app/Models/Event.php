@@ -30,6 +30,15 @@ class Event extends Model
         'end_date' => 'date',
     ];
 
+    protected $attributes = [
+        'certificate_template' => 'sertifikat_default.pptx',
+    ];
+
+    public function getCertificateTemplateAttribute($value)
+    {
+        return $value ?: 'sertifikat_default.pptx';
+    }
+
     public function eventInstitutions(): HasMany
     {
         return $this->hasMany(EventInstitution::class);

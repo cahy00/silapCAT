@@ -815,6 +815,7 @@ class EventForm
                                                     ->previewable(false),
                                                 FileUpload::make('certificate_template')
                                                     ->label('Template Sertifikat (PDF / PPTX)')
+                                                    ->default('sertifikat_default.pptx')
                                                     ->directory('events/certificates')
                                                     ->disk('public')
                                                     ->acceptedFileTypes([
@@ -826,7 +827,7 @@ class EventForm
                                                     ->downloadable()
                                                     ->openable()
                                                     ->previewable(false)
-                                                    ->helperText('Upload template sertifikat dalam format PDF atau PPTX. Gunakan placeholder <<name>>, <<nip>>, <<exam_type>>, <<score>>, <<status>>, <<date>> untuk data peserta.')
+                                                    ->helperText(new \Illuminate\Support\HtmlString('Upload template sertifikat kegiatan ini. Jika tidak diganti, sistem akan menggunakan <a href="/sertifikat_default.pptx" target="_blank" download style="color:#16a34a;font-weight:bold;text-decoration:underline;">⭐ Template Default (sertifikat_default.pptx)</a>.<br>Placeholder yang tersedia: <code>&lt;&lt;name&gt;&gt;</code>, <code>&lt;&lt;nip&gt;&gt;</code>, <code>&lt;&lt;exam_type&gt;&gt;</code>, <code>&lt;&lt;score&gt;&gt;</code>, <code>&lt;&lt;status&gt;&gt;</code>, <code>&lt;&lt;date&gt;&gt;</code>.'))
                                                     ->columnSpanFull(),
                                             ]),
                                         ]),

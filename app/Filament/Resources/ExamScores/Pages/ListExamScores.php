@@ -40,10 +40,11 @@ class ListExamScores extends ListRecords
                         ->live()
                         ->afterStateUpdated(function ($state, callable $set) {
                             $event = \App\Models\Event::find($state);
-                            $set('certificate_template', $event?->certificate_template);
+                            $set('certificate_template', $event?->certificate_template ?: 'sertifikat_default.pptx');
                         }),
                     \Filament\Forms\Components\FileUpload::make('certificate_template')
                         ->label('Template Sertifikat (PDF / PPTX)')
+                        ->default('sertifikat_default.pptx')
                         ->directory('certificate-templates')
                         ->disk('public')
                         ->acceptedFileTypes([
@@ -58,9 +59,10 @@ class ListExamScores extends ListRecords
                         ->helperText(new \Illuminate\Support\HtmlString(
                             '<div style="margin-top:6px;">'
                             . '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-bottom:10px;">'
-                            . '<strong style="color:#1e40af;">📥 Download Contoh Template:</strong><br>'
-                            . '<a href="/examples/template_sertifikat.pdf" target="_blank" download style="color:#2563eb;text-decoration:underline;font-weight:600;margin-right:16px;">📄 Contoh Template PDF</a>'
-                            . '<a href="/examples/template_sertifikat.pptx" target="_blank" download style="color:#2563eb;text-decoration:underline;font-weight:600;">📊 Contoh Template PPTX</a>'
+                            . '<strong style="color:#1e40af;">📥 Download Template Sertifikat:</strong><br>'
+                            . '<a href="/sertifikat_default.pptx" target="_blank" download style="color:#16a34a;text-decoration:underline;font-weight:700;margin-right:16px;">⭐ Template Default (sertifikat_default.pptx)</a>'
+                            . '<a href="/examples/template_sertifikat.pdf" target="_blank" download style="color:#2563eb;text-decoration:underline;font-weight:600;margin-right:16px;">📄 Contoh PDF</a>'
+                            . '<a href="/examples/template_sertifikat.pptx" target="_blank" download style="color:#2563eb;text-decoration:underline;font-weight:600;">📊 Contoh PPTX</a>'
                             . '</div>'
                             . '<strong>Format yang diterima:</strong> PDF atau PPTX (PowerPoint). Maks 10MB.<br><br>'
                             . '<strong>Placeholder yang tersedia:</strong>'
