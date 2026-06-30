@@ -55,3 +55,18 @@ Route::get('/template/exam-score-import', [\App\Http\Controllers\TemplateExportC
 Route::get('/template/employee-import', [\App\Http\Controllers\TemplateExportController::class, 'downloadEmployeeTemplate'])->name('template.employee-import')->middleware(['auth']);
 Route::get('/template/location-import', [\App\Http\Controllers\TemplateExportController::class, 'downloadLocationTemplate'])->name('template.location-import')->middleware(['auth']);
 Route::get('/template/institution-import', [\App\Http\Controllers\TemplateExportController::class, 'downloadInstitutionTemplate'])->name('template.institution-import')->middleware(['auth']);
+
+// Fallback Route for Storage Files (solves 404 on shared hosting without symlink)
+Route::get('/storage/{path}', function ($path) {
+    if (str_contains($path, '..')) {
+        abort(403);
+    }
+
+    $filePath = storage_path('app/public/' . $path);
+
+    if (! file_exists($filePath) || ! is_file($filePath)) {
+        abort(404);
+    }
+
+    return response()->file($filePath);
+})->where('path', '.*');

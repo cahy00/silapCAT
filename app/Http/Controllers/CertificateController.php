@@ -129,9 +129,11 @@ class CertificateController extends Controller
                 @unlink($tempPdf);
             }
 
-            $cmd = '$p = New-Object -ComObject PowerPoint.Application; $pres = $p.Presentations.Open("' . $tempFile . '", 2, 2, 0); $pres.SaveAs("' . $tempPdf . '", 32); $pres.Close(); $p.Quit();';
-            $enc = base64_encode(mb_convert_encoding($cmd, 'UTF-16LE'));
-            exec("powershell -NoProfile -NonInteractive -EncodedCommand $enc");
+            if (function_exists('exec') && windows_os()) {
+                $cmd = '$p = New-Object -ComObject PowerPoint.Application; $pres = $p.Presentations.Open("' . $tempFile . '", 2, 2, 0); $pres.SaveAs("' . $tempPdf . '", 32); $pres.Close(); $p.Quit();';
+                $enc = base64_encode(mb_convert_encoding($cmd, 'UTF-16LE'));
+                @exec("powershell -NoProfile -NonInteractive -EncodedCommand $enc");
+            }
 
             if (file_exists($tempPdf) && filesize($tempPdf) > 0) {
                 @unlink($tempFile);
