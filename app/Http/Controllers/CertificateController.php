@@ -124,6 +124,23 @@ class CertificateController extends Controller
                 $zip->close();
             }
 
+            $tempPdf = tempnam(sys_get_temp_dir(), 'cert_pdf_') . '.pdf';
+            if (file_exists($tempPdf)) {
+                @unlink($tempPdf);
+            }
+
+            $cmd = '$p = New-Object -ComObject PowerPoint.Application; $pres = $p.Presentations.Open("' . $tempFile . '", 2, 2, 0); $pres.SaveAs("' . $tempPdf . '", 32); $pres.Close(); $p.Quit();';
+            $enc = base64_encode(mb_convert_encoding($cmd, 'UTF-16LE'));
+            exec("powershell -NoProfile -NonInteractive -EncodedCommand $enc");
+
+            if (file_exists($tempPdf) && filesize($tempPdf) > 0) {
+                @unlink($tempFile);
+                $filename = "Sertifikat_" . str_replace(' ', '_', $examScore->name) . "_" . $examScore->exam_type . ".pdf";
+                return response()->download($tempPdf, $filename, [
+                    'Content-Type' => 'application/pdf',
+                ])->deleteFileAfterSend(true);
+            }
+
             $filename = "Sertifikat_" . str_replace(' ', '_', $examScore->name) . "_" . $examScore->exam_type . ".pptx";
             return response()->download($tempFile, $filename, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
