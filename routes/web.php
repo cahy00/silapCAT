@@ -56,6 +56,15 @@ Route::get('/template/employee-import', [\App\Http\Controllers\TemplateExportCon
 Route::get('/template/location-import', [\App\Http\Controllers\TemplateExportController::class, 'downloadLocationTemplate'])->name('template.location-import')->middleware(['auth']);
 Route::get('/template/institution-import', [\App\Http\Controllers\TemplateExportController::class, 'downloadInstitutionTemplate'])->name('template.institution-import')->middleware(['auth']);
 
+// Public Short Link Creator
+Route::get('/buat-link', [\App\Http\Controllers\PublicShortLinkController::class, 'index'])->name('public.shortlink.create');
+Route::post('/buat-link', [\App\Http\Controllers\PublicShortLinkController::class, 'store'])->name('public.shortlink.store')->middleware('throttle:5,1');
+
+// Short Link Redirect
+Route::get('/{shortCode}', [\App\Http\Controllers\ShortLinkController::class, 'redirect'])
+    ->name('shortlink.redirect')
+    ->where('shortCode', '[A-Za-z0-9\-\_]+');
+
 // Fallback Route for Storage Files (solves 404 on shared hosting without symlink)
 Route::get('/storage/{path}', function ($path) {
     if (str_contains($path, '..')) {

@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.10.1",
         "phpoffice/phpspreadsheet": "*",
         "pxlrbt/filament-activity-log": "^2.2",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-activitylog": "^4.12",
         "spatie/laravel-permission": "^6.25"
     },
