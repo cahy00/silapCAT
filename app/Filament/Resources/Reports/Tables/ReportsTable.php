@@ -61,6 +61,12 @@ class ReportsTable
             ->filters([
                 //
             ])
+            ->groups([
+                \Filament\Tables\Grouping\Group::make('event_location_id')
+                    ->label('Kegiatan & Lokasi')
+                    ->getTitleFromRecordUsing(fn (\App\Models\Report $record) => ($record->event?->name ?? '-') . ' - ' . ($record->eventLocation?->location?->name ?? '-'))
+            ])
+            ->defaultGroup('event_location_id')
             ->recordActions([
                 \Filament\Actions\Action::make('pdf')
                     ->label('PDF')

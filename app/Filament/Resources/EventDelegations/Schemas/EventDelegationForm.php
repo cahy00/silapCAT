@@ -23,9 +23,28 @@ class EventDelegationForm
                     ->schema([
                         Select::make('event_id')
                             ->label('Kegiatan')
-                            ->relationship('event', 'name')
+                            ->options(function () {
+                                $events = \App\Models\Event::with('eventLocations.location')
+                                    ->where(function($q) {
+                                        $q->where(function($sub) {
+                                            $sub->whereDate('start_date', '<=', now()->startOfDay())
+                                                ->whereDate('end_date', '>=', now()->startOfDay());
+                                        })->orWhere(function($sub) {
+                                            $sub->whereNull('start_date')->where('status', 'aktif');
+                                        });
+                                    })
+                                    ->get();
+
+                                return $events->mapWithKeys(function ($event) {
+                                    $locations = $event->eventLocations->map(fn($loc) => $loc->location?->name)
+                                        ->filter()
+                                        ->unique()
+                                        ->join(', ') ?: '-';
+
+                                    return [$event->id => "{$event->name} - {$locations}"];
+                                })->toArray();
+                            })
                             ->searchable()
-                            ->preload()
                             ->required()
                             ->live(),
                         Select::make('event_location_id')

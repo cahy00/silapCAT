@@ -129,14 +129,17 @@ class ReportForm
                     ->schema([
                         Grid::make(3)->schema([
                             TextInput::make('total_participants')
+                                ->label('Total Peserta')
                                 ->required()
                                 ->numeric()
                                 ->default(0),
                             TextInput::make('present_count')
+                                ->label('Jumlah Hadir')
                                 ->required()
                                 ->numeric()
                                 ->default(0),
                             TextInput::make('absent_count')
+                                ->label('Jumlah Tidak Hadir')
                                 ->required()
                                 ->numeric()
                                 ->default(0),
@@ -148,9 +151,11 @@ class ReportForm
                     ->schema([
                         Grid::make(2)->schema([
                             TextInput::make('highest_score')
+                                ->label('Nilai Tertinggi')
                                 ->numeric()
                                 ->default(null),
                             TextInput::make('lowest_score')
+                                ->label('Nilai Terendah')
                                 ->numeric()
                                 ->default(null),
                         ]),

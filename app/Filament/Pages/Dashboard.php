@@ -10,4 +10,14 @@ class Dashboard extends BaseDashboard
     {
         return '';
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\EventParticipantStats::class,
+            \App\Filament\Widgets\ExamScorePassFailChart::class,
+            \App\Filament\Widgets\ReportParticipantChart::class,
+            \App\Filament\Widgets\AverageScoreByEventChart::class,
+        ];
+    }
 }

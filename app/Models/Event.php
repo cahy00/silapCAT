@@ -30,6 +30,23 @@ class Event extends Model
         'end_date' => 'date',
     ];
 
+    public function getStatusAttribute($value)
+    {
+        if ($this->start_date && $this->end_date) {
+            $now = now()->startOfDay();
+            $start = \Carbon\Carbon::parse($this->start_date)->startOfDay();
+            $end = \Carbon\Carbon::parse($this->end_date)->startOfDay();
+
+            if ($now->between($start, $end)) {
+                return 'aktif';
+            } elseif ($now->gt($end)) {
+                return 'selesai';
+            }
+        }
+
+        return $value;
+    }
+
     protected $attributes = [
         'certificate_template' => 'sertifikat_default.pptx',
     ];
@@ -75,3 +92,5 @@ class Event extends Model
         return $this->hasMany(EventDelegation::class);
     }
 }
+
+

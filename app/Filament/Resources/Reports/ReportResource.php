@@ -54,7 +54,36 @@ class ReportResource extends Resource
         $user = auth()->user();
 
         if ($user->hasRole('operator')) {
+            // Hanya melihat laporan miliknya
             $query->where('user_id', $user->id);
+            
+            // Berdasarkan event & lokasi yang di-set pada delegasi
+            $delegations = \App\Models\EventDelegation::where('user_id', $user->id)->get();
+            $query->where(function ($q) use ($delegations) {
+                if ($delegations->isEmpty()) {
+                    $q->whereRaw('1 = 0');
+                } else {
+                    foreach ($delegations as $delegation) {
+                        $q->orWhere(function ($subQ) use ($delegation) {
+                            $subQ->where('event_id', $delegation->event_id)
+                                 ->where('event_location_id', $delegation->event_location_id);
+                        });
+                    }
+                }
+            });
+        }
+
+        // Jangan tampilkan laporan dari kegiatan yang statusnya selesai (kecuali super_admin)
+        if (!$user->hasRole('super_admin')) {
+            $query->whereHas('event', function ($q) {
+                $q->where(function($sub) {
+                    $sub->whereDate('end_date', '>=', now()->startOfDay())
+                        ->orWhereNull('end_date');
+                })->where(function($sub) {
+                    $sub->where('status', '!=', 'selesai')
+                        ->orWhereNull('status');
+                });
+            });
         }
 
         return $query;
