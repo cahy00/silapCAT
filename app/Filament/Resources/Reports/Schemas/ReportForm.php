@@ -111,7 +111,7 @@ class ReportForm
                             ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get) {
                                 return $rule->where('event_id', $get('event_id'))
                                     ->where('event_location_id', $get('event_location_id'))
-                                    ->where('session_name', $get('session_name'));
+                                    ->where('session_name', $get('session_name') ?? 'N/A');
                             }),
                         Select::make('session_name')
                             ->label('Sesi')
@@ -121,11 +121,13 @@ class ReportForm
                                 'Sesi 3' => 'Sesi 3',
                                 'Sesi 4' => 'Sesi 4',
                             ])
-                            ->required(),
+                            ->required()
+                            ->hiddenOn('create'),
                     ])->columns(4)->columnSpan(12),
                     
                 Section::make('Data Kehadiran')
                     ->icon('heroicon-o-users')
+                    ->hiddenOn('create')
                     ->schema([
                         Grid::make(3)->schema([
                             TextInput::make('total_participants')
@@ -148,6 +150,7 @@ class ReportForm
                     
                 Section::make('Hasil / Nilai')
                     ->icon('heroicon-o-chart-bar')
+                    ->hiddenOn('create')
                     ->schema([
                         Grid::make(2)->schema([
                             TextInput::make('highest_score')
@@ -159,6 +162,51 @@ class ReportForm
                                 ->numeric()
                                 ->default(null),
                         ]),
+                    ])->columnSpan(12),
+
+                Section::make('Data Sesi')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->visibleOn('create')
+                    ->schema([
+                        \Filament\Forms\Components\Repeater::make('sessions_repeater')
+                            ->label('')
+                            ->schema([
+                                Select::make('session_name')
+                                    ->label('Sesi')
+                                    ->options([
+                                        'Sesi 1' => 'Sesi 1',
+                                        'Sesi 2' => 'Sesi 2',
+                                        'Sesi 3' => 'Sesi 3',
+                                        'Sesi 4' => 'Sesi 4',
+                                    ])
+                                    ->required(),
+                                TextInput::make('total_participants')
+                                    ->label('Total Peserta')
+                                    ->required()
+                                    ->numeric()
+                                    ->default(0),
+                                TextInput::make('present_count')
+                                    ->label('Hadir')
+                                    ->required()
+                                    ->numeric()
+                                    ->default(0),
+                                TextInput::make('absent_count')
+                                    ->label('Tidak Hadir')
+                                    ->required()
+                                    ->numeric()
+                                    ->default(0),
+                                TextInput::make('highest_score')
+                                    ->label('Tertinggi')
+                                    ->numeric()
+                                    ->default(null),
+                                TextInput::make('lowest_score')
+                                    ->label('Terendah')
+                                    ->numeric()
+                                    ->default(null),
+                            ])
+                            ->columns(6)
+                            ->defaultItems(1)
+                            ->addActionLabel('Tambah Sesi')
                     ])->columnSpan(12),
             ]);
     }
