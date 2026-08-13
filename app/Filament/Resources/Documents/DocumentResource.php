@@ -3,7 +3,7 @@ namespace App\Filament\Resources\Documents;
 use App\Filament\Resources\Documents\Pages\{CreateDocument, EditDocument, ListDocuments};
 use App\Models\Document;
 use BackedEnum;
-use Filament\Actions\{BulkActionGroup, DeleteBulkAction, EditAction};
+use Filament\Tables\Actions\{BulkActionGroup, DeleteBulkAction, EditAction};
 use Filament\Forms\Components\{FileUpload, RichEditor, Select, TextInput};
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
