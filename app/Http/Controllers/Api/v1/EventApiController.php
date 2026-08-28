@@ -129,12 +129,21 @@ class EventApiController extends Controller
         $validScores = $scores->where('total_score', '>', 0);
         $avgScore = (float) ($validScores->count() > 0 ? round($validScores->avg('total_score'), 2) : 0);
 
+        $institutions = $event->eventInstitutions->map(fn ($ei) => [
+            'id' => $ei->institution?->id ?? $ei->id,
+            'name' => $ei->institution?->name ?? null,
+            'code' => $ei->institution?->code ?? null,
+        ])->filter(fn ($inst) => ! empty($inst['name']))->values();
+
         return [
             'id' => $event->id,
             'name' => $event->name,
             'status' => $event->status,
             'start_date' => $event->start_date ? Carbon::parse($event->start_date)->format('Y-m-d') : null,
             'end_date' => $event->end_date ? Carbon::parse($event->end_date)->format('Y-m-d') : null,
+            'institutions' => $institutions,
+            'institutions_count' => $institutions->count(),
+            'institutions_names' => $institutions->pluck('name')->all(),
             'statistics' => [
                 'total_participants' => $totalParticipants,
                 'present' => $presentCount,
