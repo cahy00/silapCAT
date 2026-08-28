@@ -18,7 +18,13 @@ class EventApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Event::with(['eventLocations', 'eventInstitutions.institution', 'examScores']);
+        $query = Event::with([
+            'eventLocations.location',
+            'eventInstitutions.institution',
+            'reports.eventLocation.location',
+            'reports.user',
+            'examScores',
+        ]);
 
         // Search by event name
         if ($request->filled('search')) {
@@ -69,6 +75,8 @@ class EventApiController extends Controller
             'eventLocations.location',
             'eventInstitutions.institution',
             'eventEmployees.employee',
+            'reports.eventLocation.location',
+            'reports.user',
             'examScores',
         ])->find($id);
 
@@ -91,20 +99,34 @@ class EventApiController extends Controller
      */
     private function formatEvent(Event $event): array
     {
+        $reports = $event->reports;
         $scores = $event->examScores;
-        $totalParticipants = $scores->count();
 
-        $presentCount = $scores->filter(function ($s) {
-            $notes = strtolower($s->notes ?? '');
-            return ! str_contains($notes, 'tidak hadir') && ! str_contains($notes, 'th') && $notes !== 'absen';
-        })->count();
+        if ($reports && $reports->isNotEmpty()) {
+            $totalParticipants = (int) $reports->sum('total_participants');
+            $presentCount = (int) $reports->sum('present_count');
+            $absentCount = (int) $reports->sum('absent_count');
+            $highestScore = (float) ($reports->max('highest_score') ?? 0);
+            
+            $validLowest = $reports->whereNotNull('lowest_score')->where('lowest_score', '>', 0);
+            $lowestScore = (float) ($validLowest->isNotEmpty() ? $validLowest->min('lowest_score') : ($reports->min('lowest_score') ?? 0));
+        } else {
+            $totalParticipants = $scores->count();
+            $presentCount = $scores->filter(function ($s) {
+                $notes = strtolower($s->notes ?? '');
+                return ! str_contains($notes, 'tidak hadir') && ! str_contains($notes, 'th') && $notes !== 'absen';
+            })->count();
+            $absentCount = $totalParticipants - $presentCount;
+
+            $validScores = $scores->where('total_score', '>', 0);
+            $highestScore = (float) ($scores->max('total_score') ?? 0);
+            $lowestScore = (float) ($validScores->count() > 0 ? $validScores->min('total_score') : 0);
+        }
 
         $passedCount = $scores->where('status', 'Lulus')->count();
         $failedCount = $scores->where('status', 'Tidak Lulus')->count();
 
         $validScores = $scores->where('total_score', '>', 0);
-        $highestScore = (float) ($scores->max('total_score') ?? 0);
-        $lowestScore = (float) ($validScores->count() > 0 ? $validScores->min('total_score') : 0);
         $avgScore = (float) ($validScores->count() > 0 ? round($validScores->avg('total_score'), 2) : 0);
 
         return [
@@ -116,7 +138,7 @@ class EventApiController extends Controller
             'statistics' => [
                 'total_participants' => $totalParticipants,
                 'present' => $presentCount,
-                'absent' => $totalParticipants - $presentCount,
+                'absent' => $absentCount,
                 'passed' => $passedCount,
                 'failed' => $failedCount,
                 'highest_score' => $highestScore,
@@ -145,6 +167,19 @@ class EventApiController extends Controller
             'id' => $ei->institution?->id ?? $ei->id,
             'name' => $ei->institution?->name ?? null,
             'code' => $ei->institution?->code ?? null,
+        ]);
+
+        $base['session_reports'] = $event->reports->map(fn ($rep) => [
+            'id' => $rep->id,
+            'report_date' => $rep->report_date ? Carbon::parse($rep->report_date)->format('Y-m-d') : null,
+            'session_name' => $rep->session_name,
+            'location_name' => $rep->eventLocation?->location?->name ?? $rep->eventLocation?->name ?? null,
+            'total_participants' => (int) $rep->total_participants,
+            'present_count' => (int) $rep->present_count,
+            'absent_count' => (int) $rep->absent_count,
+            'highest_score' => (float) $rep->highest_score,
+            'lowest_score' => (float) $rep->lowest_score,
+            'reporter_name' => $rep->user?->name ?? null,
         ]);
 
         $base['documents'] = [
