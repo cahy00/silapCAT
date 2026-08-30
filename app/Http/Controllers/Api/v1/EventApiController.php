@@ -20,6 +20,7 @@ class EventApiController extends Controller
     {
         $query = Event::with([
             'eventLocations.location',
+            'eventLocations.eventLocationInstitutions.institution',
             'eventInstitutions.institution',
             'reports.eventLocation.location',
             'reports.user',
@@ -73,6 +74,7 @@ class EventApiController extends Controller
     {
         $event = Event::with([
             'eventLocations.location',
+            'eventLocations.eventLocationInstitutions.institution',
             'eventInstitutions.institution',
             'eventEmployees.employee',
             'reports.eventLocation.location',
@@ -129,11 +131,7 @@ class EventApiController extends Controller
         $validScores = $scores->where('total_score', '>', 0);
         $avgScore = (float) ($validScores->count() > 0 ? round($validScores->avg('total_score'), 2) : 0);
 
-        $institutions = $event->eventInstitutions->map(fn ($ei) => [
-            'id' => $ei->institution?->id ?? $ei->id,
-            'name' => $ei->institution?->name ?? null,
-            'code' => $ei->institution?->code ?? null,
-        ])->filter(fn ($inst) => ! empty($inst['name']))->values();
+        $institutions = $this->getEventInstitutions($event);
 
         return [
             'id' => $event->id,
@@ -159,6 +157,61 @@ class EventApiController extends Controller
     }
 
     /**
+     * Gather participating institutions from all possible relations in SILAPCAT.
+     */
+    private function getEventInstitutions(Event $event)
+    {
+        $collected = collect();
+
+        // 1. Direct eventInstitutions relation
+        if ($event->eventInstitutions) {
+            foreach ($event->eventInstitutions as $ei) {
+                if ($ei->institution) {
+                    $collected->push([
+                        'id' => $ei->institution->id,
+                        'name' => trim($ei->institution->name),
+                        'code' => $ei->institution->code ?? null,
+                    ]);
+                }
+            }
+        }
+
+        // 2. eventLocations -> eventLocationInstitutions relation
+        if ($event->eventLocations) {
+            foreach ($event->eventLocations as $el) {
+                if ($el->eventLocationInstitutions) {
+                    foreach ($el->eventLocationInstitutions as $eli) {
+                        if ($eli->institution) {
+                            $collected->push([
+                                'id' => $eli->institution->id,
+                                'name' => trim($eli->institution->name),
+                                'code' => $eli->institution->code ?? null,
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. examScores (string institution)
+        if ($event->examScores) {
+            foreach ($event->examScores as $score) {
+                if (! empty($score->institution)) {
+                    $collected->push([
+                        'id' => null,
+                        'name' => trim($score->institution),
+                        'code' => null,
+                    ]);
+                }
+            }
+        }
+
+        return $collected->filter(fn ($inst) => ! empty($inst['name']))
+            ->unique('name')
+            ->values();
+    }
+
+    /**
      * Format detailed event payload.
      */
     private function formatEventDetail(Event $event): array
@@ -170,12 +223,6 @@ class EventApiController extends Controller
             'location_name' => $el->location?->name ?? $el->name,
             'address' => $el->location?->address ?? null,
             'city' => $el->location?->city?->name ?? null,
-        ]);
-
-        $base['institutions'] = $event->eventInstitutions->map(fn ($ei) => [
-            'id' => $ei->institution?->id ?? $ei->id,
-            'name' => $ei->institution?->name ?? null,
-            'code' => $ei->institution?->code ?? null,
         ]);
 
         $base['session_reports'] = $event->reports->map(fn ($rep) => [
