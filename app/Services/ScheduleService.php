@@ -52,8 +52,8 @@ class ScheduleService
                     continue;
                 }
 
-                // Hari Jumat maksimal 3 sesi
-                $actualSessionsToday = $currentDate->isFriday() ? min(3, $sessionsCount) : $sessionsCount;
+                // Hari Jumat maksimal 2 sesi (waktu terbatas karena shalat Jumat)
+                $actualSessionsToday = $currentDate->isFriday() ? min(2, $sessionsCount) : $sessionsCount;
 
                 if (!isset($locationUsage[$dateString])) {
                     $locationUsage[$dateString] = [];
@@ -155,8 +155,8 @@ class ScheduleService
                 continue;
             }
 
-            // Hari Jumat maksimal 3 sesi
-            $actualSessionsToday = $currentDate->isFriday() ? min(3, $sessionsCount) : $sessionsCount;
+            // Hari Jumat maksimal 2 sesi (waktu terbatas karena shalat Jumat)
+            $actualSessionsToday = $currentDate->isFriday() ? min(2, $sessionsCount) : $sessionsCount;
             $dayCapacity = $pcCapacity * $actualSessionsToday;
             $dayTotal = min($remainingParticipants, $dayCapacity);
 

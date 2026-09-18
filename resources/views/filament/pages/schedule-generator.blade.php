@@ -339,6 +339,59 @@
         }
         .dark .sg-day-total { color: #34d399; background: rgba(52, 211, 153, 0.06); }
 
+        /* View Switcher */
+        .sg-view-switcher {
+            display: inline-flex; background: #f1f5f9; padding: 3px; border-radius: 10px; border: 1px solid #e2e8f0;
+        }
+        .dark .sg-view-switcher { background: #1e293b; border-color: #334155; }
+        .sg-view-btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 11px; font-weight: 700;
+            border-radius: 8px; border: none; cursor: pointer; color: #64748b; background: transparent; transition: all 0.15s ease;
+        }
+        .sg-view-btn.active {
+            background: #fff; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .dark .sg-view-btn.active { background: #0f172a; color: #818cf8; }
+
+        /* Calendar Grid & Cards */
+        .sg-calendar-timeline {
+            display: flex; flex-direction: column; gap: 1.25rem;
+        }
+        .sg-calendar-day-group {
+            border-radius: 12px; border: 1px solid #e2e8f0; background: #ffffff; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .dark .sg-calendar-day-group { background: #0f172a; border-color: #1e293b; }
+        .sg-calendar-day-header {
+            padding: 10px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+        }
+        .dark .sg-calendar-day-header { background: #1e293b; border-bottom-color: #334155; }
+        .sg-cal-date-badge {
+            display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #0f172a;
+        }
+        .dark .sg-cal-date-badge { color: #f1f5f9; }
+        .sg-calendar-cards-grid {
+            padding: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem;
+        }
+        .sg-cal-event-card {
+            border-radius: 10px; border: 1px solid #e2e8f0; background: #fafbfc; padding: 12px;
+            display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
+            transition: all 0.15s ease;
+        }
+        .sg-cal-event-card:hover { border-color: #a5b4fc; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08); }
+        .dark .sg-cal-event-card { background: rgba(30, 41, 59, 0.5); border-color: #1e293b; }
+        .dark .sg-cal-event-card:hover { border-color: #6366f1; }
+        
+        .sg-cal-session-pills {
+            display: flex; flex-wrap: wrap; gap: 4px;
+        }
+        .sg-cal-session-pill {
+            display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700;
+            padding: 2px 7px; border-radius: 5px; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;
+        }
+        .dark .sg-cal-session-pill { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border-color: rgba(129, 140, 248, 0.3); }
+
         /* Save action bar */
         .sg-save-bar {
             display: flex; justify-content: flex-end; padding-top: 1.25rem;
@@ -437,6 +490,17 @@
                 </div>
 
                 <div class="sg-toolbar-right">
+                    {{-- Scenario Actions --}}
+                    <button type="button" wire:click="openLoadScenarioModal" class="sg-btn sg-btn-secondary" style="border-color: #cbd5e1; color: #475569;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #6366f1;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Muat Skenario / Draft
+                    </button>
+
+                    <button type="button" wire:click="openSaveScenarioModal" class="sg-btn sg-btn-secondary" style="border-color: #cbd5e1; color: #475569;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #059669;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                        Simpan Draft Skenario
+                    </button>
+
                     <button type="button" wire:click="addRow" class="sg-btn sg-btn-secondary">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Tambah Baris
@@ -460,7 +524,7 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 16px;">🧬</span>
                         <div>
-                            <strong>Algoritma Genetika Diterapkan Otomatis!</strong> Petugas telah dialokasikan sesuai rasio kapasitas (Koordinator 1:1 Tilok, IT 1:50 PC, Pengawas 1:25 PC / Ruangan) bebas bentrokan. Anda dapat menyesuaikan manual pada kartu hasil di bawah.
+                            <strong>Algoritma Genetika Diterapkan Otomatis!</strong> Petugas dialokasikan <strong>per Titik Lokasi</strong> (1 Tilok = 1 Tim), bukan per instansi. Instansi yang berada di tilok yang sama berbagi tim yang sama agar lebih efisien. Rasio: Koordinator 1:1 Tilok, IT 1:50 PC, Pengawas 1:25 PC/Ruangan. Sesi Jumat otomatis dibatasi maks. 2 sesi.
                         </div>
                     </div>
                 </div>
@@ -538,124 +602,234 @@
             </div>
         </div>
 
-        {{-- Section 3: Generated Results Matrix --}}
+        {{-- Section 3: Generated Results (Matrix & Visual Calendar) --}}
         @if($isGenerated && !empty($generatedResults))
             <div class="sg-card">
-                <div class="sg-card-header">
-                    <div class="sg-card-icon sg-icon-teal">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <div class="sg-card-header" style="justify-content: space-between; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="sg-card-icon sg-icon-teal">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div>
+                            <div class="sg-card-title">3. Hasil Penjadwalan & Alokasi Petugas</div>
+                            <div class="sg-card-desc">Petugas telah di-assign otomatis. Anda dapat meninjau dalam format Matriks Detail atau Kalender Visual Harian.</div>
+                        </div>
                     </div>
-                    <div>
-                        <div class="sg-card-title">3. Matriks Penjadwalan per Hari & Sesi</div>
-                        <div class="sg-card-desc">Petugas telah di-assign otomatis. Anda dapat menyesuaikan kuota sesi atau mengubah petugas secara manual jika diperlukan.</div>
+
+                    {{-- View Switcher Tab --}}
+                    <div class="sg-view-switcher">
+                        <button type="button" wire:click="setViewMode('matrix')" class="sg-view-btn {{ $activeView === 'matrix' ? 'active' : '' }}">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            Tampilan Matriks
+                        </button>
+                        <button type="button" wire:click="setViewMode('calendar')" class="sg-view-btn {{ $activeView === 'calendar' ? 'active' : '' }}">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            Kalender Visual
+                        </button>
                     </div>
                 </div>
 
-                @foreach($generatedResults as $rIndex => $res)
-                    @php 
-                        $calc = $res['calculation']; 
-                        $rowItemIdx = $res['index'] ?? $rIndex;
-                    @endphp
-                    <div class="sg-result-block">
-                        <div class="sg-result-header">
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span class="sg-result-tag">Instansi & Tilok #{{ $rIndex + 1 }}</span>
-                                    @if(!empty($res['is_ga_recommendation']))
-                                        <span class="sg-rec-badge">🧬 Rekomendasi GA</span>
-                                    @else
-                                        <span class="sg-rec-badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; border-color: rgba(16, 185, 129, 0.25);">✏️ Manual</span>
-                                    @endif
-                                </div>
-                                <div class="sg-result-title">{{ $res['institution_name'] }}</div>
-                                <div class="sg-result-subtitle">
-                                    Lokasi Ujian: <strong>{{ $res['location_name'] }}</strong>
-                                </div>
-                                <div style="margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-                                    @if(!empty($res['koordinator_names']))
-                                        <span class="sg-role-pill sg-role-k">
-                                            👔 Koordinator: <strong>{{ $res['koordinator_names'] }}</strong>
-                                        </span>
-                                    @endif
-                                    @if(!empty($res['it_names']))
-                                        <span class="sg-role-pill sg-role-it">
-                                            💻 Tim IT: <strong>{{ $res['it_names'] }}</strong>
-                                        </span>
-                                    @endif
-                                    @if(!empty($res['pengawas_names']))
-                                        <span class="sg-role-pill sg-role-p">
-                                            👁️ Pengawas: <strong>{{ $res['pengawas_names'] }}</strong>
-                                        </span>
-                                    @endif
+                {{-- ==================== VIEW 1: MATRIX VIEW ==================== --}}
+                @if($activeView === 'matrix')
+                    @foreach($generatedResults as $rIndex => $res)
+                        @php 
+                            $calc = $res['calculation']; 
+                            $rowItemIdx = $res['index'] ?? $rIndex;
+                        @endphp
+                        <div class="sg-result-block">
+                            <div class="sg-result-header">
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="sg-result-tag">Instansi & Tilok #{{ $rIndex + 1 }}</span>
+                                        @if(!empty($res['is_ga_recommendation']))
+                                            <span class="sg-rec-badge">🧬 Rekomendasi GA</span>
+                                        @else
+                                            <span class="sg-rec-badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; border-color: rgba(16, 185, 129, 0.25);">✏️ Manual</span>
+                                        @endif
+                                    </div>
+                                    <div class="sg-result-title">{{ $res['institution_name'] }}</div>
+                                    <div class="sg-result-subtitle">
+                                        Lokasi Ujian: <strong>{{ $res['location_name'] }}</strong>
+                                    </div>
+                                    <div style="margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+                                        @if(!empty($res['koordinator_names']))
+                                            <span class="sg-role-pill sg-role-k">
+                                                👔 Koordinator: <strong>{{ $res['koordinator_names'] }}</strong>
+                                            </span>
+                                        @endif
+                                        @if(!empty($res['it_names']))
+                                            <span class="sg-role-pill sg-role-it">
+                                                💻 Tim IT: <strong>{{ $res['it_names'] }}</strong>
+                                            </span>
+                                        @endif
+                                        @if(!empty($res['pengawas_names']))
+                                            <span class="sg-role-pill sg-role-p">
+                                                👁️ Pengawas: <strong>{{ $res['pengawas_names'] }}</strong>
+                                            </span>
+                                        @endif
 
-                                    {{-- Tombol Edit Petugas Manual Setelah Generate --}}
-                                    <button type="button" wire:click="openOfficerModal({{ $rowItemIdx }})"
-                                            style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; background: #ffffff; border: 1px solid #c7d2fe; color: #4338ca; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"
-                                            class="dark:bg-slate-800 dark:border-slate-700 dark:text-indigo-400">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 13px; height: 13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                        Edit Petugas
-                                    </button>
+                                        {{-- Tombol Edit Petugas Manual Setelah Generate --}}
+                                        <button type="button" wire:click="openOfficerModal({{ $rowItemIdx }})"
+                                                style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; background: #ffffff; border: 1px solid #c7d2fe; color: #4338ca; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"
+                                                class="dark:bg-slate-800 dark:border-slate-700 dark:text-indigo-400">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 13px; height: 13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                            Edit Petugas
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="sg-result-meta">
+                                    <div class="sg-meta-pill">
+                                        Total Peserta: <strong style="margin-left: 4px;">{{ number_format($calc['total_participants']) }}</strong>
+                                    </div>
+                                    <div class="sg-meta-pill">
+                                        Total Hari: <strong class="sg-green" style="margin-left: 4px;">{{ $calc['total_exam_days'] }} Hari</strong>
+                                    </div>
+                                    <div class="sg-meta-pill">
+                                        Rentang:
+                                        <strong style="margin-left: 4px;">{{ \Carbon\Carbon::parse($calc['start_date'])->format('d M Y') }} – {{ \Carbon\Carbon::parse($calc['end_date'])->format('d M Y') }}</strong>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="sg-result-meta">
-                                <div class="sg-meta-pill">
-                                    Total Peserta: <strong style="margin-left: 4px;">{{ number_format($calc['total_participants']) }}</strong>
-                                </div>
-                                <div class="sg-meta-pill">
-                                    Total Hari: <strong class="sg-green" style="margin-left: 4px;">{{ $calc['total_exam_days'] }} Hari</strong>
-                                </div>
-                                <div class="sg-meta-pill">
-                                    Rentang:
-                                    <strong style="margin-left: 4px;">{{ \Carbon\Carbon::parse($calc['start_date'])->format('d M Y') }} – {{ \Carbon\Carbon::parse($calc['end_date'])->format('d M Y') }}</strong>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="sg-table-wrap">
-                            <table class="sg-matrix-table">
-                                <thead>
-                                    <tr>
-                                        <th style="text-align: center; width: 80px;">Hari Ke</th>
-                                        <th style="width: 180px;">Waktu & Tanggal</th>
-                                        @for($s = 1; $s <= $calc['sessions_per_day']; $s++)
-                                            <th style="text-align: center;">Sesi {{ $s }}</th>
-                                        @endfor
-                                        <th style="text-align: center;" class="sg-col-total">Total Hari Ini</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($calc['days'] as $dIndex => $day)
+                            <div class="sg-table-wrap">
+                                <table class="sg-matrix-table">
+                                    <thead>
                                         <tr>
-                                            <td class="sg-day-num">Hari {{ $day['day_number'] }}</td>
-                                            <td class="sg-day-date">
-                                                {{ \Carbon\Carbon::parse($day['date'])->translatedFormat('l, d M Y') }}
-                                            </td>
-
+                                            <th style="text-align: center; width: 80px;">Hari Ke</th>
+                                            <th style="width: 180px;">Waktu & Tanggal</th>
                                             @for($s = 1; $s <= $calc['sessions_per_day']; $s++)
-                                                @php $sKey = "session_$s"; @endphp
-                                                <td style="text-align: center;">
-                                                    <input type="number"
-                                                        value="{{ $day['sessions'][$sKey] ?? 0 }}"
-                                                        wire:change="updateGeneratedSessionQuota({{ $rIndex }}, {{ $dIndex }}, '{{ $sKey }}', $event.target.value)"
-                                                        class="sg-session-input" />
-                                                </td>
+                                                <th style="text-align: center;">Sesi {{ $s }}</th>
                                             @endfor
-
-                                            <td class="sg-day-total">
-                                                {{ number_format($day['day_total']) }}
-                                            </td>
+                                            <th style="text-align: center;" class="sg-col-total">Total Hari Ini</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($calc['days'] as $dIndex => $day)
+                                            <tr>
+                                                <td class="sg-day-num">Hari {{ $day['day_number'] }}</td>
+                                                <td class="sg-day-date">
+                                                    {{ \Carbon\Carbon::parse($day['date'])->translatedFormat('l, d M Y') }}
+                                                </td>
+
+                                                @for($s = 1; $s <= $calc['sessions_per_day']; $s++)
+                                                    @php $sKey = "session_$s"; @endphp
+                                                    <td style="text-align: center;">
+                                                        <input type="number"
+                                                            value="{{ $day['sessions'][$sKey] ?? 0 }}"
+                                                            wire:change="updateGeneratedSessionQuota({{ $rIndex }}, {{ $dIndex }}, '{{ $sKey }}', $event.target.value)"
+                                                            class="sg-session-input" />
+                                                    </td>
+                                                @endfor
+
+                                                <td class="sg-day-total">
+                                                    {{ number_format($day['day_total']) }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+                    @endforeach
+                @else
+                    {{-- ==================== VIEW 2: VISUAL CALENDAR TIMELINE VIEW ==================== --}}
+                    @php $calendarDates = $this->calendarDates; @endphp
+                    <div class="sg-calendar-timeline">
+                        @foreach($calendarDates as $calDate)
+                            <div class="sg-calendar-day-group">
+                                <div class="sg-calendar-day-header">
+                                    <div class="sg-cal-date-badge">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: #4f46e5;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span>{{ $calDate['day_name'] }}, {{ $calDate['formatted_date'] }}</span>
+                                    </div>
+                                    <div style="font-size: 11px; font-weight: 700; color: #64748b;" class="dark:text-slate-400">
+                                        Total Titik Lokasi Aktif: <strong style="color: #4f46e5;">{{ count($calDate['events']) }} Lokasi</strong>
+                                    </div>
+                                </div>
+
+                                <div class="sg-calendar-cards-grid">
+                                    @foreach($calDate['events'] as $ev)
+                                        <div class="sg-cal-event-card">
+                                            <div>
+                                                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;">
+                                                    <div>
+                                                        <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #4f46e5; background: #eef2ff; padding: 2px 6px; border-radius: 4px;" class="dark:bg-indigo-950 dark:text-indigo-400">
+                                                            Hari Ke-{{ $ev['day_number'] }}
+                                                        </span>
+                                                        <h4 style="font-size: 13px; font-weight: 800; color: #0f172a; margin: 6px 0 2px;" class="dark:text-slate-100">
+                                                            {{ $ev['institution_name'] }}
+                                                        </h4>
+                                                        <div style="font-size: 11px; color: #64748b; font-weight: 500;" class="dark:text-slate-400">
+                                                            📍 {{ $ev['location_name'] }}
+                                                        </div>
+                                                    </div>
+
+                                                    <div style="text-align: right;">
+                                                        <div style="font-size: 15px; font-weight: 900; color: #059669;" class="dark:text-emerald-400">
+                                                            {{ number_format($ev['day_total']) }}
+                                                        </div>
+                                                        <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 700;">Peserta</div>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Sessions Breakdown Pills --}}
+                                                <div style="margin-top: 10px;">
+                                                    <div style="font-size: 10px; font-weight: 700; color: #475569; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em;" class="dark:text-slate-400">Distribusi Sesi:</div>
+                                                    <div class="sg-cal-session-pills">
+                                                        @for($s = 1; $s <= $ev['sessions_per_day']; $s++)
+                                                            @php $sKey = "session_$s"; @endphp
+                                                            <span class="sg-cal-session-pill">
+                                                                S{{ $s }}: <strong>{{ $ev['sessions'][$sKey] ?? 0 }}</strong>
+                                                            </span>
+                                                        @endfor
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Officer Badges --}}
+                                            <div style="border-top: 1px dashed #e2e8f0; padding-top: 8px; margin-top: 4px; display: flex; flex-direction: column; gap: 4px;" class="dark:border-slate-800">
+                                                <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;" class="dark:text-slate-400">Petugas Bertugas:</div>
+                                                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                                    @if(!empty($ev['koordinator_names']))
+                                                        <span class="sg-role-pill sg-role-k" style="font-size: 10px; padding: 2px 6px;">
+                                                            👔 {{ $ev['koordinator_names'] }}
+                                                        </span>
+                                                    @endif
+                                                    @if(!empty($ev['it_names']))
+                                                        <span class="sg-role-pill sg-role-it" style="font-size: 10px; padding: 2px 6px;">
+                                                            💻 {{ $ev['it_names'] }}
+                                                        </span>
+                                                    @endif
+                                                    @if(!empty($ev['pengawas_names']))
+                                                        <span class="sg-role-pill sg-role-p" style="font-size: 10px; padding: 2px 6px;">
+                                                            👁️ {{ $ev['pengawas_names'] }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                @endforeach
+                @endif
 
                 {{-- Save Action --}}
-                <div class="sg-save-bar">
-                    <button type="button" wire:click="saveSchedules" wire:loading.attr="disabled" class="sg-btn sg-btn-save">
+                <div class="sg-save-bar" style="gap: 12px;">
+                    <button type="button" wire:click="exportExcel" wire:loading.attr="disabled" class="sg-btn sg-btn-save" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);">
+                        <span wire:loading.remove wire:target="exportExcel" style="display: inline-flex; align-items: center; gap: 8px;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Export ke Excel
+                        </span>
+                        <span wire:loading wire:target="exportExcel" style="display: inline-flex; align-items: center; gap: 8px;">
+                            <svg class="sg-spinner" fill="none" viewBox="0 0 24 24" style="width:18px;height:18px;"><circle style="opacity:0.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path style="opacity:0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Mengekspor...
+                        </span>
+                    </button>
+
+                    <button type="button" wire:click="saveSchedules" wire:loading.attr="disabled" class="sg-btn sg-btn-save" style="background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);">
                         <span wire:loading.remove wire:target="saveSchedules" style="display: inline-flex; align-items: center; gap: 8px;">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             Simpan Penjadwalan ke Event Utama
@@ -825,6 +999,153 @@
                         </button>
                         <button type="button" wire:click="saveOfficerModal" class="sg-btn sg-btn-primary" style="padding: 6px 16px; font-size: 12px;">
                             Simpan Petugas
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        @endif
+
+        {{-- ========================================== --}}
+        {{-- MODAL 1: Simpan Skenario / Draft --}}
+        {{-- ========================================== --}}
+        @if($showSaveScenarioModal)
+            <div style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); padding: 1rem;">
+                <div style="background: #ffffff; border-radius: 1rem; width: 100%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column;" class="dark:bg-slate-900 dark:border-slate-800">
+                    
+                    {{-- Modal Header --}}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9;" class="dark:border-slate-800">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 32px; height: 32px; border-radius: 8px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center;" class="dark:bg-emerald-950 dark:text-emerald-400">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0;" class="dark:text-slate-100">Simpan Draft / Skenario</h3>
+                                <p style="font-size: 11px; color: #64748b; margin: 2px 0 0;" class="dark:text-slate-400">Simpan kondisi input & hasil generate untuk simulasi perbandingan.</p>
+                            </div>
+                        </div>
+                        <button type="button" wire:click="closeSaveScenarioModal" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px; border-radius: 6px;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- Modal Body --}}
+                    <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                        <div>
+                            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 6px;" class="dark:text-slate-300">
+                                Nama Skenario / Versi <span style="color:#ef4444;">*</span>
+                            </label>
+                            <input type="text" wire:model="scenarioName" placeholder="Contoh: Skenario A - Kapasitas 200 PC 4 Sesi" class="sg-input" style="width: 100%; font-size: 13px;" />
+                        </div>
+
+                        <div>
+                            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 6px;" class="dark:text-slate-300">
+                                Catatan / Deskripsi Tambahan
+                            </label>
+                            <textarea wire:model="scenarioDescription" rows="3" placeholder="Contoh: Simulasi jika tilok BKN menggunakan 4 sesi penuh dan penugasan pengawas lokal..." class="sg-input" style="width: 100%; font-size: 12px; resize: vertical;"></textarea>
+                        </div>
+
+                        <div style="padding: 10px 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 11px; color: #64748b;" class="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400">
+                            ℹ️ <strong>Informasi Draft:</strong> Menyimpan <strong>{{ count($items) }} baris Tilok</strong> @if($isGenerated) dan <strong>matriks hasil kalkulasi jadwal + alokasi petugas</strong> @else (belum di-generate) @endif.
+                        </div>
+                    </div>
+
+                    {{-- Modal Footer --}}
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #f1f5f9;" class="dark:bg-slate-800/50 dark:border-slate-800">
+                        <button type="button" wire:click="closeSaveScenarioModal" class="sg-btn sg-btn-secondary" style="padding: 6px 14px; font-size: 12px;">
+                            Batal
+                        </button>
+                        <button type="button" wire:click="saveScenario" class="sg-btn sg-btn-primary" style="padding: 6px 18px; font-size: 12px; background: linear-gradient(135deg, #059669, #0d9488);">
+                            Simpan Skenario
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        @endif
+
+        {{-- ========================================== --}}
+        {{-- MODAL 2: Muat / Kelola Skenario Draft --}}
+        {{-- ========================================== --}}
+        @if($showLoadScenarioModal)
+            <div style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); padding: 1rem;">
+                <div style="background: #ffffff; border-radius: 1rem; width: 100%; max-width: 750px; max-height: 85vh; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); overflow: hidden; border: 1px solid #e2e8f0; display: flex; flex-direction: column;" class="dark:bg-slate-900 dark:border-slate-800">
+                    
+                    {{-- Modal Header --}}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;" class="dark:border-slate-800">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 32px; height: 32px; border-radius: 8px; background: #eef2ff; color: #4f46e5; display: flex; align-items: center; justify-content: center;" class="dark:bg-indigo-950 dark:text-indigo-400">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0;" class="dark:text-slate-100">Daftar Skenario / Versi Tersimpan</h3>
+                                <p style="font-size: 11px; color: #64748b; margin: 2px 0 0;" class="dark:text-slate-400">Pilih skenario yang ingin dimuat kembali ke lembar kerja generator.</p>
+                            </div>
+                        </div>
+                        <button type="button" wire:click="closeLoadScenarioModal" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px; border-radius: 6px;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- Modal Body --}}
+                    <div style="padding: 1.25rem 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                        @php $scenarios = $this->scenarios; @endphp
+
+                        @if($scenarios->isEmpty())
+                            <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 42px; height: 42px; margin: 0 auto 10px; opacity: 0.5;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                <div style="font-size: 13px; font-weight: 600; color: #64748b;" class="dark:text-slate-400">Belum Ada Skenario / Draft Tersimpan</div>
+                                <div style="font-size: 11px; margin-top: 4px;">Gunakan tombol "Simpan Draft Skenario" di lembar kerja untuk menyimpan preset skenario Anda.</div>
+                            </div>
+                        @else
+                            @foreach($scenarios as $sc)
+                                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; transition: all 0.15s ease;" class="dark:bg-slate-800 dark:border-slate-700 hover:border-indigo-300">
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                            <span style="font-size: 13px; font-weight: 800; color: #1e1b4b;" class="dark:text-slate-100">{{ $sc->name }}</span>
+                                            @if($sc->summary_meta['is_generated'] ?? false)
+                                                <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(5, 150, 105, 0.1); color: #059669;">Matrix Generated</span>
+                                            @endif
+                                            @if($sc->summary_meta['is_ga_applied'] ?? false)
+                                                <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(147, 51, 234, 0.1); color: #9333ea;">GA Optimized</span>
+                                            @endif
+                                        </div>
+                                        
+                                        <div style="font-size: 11px; color: #64748b; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 10px;" class="dark:text-slate-400">
+                                            @if($sc->event_name)
+                                                <span>📌 Event: <strong>{{ $sc->event_name }}</strong></span>
+                                            @endif
+                                            <span>🏛️ <strong>{{ $sc->summary_meta['total_items'] ?? count($sc->items_data) }}</strong> Tilok</span>
+                                            <span>👥 <strong>{{ number_format($sc->summary_meta['total_participants'] ?? 0) }}</strong> Peserta</span>
+                                            <span>🕒 {{ $sc->created_at->translatedFormat('d M Y H:i') }}</span>
+                                        </div>
+
+                                        @if($sc->description)
+                                            <div style="font-size: 11px; color: #475569; margin-top: 4px; font-style: italic;" class="dark:text-slate-300">
+                                                "{{ $sc->description }}"
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                        <button type="button" wire:click="loadScenario({{ $sc->id }})" class="sg-btn sg-btn-primary" style="padding: 6px 12px; font-size: 11px;">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            Muat Skenario
+                                        </button>
+
+                                        <button type="button" wire:click="deleteScenario({{ $sc->id }})" wire:confirm="Yakin ingin menghapus skenario ini?" class="sg-btn-delete" title="Hapus Skenario">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+
+                    {{-- Modal Footer --}}
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #f1f5f9; flex-shrink: 0;" class="dark:bg-slate-800/50 dark:border-slate-800">
+                        <button type="button" wire:click="closeLoadScenarioModal" class="sg-btn sg-btn-secondary" style="padding: 6px 14px; font-size: 12px;">
+                            Tutup
                         </button>
                     </div>
 

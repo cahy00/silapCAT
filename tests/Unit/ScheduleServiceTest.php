@@ -34,14 +34,14 @@ test('calculates correct daily and session breakdown for location item', functio
     expect($result['days'][2]['sessions']['session_3'])->toBe(0);
 });
 
-test('restricts Friday to 3 sessions and skips Sunday execution', function () {
+test('restricts Friday to 2 sessions and skips Sunday execution', function () {
     $service = new ScheduleService();
 
     // 2026-10-02 is Friday, 2026-10-03 is Saturday, 2026-10-04 is Sunday
     $item = [
         'pc_capacity' => 100,
         'sessions_per_day' => 4,
-        'participants_count' => 800, // Fri: 300 (max 3 sessions), Sat: 400, Sun: skipped, Mon (2026-10-05): 100
+        'participants_count' => 800, // Fri: 200 (max 2 sessions), Sat: 400, Sun: skipped, Mon (2026-10-05): 200
         'start_date' => '2026-10-02',
         'has_opening_day' => false,
         'holiday_dates' => [],
@@ -51,15 +51,15 @@ test('restricts Friday to 3 sessions and skips Sunday execution', function () {
 
     expect($result['total_exam_days'])->toBe(3);
     expect($result['days'][0]['date'])->toBe('2026-10-02'); // Friday
-    expect($result['days'][0]['day_total'])->toBe(300); // 3 sessions max on Friday
-    expect(count($result['days'][0]['sessions']))->toBe(3);
+    expect($result['days'][0]['day_total'])->toBe(200); // 2 sessions max on Friday
+    expect(count($result['days'][0]['sessions']))->toBe(2);
 
     expect($result['days'][1]['date'])->toBe('2026-10-03'); // Saturday
     expect($result['days'][1]['day_total'])->toBe(400);
 
     // Sunday (2026-10-04) is skipped, so day 3 is Monday (2026-10-05)
     expect($result['days'][2]['date'])->toBe('2026-10-05'); // Monday
-    expect($result['days'][2]['day_total'])->toBe(100);
+    expect($result['days'][2]['day_total'])->toBe(200);
 });
 
 test('calculates correct grouped schedule for multiple institutions sharing same location capacity', function () {
