@@ -24,50 +24,80 @@ class EventsTable
             ->emptyStateIcon(null)
             ->columns([
                 TextColumn::make('name')
-                    ->label('INFORMASI KEGIATAN')
+                    ->label('INFORMASI KEGIATAN & TITIK LOKASI')
                     ->searchable(['name'])
                     ->sortable()
                     ->html()
                     ->formatStateUsing(function (Event $record): HtmlString {
                         $name = e($record->name);
                         $formationYear = e($record->formation_year ?? '-');
-                        
-                        $institutions = $record->eventLocations->flatMap(fn($loc) => $loc->eventLocationInstitutions)
-                            ->map(fn($ei) => $ei->institution)
-                            ->unique('id')
-                            ->map(fn($inst) => 
-                                "<div class='flex items-center gap-2 py-1'>
-                                    <div class='w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 shrink-0'></div>
-                                    <span class='text-sm text-slate-950 dark:text-white font-black tracking-tight leading-snug'>" . e($inst?->name ?? '-') . "</span>
-                                </div>"
-                            )->join('');
+                        $procurementTypeName = e($record->procurementType?->name ?? '');
 
-                        $locations = $record->eventLocations->map(fn($el) => 
-                            "<div class='py-0.5'>
-                                <span class='inline-flex items-center gap-1.5 text-[11px] font-black text-indigo-950 dark:text-indigo-100 bg-indigo-100 dark:bg-indigo-950/80 px-2.5 py-1 rounded-md border border-indigo-300 dark:border-indigo-700 uppercase tracking-wider shadow-2xs'>LOKASI: " . e($el->location?->name ?? '-') . "</span>
-                            </div>"
-                        )->join('');
-                        
+                        // Generate structured cards for each Titik Lokasi
+                        $locationCards = '';
+                        $locations = $record->eventLocations;
+
+                        if ($locations->isEmpty()) {
+                            $locationCards = "<div class='text-xs italic text-gray-400 py-1'>Belum ada titik lokasi yang ditambahkan.</div>";
+                        } else {
+                            foreach ($locations as $el) {
+                                $locName = e($el->location?->name ?? '-');
+                                $locCity = e($el->location?->city ?? '');
+                                
+                                // Schedule per tilok
+                                $locStart = $el->start_date ? \Carbon\Carbon::parse($el->start_date)->translatedFormat('d M Y') : null;
+                                $locEnd = $el->end_date ? \Carbon\Carbon::parse($el->end_date)->translatedFormat('d M Y') : null;
+                                $scheduleText = ($locStart && $locEnd) ? "{$locStart} - {$locEnd}" : ($locStart ?: 'Jadwal belum ditentukan');
+                                
+                                // Institutions & Participants in this tilok
+                                $instPills = '';
+                                $locParticipants = 0;
+                                foreach ($el->eventLocationInstitutions as $eli) {
+                                    $iName = e($eli->institution?->name ?? '-');
+                                    $pCount = number_format((int) $eli->participants_count);
+                                    $locParticipants += (int) $eli->participants_count;
+                                    $instPills .= "
+                                        <div class='text-sm text-slate-700 dark:text-slate-300'>
+                                            {$iName} ({$pCount})
+                                        </div>";
+                                }
+
+                                $totalLocFormatted = number_format($locParticipants);
+
+                                $locationCards .= "
+                                    <div class='mt-3 flex flex-col gap-1'>
+                                        <div class='flex items-center gap-1.5'>
+                                            <span class='font-semibold text-sm text-slate-900 dark:text-slate-100'>{$locName}</span>
+                                            " . ($locCity ? "<span class='text-sm text-slate-500 dark:text-slate-400 shrink-0'>({$locCity})</span>" : "") . "
+                                        </div>
+                                        
+                                        <div class='flex flex-col'>
+                                            {$instPills}
+                                        </div>
+                                        
+                                    </div>";
+                            }
+                        }
+
+                        $categoryBadge = $procurementTypeName ? "
+                            <span class='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border border-blue-200 dark:border-blue-800 uppercase tracking-wider'>
+                                {$procurementTypeName}
+                            </span>" : "";
+
                         return new HtmlString("
-                            <div class='flex flex-col py-3 gap-2.5'>
+                            <div class='flex flex-col py-3 min-w-[340px] max-w-[550px]'>
                                 <div>
-                                    <h3 class='font-black text-base text-slate-950 dark:text-white uppercase tracking-tighter leading-tight'>{$name}</h3>
-                                    <div class='mt-2'>
-                                        <span class='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-950 dark:bg-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-800 uppercase tracking-wider shadow-2xs'>
-                                            FORMASI: {$formationYear}
-                                        </span>
-                                    </div>
+                                    <h3 class='font-black text-sm md:text-base text-slate-950 dark:text-white uppercase tracking-tight leading-snug'>{$name}</h3>
                                 </div>
-                                <div class='flex flex-col gap-1 mt-0.5 pt-2 border-t border-gray-200 dark:border-gray-800'>
-                                    {$institutions}
-                                    <div class='flex flex-col items-start gap-1.5 mt-0.5'>{$locations}</div>
+                                <div class='mt-1'>
+                                    {$locationCards}
                                 </div>
                             </div>
                         ");
                     }),
 
                 TextColumn::make('jadwal_pelaksanaan')
-                    ->label('JADWAL')
+                    ->label('JADWAL EVENT')
                     ->html()
                     ->getStateUsing(fn (Event $record) => $record->id)
                     ->formatStateUsing(function (Event $record): HtmlString {
@@ -80,19 +110,19 @@ class EventsTable
 
                         $start = $startDate->translatedFormat('d M Y');
                         $end = $endDate->translatedFormat('d M Y');
-                        
+                        $locCount = $record->eventLocations->count();
                         $duration = $startDate->diffInDays($endDate) + 1;
 
                         return new HtmlString("
-                            <div class='flex flex-col py-2 gap-1'>
-                                <div class='text-sm font-bold text-gray-900 dark:text-white leading-tight'>{$start} &mdash; {$end}</div>
-                                <div class='text-[10px] font-black text-primary-600 dark:text-primary-400 tracking-wider uppercase'>{$duration} Hari Range Global</div>
+                            <div class='flex flex-col py-2 gap-1 min-w-[130px]'>
+                                <div class='text-xs font-bold text-gray-900 dark:text-white leading-tight'>{$start} &mdash; {$end}</div>
+                                <div class='text-[10px] font-bold text-indigo-600 dark:text-indigo-400 tracking-wider uppercase'>{$duration} Hari ({$locCount} Tilok)</div>
                             </div>
                         ");
                     }),
 
                 TextColumn::make('total_peserta')
-                    ->label('PESERTA')
+                    ->label('TOTAL PESERTA')
                     ->html()
                     ->getStateUsing(fn(Event $record) => $record->eventLocations->flatMap(fn($l) => $l->eventLocationInstitutions)->sum('participants_count'))
                     ->formatStateUsing(function ($state): HtmlString {
@@ -104,8 +134,8 @@ class EventsTable
                         return new HtmlString("
                             <div class='flex flex-col py-3'>
                                 <div class='flex items-baseline gap-1'>
-                                    <span class='text-xl font-black text-primary-600 dark:text-primary-400 leading-none'>" . number_format($count) . "</span>
-                                    <span class='text-[10px] font-bold text-gray-400 uppercase tracking-widest'>Peserta</span>
+                                    <span class='text-lg font-black text-indigo-600 dark:text-indigo-400 leading-none'>" . number_format($count) . "</span>
+                                    <span class='text-[10px] font-bold text-gray-400 uppercase tracking-widest'>Total</span>
                                 </div>
                             </div>
                         ");
@@ -194,18 +224,6 @@ class EventsTable
                         ");
                     })
                     ->sortable(),
-
-                TextColumn::make('status')
-                    ->label('STATUS')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state): string => strtoupper($state))
-                    ->color(fn (string $state): string => match ($state) {
-                        'draft' => 'gray',
-                        'active' => 'info',
-                        'completed' => 'success',
-                        'cancelled' => 'danger',
-                        default => 'gray',
-                    }),
             ])
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('procurement_category')

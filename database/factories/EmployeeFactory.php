@@ -2,19 +2,14 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Employee;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Employee>
  */
 class EmployeeFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Employee::class;
 
     /**
@@ -24,17 +19,69 @@ class EmployeeFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            'employee_number' => $this->faker->unique()->numerify('198#######200#####'),
-            'name' => $this->faker->name(),
-            'position' => $this->faker->randomElement([
-                'Analis Kepegawaian Ahli Pertama', 
-                'Analis SDM Aparatur', 
-                'Pranata Komputer Ahli Muda',
-                'Auditor Kepegawaian',
-                'Pengelola IT'
+        $role = $this->faker->randomElement(['Koordinator', 'IT', 'Pengawas']);
+
+        $position = match ($role) {
+            'Koordinator' => $this->faker->randomElement([
+                'Kepala Bagian Umum & Kepegawaian',
+                'Analis SDM Aparatur Ahli Madya',
+                'Koordinator Tim Pelaksana CAT',
+                'Pranata Komputer Ahli Madya',
             ]),
-            'status' => json_encode(['active' => true, 'verified' => $this->faker->boolean()]),
+            'IT' => $this->faker->randomElement([
+                'Pranata Komputer Ahli Muda',
+                'Pranata Komputer Ahli Pertama',
+                'Pranata Komputer Terampil',
+                'Pengelola Jaringan & Server',
+                'Staff IT Infrastruktur CAT',
+            ]),
+            'Pengawas' => $this->faker->randomElement([
+                'Analis Kepegawaian Ahli Pertama',
+                'Pengawas Ruang Ujian CAT',
+                'Auditor Kepegawaian',
+                'Pengadministrasi Ujian',
+                'Penyusun Rencana Kegiatan',
+            ]),
+        };
+
+        return [
+            'employee_number' => $this->faker->unique()->numerify('199#######202#####'),
+            'name' => $this->faker->name(),
+            'position' => $position,
+            'status' => [$role],
         ];
+    }
+
+    /**
+     * State specifically for Koordinator.
+     */
+    public function koordinator(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'position' => 'Koordinator Tim Pelaksana CAT',
+            'status' => ['Koordinator'],
+        ]);
+    }
+
+    /**
+     * State specifically for IT.
+     */
+    public function it(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'position' => 'Pranata Komputer Ahli Pertama',
+            'status' => ['IT'],
+        ]);
+    }
+
+    /**
+     * State specifically for Pengawas.
+     */
+    public function pengawas(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'position' => 'Pengawas Ruang Ujian CAT',
+            'status' => ['Pengawas'],
+        ]);
     }
 }

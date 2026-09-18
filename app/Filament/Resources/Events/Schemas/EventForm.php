@@ -632,6 +632,50 @@ class EventForm
                                                         ])
                                                         ->visible(fn (callable $get) => filled($get('location_id')))
                                                         ->columnSpanFull(),
+
+                                                    Section::make('👥 Petugas Titik Lokasi')
+                                                        ->description('Penugasan personil SDM khusus untuk titik lokasi ini.')
+                                                        ->compact()
+                                                        ->schema([
+                                                            Grid::make(3)->schema([
+                                                                Select::make('koordinator_ids')
+                                                                    ->label('👤 Koordinator')
+                                                                    ->multiple()
+                                                                    ->options(fn () => \App\Models\Employee::whereJsonContains('status', 'Koordinator')
+                                                                        ->orderBy('name')
+                                                                        ->get()
+                                                                        ->mapWithKeys(fn ($emp) => [$emp->id => "{$emp->name} ({$emp->position})"])
+                                                                        ->toArray())
+                                                                    ->searchable()
+                                                                    ->preload()
+                                                                    ->placeholder('Pilih Koordinator...'),
+
+                                                                Select::make('it_ids')
+                                                                    ->label('💻 Tim IT')
+                                                                    ->multiple()
+                                                                    ->options(fn () => \App\Models\Employee::whereJsonContains('status', 'IT')
+                                                                        ->orderBy('name')
+                                                                        ->get()
+                                                                        ->mapWithKeys(fn ($emp) => [$emp->id => "{$emp->name} ({$emp->position})"])
+                                                                        ->toArray())
+                                                                    ->searchable()
+                                                                    ->preload()
+                                                                    ->placeholder('Pilih Tim IT...'),
+
+                                                                Select::make('pengawas_ids')
+                                                                    ->label('🛡️ Pengawas')
+                                                                    ->multiple()
+                                                                    ->options(fn () => \App\Models\Employee::whereJsonContains('status', 'Pengawas')
+                                                                        ->orderBy('name')
+                                                                        ->get()
+                                                                        ->mapWithKeys(fn ($emp) => [$emp->id => "{$emp->name} ({$emp->position})"])
+                                                                        ->toArray())
+                                                                    ->searchable()
+                                                                    ->preload()
+                                                                    ->placeholder('Pilih Pengawas...'),
+                                                            ]),
+                                                        ])
+                                                        ->columnSpanFull(),
                                                 ])
                                                 ->columns(1)
                                                 ->addActionLabel('Tambah Lokasi'),
@@ -650,11 +694,27 @@ class EventForm
                                                         ->content(function (callable $get, ?\Illuminate\Database\Eloquent\Model $record) {
                                                             $estimates = self::getLocationEstimates($get, $record);
 
-                                                            $roleCounts = [
-                                                                'Koordinator' => count($get('employee_koordinator') ?? []),
-                                                                'IT' => count($get('employee_it') ?? []),
-                                                                'Pengawas' => count($get('employee_pengawas') ?? []),
+                                                            // Aggregate officer counts from both global fields and per-tilok
+                                                            $eventLocations = $get('eventLocations') ?? [];
+                                                            $roleLocKeyMap = [
+                                                                'Koordinator' => 'koordinator_ids',
+                                                                'IT' => 'it_ids',
+                                                                'Pengawas' => 'pengawas_ids',
                                                             ];
+                                                            $roleGlobalKeyMap = [
+                                                                'Koordinator' => 'employee_koordinator',
+                                                                'IT' => 'employee_it',
+                                                                'Pengawas' => 'employee_pengawas',
+                                                            ];
+
+                                                            $roleCounts = [];
+                                                            foreach (['Koordinator', 'IT', 'Pengawas'] as $role) {
+                                                                $ids = (array) ($get($roleGlobalKeyMap[$role]) ?? []);
+                                                                foreach ($eventLocations as $loc) {
+                                                                    $ids = array_merge($ids, (array) ($loc[$roleLocKeyMap[$role]] ?? []));
+                                                                }
+                                                                $roleCounts[$role] = count(array_unique(array_filter($ids)));
+                                                            }
 
                                                             $roleConfig = [
                                                                 'Koordinator' => [
@@ -892,17 +952,25 @@ class EventForm
                                     \Filament\Forms\Components\Placeholder::make('rev_emp')
                                         ->hiddenLabel()
                                         ->content(function (callable $get) {
-                                            $roleFieldMap = [
-                                                'Koordinator' => ['field' => 'employee_koordinator', 'icon' => '👤', 'color' => '#6366f1', 'bg' => '#eef2ff', 'badgeText' => '#4338ca'],
-                                                'IT' => ['field' => 'employee_it', 'icon' => '💻', 'color' => '#0ea5e9', 'bg' => '#f0f9ff', 'badgeText' => '#0369a1'],
-                                                'Pengawas' => ['field' => 'employee_pengawas', 'icon' => '🛡️', 'color' => '#10b981', 'bg' => '#ecfdf5', 'badgeText' => '#047857'],
+                                            $roleConfig = [
+                                                'Koordinator' => ['locKey' => 'koordinator_ids', 'globalKey' => 'employee_koordinator', 'icon' => '👤', 'color' => '#6366f1', 'bg' => '#eef2ff', 'badgeText' => '#4338ca'],
+                                                'IT' => ['locKey' => 'it_ids', 'globalKey' => 'employee_it', 'icon' => '💻', 'color' => '#0ea5e9', 'bg' => '#f0f9ff', 'badgeText' => '#0369a1'],
+                                                'Pengawas' => ['locKey' => 'pengawas_ids', 'globalKey' => 'employee_pengawas', 'icon' => '🛡️', 'color' => '#10b981', 'bg' => '#ecfdf5', 'badgeText' => '#047857'],
                                             ];
 
+                                            $eventLocations = $get('eventLocations') ?? [];
                                             $allEmpty = true;
                                             $columns = '';
 
-                                            foreach ($roleFieldMap as $roleName => $config) {
-                                                $ids = $get($config['field']) ?? [];
+                                            foreach ($roleConfig as $roleName => $config) {
+                                                // Collect from both per-tilok eventLocations and global field
+                                                $ids = (array) ($get($config['globalKey']) ?? []);
+                                                foreach ($eventLocations as $loc) {
+                                                    $locIds = (array) ($loc[$config['locKey']] ?? []);
+                                                    $ids = array_merge($ids, $locIds);
+                                                }
+                                                $ids = array_values(array_unique(array_filter($ids)));
+
                                                 $employees = !empty($ids) ? \App\Models\Employee::whereIn('id', $ids)->get() : collect();
                                                 $count = $employees->count();
                                                 if ($count > 0) $allEmpty = false;
@@ -993,14 +1061,39 @@ class EventForm
                                                     }
                                                 }
 
+                                                // Build officers summary for this location
+                                                $locKoordIds = $loc['koordinator_ids'] ?? [];
+                                                $locItIds = $loc['it_ids'] ?? [];
+                                                $locPengawasIds = $loc['pengawas_ids'] ?? [];
+
+                                                $officerPills = '';
+                                                if (!empty($locKoordIds)) {
+                                                    $kCount = count($locKoordIds);
+                                                    $officerPills .= "<span style='padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; background: #eef2ff; color: #4338ca;'>👤 {$kCount} Koord</span>";
+                                                }
+                                                if (!empty($locItIds)) {
+                                                    $iCount = count($locItIds);
+                                                    $officerPills .= "<span style='padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; background: #f0f9ff; color: #0369a1;'>💻 {$iCount} IT</span>";
+                                                }
+                                                if (!empty($locPengawasIds)) {
+                                                    $pCount = count($locPengawasIds);
+                                                    $officerPills .= "<span style='padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857;'>🛡️ {$pCount} Pengawas</span>";
+                                                }
+                                                if (empty($officerPills)) {
+                                                    $officerPills = "<span style='font-size: 10px; color: #9ca3af; font-style: italic;'>Belum ada petugas</span>";
+                                                }
+
                                                 $cards .= "
                                                     <div style='flex: 1; min-width: 320px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;'>
                                                         <div style='padding: 14px 16px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;'>
                                                             <div style='min-width: 0;'>
                                                                 <div style='font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'>{$name}</div>
-                                                                <div style='font-size: 11px; font-weight: 500; color: #6b7280; display: flex; align-items: center; gap: 6px;'>
+                                                                <div style='font-size: 11px; font-weight: 500; color: #6b7280; display: flex; align-items: center; gap: 6px; margin-bottom: 6px;'>
                                                                     <svg style='width: 14px; height: 14px;' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'></path></svg>
                                                                     {$start} &mdash; {$end}
+                                                                </div>
+                                                                <div style='display: flex; gap: 6px; flex-wrap: wrap;'>
+                                                                    {$officerPills}
                                                                 </div>
                                                             </div>
                                                             <span style='display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; background: #ecfdf5; color: #047857; letter-spacing: 0.05em; flex-shrink: 0;'>" . number_format($locTotal) . " Peserta</span>
@@ -1260,38 +1353,53 @@ class EventForm
     }
 
     /**
-     * Save the 3 multi-select fields into the eventEmployees relationship.
+     * Save the multi-select fields (both per-tilok from eventLocations repeater and global fields) into the eventEmployees relationship.
      */
     public static function saveEventEmployees(\App\Models\Event $event, array $data): void
     {
-        $roleFieldMap = [
+        $employeeRoles = []; // employee_id => [roles]
+
+        // 1. Process per-tilok officers from eventLocations repeater
+        $eventLocations = $data['eventLocations'] ?? [];
+        foreach ($eventLocations as $loc) {
+            foreach ($loc['koordinator_ids'] ?? [] as $id) {
+                if ($id) $employeeRoles[$id][] = 'Koordinator';
+            }
+            foreach ($loc['it_ids'] ?? [] as $id) {
+                if ($id) $employeeRoles[$id][] = 'IT';
+            }
+            foreach ($loc['pengawas_ids'] ?? [] as $id) {
+                if ($id) $employeeRoles[$id][] = 'Pengawas';
+            }
+        }
+
+        // 2. Process global fields if any are present
+        $globalRoleFieldMap = [
             'Koordinator' => 'employee_koordinator',
             'IT' => 'employee_it',
             'Pengawas' => 'employee_pengawas',
         ];
-
-        // Build a map: employee_id => [roles]
-        $employeeRoles = [];
-        foreach ($roleFieldMap as $roleName => $fieldName) {
+        foreach ($globalRoleFieldMap as $roleName => $fieldName) {
             $ids = $data[$fieldName] ?? [];
             foreach ($ids as $id) {
-                $employeeRoles[$id][] = $roleName;
+                if ($id) $employeeRoles[$id][] = $roleName;
             }
         }
 
-        // Delete existing and re-create
+        // Delete existing and re-create unique
         $event->eventEmployees()->delete();
 
         foreach ($employeeRoles as $employeeId => $roles) {
+            $uniqueRoles = array_values(array_unique(array_filter($roles)));
             $event->eventEmployees()->create([
                 'employee_id' => $employeeId,
-                'role' => $roles,
+                'role' => $uniqueRoles,
             ]);
         }
     }
 
     /**
-     * Load eventEmployees relationship data into the 3 multi-select fields.
+     * Load eventEmployees relationship data into the multi-select fields.
      */
     public static function loadEventEmployees(\App\Models\Event $event): array
     {

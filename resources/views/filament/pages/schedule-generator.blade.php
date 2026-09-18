@@ -36,6 +36,9 @@
         .sg-stat-card.sg-stat-green .sg-stat-val { color: #34d399; }
         .sg-stat-card.sg-stat-green { background: rgba(52, 211, 153, 0.06); border-color: rgba(52, 211, 153, 0.15); }
         .sg-stat-card.sg-stat-green .sg-stat-lbl { color: #6ee7b7; }
+        .sg-stat-card.sg-stat-purple .sg-stat-val { color: #c084fc; }
+        .sg-stat-card.sg-stat-purple { background: rgba(192, 132, 252, 0.06); border-color: rgba(192, 132, 252, 0.15); }
+        .sg-stat-card.sg-stat-purple .sg-stat-lbl { color: #d8b4fe; }
 
         /* Section Cards */
         .sg-card {
@@ -59,9 +62,11 @@
         .sg-card-icon.sg-icon-indigo { background: #eef2ff; color: #4f46e5; }
         .sg-card-icon.sg-icon-emerald { background: #ecfdf5; color: #059669; }
         .sg-card-icon.sg-icon-teal { background: #f0fdfa; color: #0d9488; }
+        .sg-card-icon.sg-icon-purple { background: #faf5ff; color: #9333ea; }
         .dark .sg-card-icon.sg-icon-indigo { background: rgba(79, 70, 229, 0.12); color: #818cf8; }
         .dark .sg-card-icon.sg-icon-emerald { background: rgba(5, 150, 105, 0.12); color: #34d399; }
         .dark .sg-card-icon.sg-icon-teal { background: rgba(13, 148, 136, 0.12); color: #2dd4bf; }
+        .dark .sg-card-icon.sg-icon-purple { background: rgba(147, 51, 234, 0.12); color: #c084fc; }
 
         .sg-card-title { font-size: 0.9375rem; font-weight: 700; color: #0f172a; }
         .sg-card-desc { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
@@ -112,7 +117,7 @@
         .dark .sg-toolbar { border-bottom-color: #1e293b; }
 
         .sg-toolbar-left { display: flex; align-items: center; gap: 12px; }
-        .sg-toolbar-right { display: flex; align-items: center; gap: 8px; }
+        .sg-toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
         .sg-btn {
             display: inline-flex; align-items: center; gap: 6px;
@@ -127,17 +132,34 @@
         .sg-btn-secondary:hover { background: #e2e8f0; }
         .dark .sg-btn-secondary { background: #1e293b; color: #cbd5e1; border-color: #334155; }
         .dark .sg-btn-secondary:hover { background: #334155; }
+        
+        .sg-btn-ga {
+            background: linear-gradient(135deg, #7c3aed, #9333ea); color: #fff;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+        }
+        .sg-btn-ga:hover { box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35); filter: brightness(1.08); }
+
         .sg-btn-primary {
             background: linear-gradient(135deg, #4f46e5, #3b82f6); color: #fff;
             box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
         }
         .sg-btn-primary:hover { box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35); filter: brightness(1.05); }
+        
         .sg-btn-save {
             padding: 10px 24px; font-size: 13px; font-weight: 700; border-radius: 12px;
             background: linear-gradient(135deg, #059669, #0d9488); color: #fff;
             box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
         }
         .sg-btn-save:hover { box-shadow: 0 4px 16px rgba(5, 150, 105, 0.35); filter: brightness(1.05); }
+
+        /* GA Banner */
+        .sg-ga-banner {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 10px 16px; border-radius: 10px; margin-bottom: 1.25rem;
+            background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(147, 51, 234, 0.25);
+            font-size: 12px; color: #6b21a8;
+        }
+        .dark .sg-ga-banner { background: rgba(147, 51, 234, 0.15); color: #d8b4fe; border-color: rgba(192, 132, 252, 0.3); }
 
         /* Spreadsheet Table */
         .sg-table-wrap {
@@ -214,6 +236,16 @@
         .dark .sg-btn-delete:hover { background: rgba(239,68,68,0.1); color: #f87171; }
         .sg-btn-delete svg { width: 16px; height: 16px; }
 
+        /* Badge Rekomendasi GA */
+        .sg-rec-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 6px;
+            background: rgba(147, 51, 234, 0.12); color: #7c3aed;
+            border: 1px solid rgba(147, 51, 234, 0.25);
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .dark .sg-rec-badge { background: rgba(192, 132, 252, 0.15); color: #c084fc; border-color: rgba(192, 132, 252, 0.3); }
+
         /* Results Section */
         .sg-result-block {
             padding: 1.25rem; border-radius: 12px;
@@ -252,6 +284,18 @@
         .dark .sg-meta-pill strong { color: #f1f5f9; }
         .sg-meta-pill strong.sg-green { color: #059669; }
         .dark .sg-meta-pill strong.sg-green { color: #34d399; }
+
+        /* Role Pill in Results */
+        .sg-role-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+        }
+        .sg-role-k { background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; }
+        .sg-role-it { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .sg-role-p { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+        .dark .sg-role-k { background: rgba(99,102,241,0.15); color: #a5b4fc; border-color: rgba(129,140,248,0.3); }
+        .dark .sg-role-it { background: rgba(5,150,105,0.15); color: #6ee7b7; border-color: rgba(52,211,153,0.3); }
+        .dark .sg-role-p { background: rgba(234,88,12,0.15); color: #fdba74; border-color: rgba(251,146,60,0.3); }
 
         /* Matrix Result Table */
         .sg-matrix-table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -315,10 +359,10 @@
                 <div>
                     <div class="sg-hero-badge">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        Modul Matrix Penjadwalan Massal
+                        Modul Matrix Penjadwalan Massal + Algoritma Genetika
                     </div>
                     <h1>Spreadsheet Penjadwalan Event Ujian</h1>
-                    <p>Input instansi, titik lokasi (tilok), dan kuota peserta secara masif. Sistem akan mengkalkulasi alokasi hari, tanggal, dan distribusi peserta per sesi secara otomatis.</p>
+                    <p>Input instansi, titik lokasi (tilok), kapasitas PC, dan ruangan ujian. Sistem mengoptimalkan alokasi petugas (Koordinator 1:1 Tilok, Tim IT 1:50 PC, Pengawas 1:25 PC / Ruangan) menggunakan <strong>Algoritma Genetika</strong> agar bebas bentrokan jadwal.</p>
                 </div>
 
                 <div class="sg-hero-stats">
@@ -326,6 +370,12 @@
                         <span class="sg-stat-val">{{ count($items) }}</span>
                         <span class="sg-stat-lbl">Baris Input</span>
                     </div>
+                    @if($isGaApplied)
+                        <div class="sg-stat-card sg-stat-purple">
+                            <span class="sg-stat-val">🧬 GA</span>
+                            <span class="sg-stat-lbl">Rekomendasi</span>
+                        </div>
+                    @endif
                     @if($isGenerated)
                         <div class="sg-stat-card sg-stat-green">
                             <span class="sg-stat-val">{{ count($generatedResults) }}</span>
@@ -382,7 +432,7 @@
                     </div>
                     <div>
                         <div class="sg-card-title">2. Spreadsheet Entry (Instansi & Tilok)</div>
-                        <div class="sg-card-desc">Masukkan kombinasi instansi, titik lokasi, kuota peserta, dan kapasitas ruangan.</div>
+                        <div class="sg-card-desc">Masukkan kombinasi instansi, titik lokasi, kuota peserta, dan kapasitas ruangan. Gunakan GA untuk optimasi penugasan petugas.</div>
                     </div>
                 </div>
 
@@ -391,35 +441,44 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Tambah Baris
                     </button>
+
                     <button type="button" wire:click="generateSchedules" wire:loading.attr="disabled" class="sg-btn sg-btn-primary">
                         <span wire:loading.remove wire:target="generateSchedules" style="display: inline-flex; align-items: center; gap: 6px;">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            Generate Penjadwalan
+                            Generate Jadwal & Petugas (GA)
                         </span>
                         <span wire:loading wire:target="generateSchedules" style="display: inline-flex; align-items: center; gap: 6px;">
                             <svg class="sg-spinner" fill="none" viewBox="0 0 24 24"><circle style="opacity:0.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path style="opacity:0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            Mengkalkulasi...
+                            Mengkalkulasi & Optimasi GA...
                         </span>
                     </button>
                 </div>
             </div>
+
+            @if($isGaApplied)
+                <div class="sg-ga-banner">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 16px;">🧬</span>
+                        <div>
+                            <strong>Algoritma Genetika Diterapkan Otomatis!</strong> Petugas telah dialokasikan sesuai rasio kapasitas (Koordinator 1:1 Tilok, IT 1:50 PC, Pengawas 1:25 PC / Ruangan) bebas bentrokan. Anda dapat menyesuaikan manual pada kartu hasil di bawah.
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <div class="sg-table-wrap">
                 <table class="sg-table">
                     <thead>
                         <tr>
                             <th style="text-align:center; width: 40px;">#</th>
-                            <th style="min-width: 170px;">Instansi <span style="color:#ef4444;">*</span></th>
-                            <th style="min-width: 170px;">Titik Lokasi (Tilok) <span style="color:#ef4444;">*</span></th>
-                            <th style="min-width: 160px;">Koordinator <span style="color:#ef4444;">*</span></th>
-                            <th style="min-width: 160px;">Tim IT <span style="color:#ef4444;">*</span></th>
-                            <th style="min-width: 160px;">Pengawas <span style="color:#ef4444;">*</span></th>
-                            <th style="text-align:center; min-width: 85px; width: 85px;">PC</th>
-                            <th style="text-align:center; min-width: 100px; width: 100px;">Peserta <span style="color:#ef4444;">*</span></th>
-                            <th style="text-align:center; min-width: 135px; width: 135px;">Tgl Mulai <span style="color:#ef4444;">*</span></th>
-                            <th style="text-align:center; min-width: 100px; width: 100px;">Sesi</th>
-                            <th style="text-align:center; width: 65px;">H-1</th>
-                            <th style="text-align:center; width: 44px;">Hapus</th>
+                            <th style="min-width: 200px;">Instansi <span style="color:#ef4444;">*</span></th>
+                            <th style="min-width: 200px;">Titik Lokasi (Tilok) <span style="color:#ef4444;">*</span></th>
+                            <th style="text-align:center; min-width: 90px; width: 90px;">Kapasitas PC</th>
+                            <th style="text-align:center; min-width: 110px; width: 110px;">Peserta <span style="color:#ef4444;">*</span></th>
+                            <th style="text-align:center; min-width: 140px; width: 140px;">Tgl Mulai <span style="color:#ef4444;">*</span></th>
+                            <th style="text-align:center; min-width: 110px; width: 110px;">Pengaturan Sesi</th>
+                            <th style="text-align:center; width: 75px;">H-1 Buka</th>
+                            <th style="text-align:center; width: 50px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -448,44 +507,11 @@
                                         <div class="sg-error">{{ $message }}</div>
                                     @enderror
                                 </td>
-                                <td class="sg-cell-select">
-                                    <select wire:model.live="items.{{ $index }}.koordinator_id">
-                                        <option value="">-- Pilih Koordinator --</option>
-                                        @foreach($employeesOptions as $id => $name)
-                                            <option value="{{ $id }}">{{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error("items.{$index}.koordinator_id")
-                                        <div class="sg-error">{{ $message }}</div>
-                                    @enderror
-                                </td>
-                                <td class="sg-cell-select">
-                                    <select wire:model.live="items.{{ $index }}.it_id">
-                                        <option value="">-- Pilih Tim IT --</option>
-                                        @foreach($employeesOptions as $id => $name)
-                                            <option value="{{ $id }}">{{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error("items.{$index}.it_id")
-                                        <div class="sg-error">{{ $message }}</div>
-                                    @enderror
-                                </td>
-                                <td class="sg-cell-select">
-                                    <select wire:model.live="items.{{ $index }}.pengawas_id">
-                                        <option value="">-- Pilih Pengawas --</option>
-                                        @foreach($employeesOptions as $id => $name)
-                                            <option value="{{ $id }}">{{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error("items.{$index}.pengawas_id")
-                                        <div class="sg-error">{{ $message }}</div>
-                                    @enderror
-                                </td>
                                 <td class="sg-cell-input">
-                                    <input type="number" wire:model.live="items.{{ $index }}.pc_capacity" min="1" />
+                                    <input type="number" wire:model.live="items.{{ $index }}.pc_capacity" min="1" placeholder="PC" />
                                 </td>
                                 <td class="sg-cell-input sg-highlight">
-                                    <input type="number" wire:model.live="items.{{ $index }}.participants_count" min="1" />
+                                    <input type="number" wire:model.live="items.{{ $index }}.participants_count" min="1" placeholder="Peserta" />
                                 </td>
                                 <td class="sg-cell-input">
                                     <input type="date" wire:model.live="items.{{ $index }}.start_date" style="font-weight: 500;" />
@@ -501,7 +527,7 @@
                                     <input type="checkbox" wire:model.live="items.{{ $index }}.has_opening_day" />
                                 </td>
                                 <td class="sg-cell-action">
-                                    <button type="button" wire:click="removeRow({{ $index }})" class="sg-btn-delete">
+                                    <button type="button" wire:click="removeRow({{ $index }})" class="sg-btn-delete" title="Hapus Baris">
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 </td>
@@ -521,36 +547,54 @@
                     </div>
                     <div>
                         <div class="sg-card-title">3. Matriks Penjadwalan per Hari & Sesi</div>
-                        <div class="sg-card-desc">Sel kuota per sesi di bawah ini dapat disesuaikan (inline edit) secara langsung jika ada kondisi khusus.</div>
+                        <div class="sg-card-desc">Petugas telah di-assign otomatis. Anda dapat menyesuaikan kuota sesi atau mengubah petugas secara manual jika diperlukan.</div>
                     </div>
                 </div>
 
                 @foreach($generatedResults as $rIndex => $res)
-                    @php $calc = $res['calculation']; @endphp
+                    @php 
+                        $calc = $res['calculation']; 
+                        $rowItemIdx = $res['index'] ?? $rIndex;
+                    @endphp
                     <div class="sg-result-block">
                         <div class="sg-result-header">
                             <div>
-                                <span class="sg-result-tag">Instansi & Tilok #{{ $rIndex + 1 }}</span>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="sg-result-tag">Instansi & Tilok #{{ $rIndex + 1 }}</span>
+                                    @if(!empty($res['is_ga_recommendation']))
+                                        <span class="sg-rec-badge">🧬 Rekomendasi GA</span>
+                                    @else
+                                        <span class="sg-rec-badge" style="background: rgba(16, 185, 129, 0.12); color: #059669; border-color: rgba(16, 185, 129, 0.25);">✏️ Manual</span>
+                                    @endif
+                                </div>
                                 <div class="sg-result-title">{{ $res['institution_name'] }}</div>
                                 <div class="sg-result-subtitle">
                                     Lokasi Ujian: <strong>{{ $res['location_name'] }}</strong>
                                 </div>
-                                <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">
-                                    @if(!empty($res['koordinator_name']))
-                                        <span class="sg-meta-pill" style="border-color: #cbd5e1; background: #f8fafc; color: #1e293b;">
-                                            👔 Koordinator: <strong>{{ $res['koordinator_name'] }}</strong>
+                                <div style="margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+                                    @if(!empty($res['koordinator_names']))
+                                        <span class="sg-role-pill sg-role-k">
+                                            👔 Koordinator: <strong>{{ $res['koordinator_names'] }}</strong>
                                         </span>
                                     @endif
-                                    @if(!empty($res['it_name']))
-                                        <span class="sg-meta-pill" style="border-color: #cbd5e1; background: #f8fafc; color: #1e293b;">
-                                            💻 Tim IT: <strong>{{ $res['it_name'] }}</strong>
+                                    @if(!empty($res['it_names']))
+                                        <span class="sg-role-pill sg-role-it">
+                                            💻 Tim IT: <strong>{{ $res['it_names'] }}</strong>
                                         </span>
                                     @endif
-                                    @if(!empty($res['pengawas_name']))
-                                        <span class="sg-meta-pill" style="border-color: #cbd5e1; background: #f8fafc; color: #1e293b;">
-                                            📋 Pengawas: <strong>{{ $res['pengawas_name'] }}</strong>
+                                    @if(!empty($res['pengawas_names']))
+                                        <span class="sg-role-pill sg-role-p">
+                                            👁️ Pengawas: <strong>{{ $res['pengawas_names'] }}</strong>
                                         </span>
                                     @endif
+
+                                    {{-- Tombol Edit Petugas Manual Setelah Generate --}}
+                                    <button type="button" wire:click="openOfficerModal({{ $rowItemIdx }})"
+                                            style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; background: #ffffff; border: 1px solid #c7d2fe; color: #4338ca; box-shadow: 0 1px 2px rgba(0,0,0,0.05);"
+                                            class="dark:bg-slate-800 dark:border-slate-700 dark:text-indigo-400">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 13px; height: 13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        Edit Petugas
+                                    </button>
                                 </div>
                             </div>
 
@@ -621,6 +665,169 @@
                             Menyimpan...
                         </span>
                     </button>
+                </div>
+            </div>
+        @endif
+
+        {{-- Modal Petugas Tilok (3 Role Sections + Requirements) --}}
+        @if($showOfficerModal)
+            <div style="position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); padding: 1rem;">
+                <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 580px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;" class="dark:bg-slate-900 dark:border-slate-800">
+                    
+                    {{-- Modal Header --}}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; background: #f8fafc; flex-shrink: 0;" class="dark:bg-slate-800/50 dark:border-slate-800">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; border-radius: 10px; background: #eef2ff; color: #4f46e5; display: flex; align-items: center; justify-content: center;">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0;" class="dark:text-slate-100">Atur Petugas Tilok</h3>
+                                <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;" class="dark:text-slate-400">
+                                    Baris #{{ ($activeOfficerModalIndex ?? 0) + 1 }}
+                                    @if(isset($items[$activeOfficerModalIndex]['institution_id']) && isset($institutionsOptions[$items[$activeOfficerModalIndex]['institution_id']]))
+                                        - {{ $institutionsOptions[$items[$activeOfficerModalIndex]['institution_id']] }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" wire:click="closeOfficerModal" style="background: transparent; border: none; color: #94a3b8; cursor: pointer; padding: 4px; border-radius: 6px;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- Modal Body --}}
+                    <div style="padding: 1.25rem 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.25rem;">
+                        
+                        {{-- Requirements Summary Badge --}}
+                        @if(!empty($modalRequirements))
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 12px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;" class="dark:bg-slate-800 dark:border-slate-700">
+                                <span style="font-size: 11px; font-weight: 700; color: #64748b; width: 100%;" class="dark:text-slate-400">
+                                    📋 Standar Kebutuhan Petugas (Kapasitas: {{ number_format($items[$activeOfficerModalIndex]['pc_capacity'] ?? 0) }} PC | {{ $items[$activeOfficerModalIndex]['room_count'] ?? 1 }} Ruangan):
+                                </span>
+                                <span class="sg-role-pill sg-role-k">
+                                    👔 Koordinator: <strong>{{ $modalRequirements['koordinator'] ?? 1 }} orang</strong>
+                                </span>
+                                <span class="sg-role-pill sg-role-it">
+                                    💻 Tim IT (1:50 PC): <strong>{{ $modalRequirements['it'] ?? 1 }} orang</strong>
+                                </span>
+                                <span class="sg-role-pill sg-role-p">
+                                    👁️ Pengawas (1:25 PC / Ruangan): <strong>{{ $modalRequirements['pengawas'] ?? 1 }} orang</strong>
+                                </span>
+                            </div>
+                        @endif
+
+                        <p style="font-size: 11px; color: #64748b; margin: 0; padding: 6px 10px; background: #f1f5f9; border-radius: 6px;" class="dark:bg-slate-800 dark:text-slate-400">
+                            💡 <em>Petunjuk: Tahan tombol <strong>Ctrl</strong> (atau <strong>Cmd</strong> di Mac) untuk memilih lebih dari 1 pegawai. Anda juga dapat memilih pegawai di luar filter jika diperlukan.</em>
+                        </p>
+
+                        {{-- Section 1: Koordinator --}}
+                        <div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                <label style="font-size: 12px; font-weight: 700; color: #3730a3;" class="dark:text-indigo-400">
+                                    👔 Koordinator Tilok <span style="color:#ef4444;">*</span> (Standar: 1 orang per tilok)
+                                </label>
+                                <span style="font-size: 11px; font-weight: 600; color: #6366f1;">
+                                    Terpilih: {{ count($modalKoordinatorIds) }}
+                                </span>
+                            </div>
+                            <select wire:model.live="modalKoordinatorIds" multiple size="4" style="width: 100%; font-size: 12px; padding: 6px 8px; border-radius: 8px; border: 1px solid #c7d2fe; background: #fff; color: #0f172a; outline: none;" class="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
+                                @if(!empty($koordinatorOptions))
+                                    <optgroup label="-- Pegawai dengan Status Koordinator --">
+                                        @foreach($koordinatorOptions as $id => $name)
+                                            <option value="{{ $id }}">{{ $name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                    <optgroup label="-- Semua Pegawai --">
+                                        @foreach($employeesOptions as $id => $name)
+                                            @if(!isset($koordinatorOptions[$id]))
+                                                <option value="{{ $id }}">{{ $name }}</option>
+                                            @endif
+                                        @endforeach
+                                    </optgroup>
+                                @else
+                                    @foreach($employeesOptions as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+
+                        {{-- Section 2: Tim IT --}}
+                        <div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                <label style="font-size: 12px; font-weight: 700; color: #065f46;" class="dark:text-emerald-400">
+                                    💻 Tim IT <span style="color:#ef4444;">*</span> (Standar: {{ $modalRequirements['it'] ?? 1 }} orang [1:50 PC])
+                                </label>
+                                <span style="font-size: 11px; font-weight: 600; color: #059669;">
+                                    Terpilih: {{ count($modalItIds) }}
+                                </span>
+                            </div>
+                            <select wire:model.live="modalItIds" multiple size="4" style="width: 100%; font-size: 12px; padding: 6px 8px; border-radius: 8px; border: 1px solid #a7f3d0; background: #fff; color: #0f172a; outline: none;" class="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
+                                @if(!empty($itOptions))
+                                    <optgroup label="-- Pegawai dengan Status IT --">
+                                        @foreach($itOptions as $id => $name)
+                                            <option value="{{ $id }}">{{ $name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                    <optgroup label="-- Semua Pegawai --">
+                                        @foreach($employeesOptions as $id => $name)
+                                            @if(!isset($itOptions[$id]))
+                                                <option value="{{ $id }}">{{ $name }}</option>
+                                            @endif
+                                        @endforeach
+                                    </optgroup>
+                                @else
+                                    @foreach($employeesOptions as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+
+                        {{-- Section 3: Pengawas --}}
+                        <div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                <label style="font-size: 12px; font-weight: 700; color: #9a3412;" class="dark:text-orange-400">
+                                    👁️ Pengawas <span style="color:#ef4444;">*</span> (Standar: {{ $modalRequirements['pengawas'] ?? 1 }} orang [1:25 PC / Ruangan])
+                                </label>
+                                <span style="font-size: 11px; font-weight: 600; color: #ea580c;">
+                                    Terpilih: {{ count($modalPengawasIds) }}
+                                </span>
+                            </div>
+                            <select wire:model.live="modalPengawasIds" multiple size="4" style="width: 100%; font-size: 12px; padding: 6px 8px; border-radius: 8px; border: 1px solid #fed7aa; background: #fff; color: #0f172a; outline: none;" class="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100">
+                                @if(!empty($pengawasOptions))
+                                    <optgroup label="-- Pegawai dengan Status Pengawas --">
+                                        @foreach($pengawasOptions as $id => $name)
+                                            <option value="{{ $id }}">{{ $name }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                    <optgroup label="-- Semua Pegawai --">
+                                        @foreach($employeesOptions as $id => $name)
+                                            @if(!isset($pengawasOptions[$id]))
+                                                <option value="{{ $id }}">{{ $name }}</option>
+                                            @endif
+                                        @endforeach
+                                    </optgroup>
+                                @else
+                                    @foreach($employeesOptions as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+
+                    </div>
+
+                    {{-- Modal Footer --}}
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #f1f5f9; flex-shrink: 0;" class="dark:bg-slate-800/50 dark:border-slate-800">
+                        <button type="button" wire:click="closeOfficerModal" class="sg-btn sg-btn-secondary" style="padding: 6px 14px; font-size: 12px;">
+                            Batal
+                        </button>
+                        <button type="button" wire:click="saveOfficerModal" class="sg-btn sg-btn-primary" style="padding: 6px 16px; font-size: 12px;">
+                            Simpan Petugas
+                        </button>
+                    </div>
+
                 </div>
             </div>
         @endif

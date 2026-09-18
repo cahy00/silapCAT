@@ -40,6 +40,7 @@ class EditEvent extends EditRecord
             'employee_koordinator' => $data['employee_koordinator'] ?? [],
             'employee_it' => $data['employee_it'] ?? [],
             'employee_pengawas' => $data['employee_pengawas'] ?? [],
+            'eventLocations' => $data['eventLocations'] ?? [],
         ];
         
         unset($data['employee_koordinator'], $data['employee_it'], $data['employee_pengawas']);

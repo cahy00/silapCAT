@@ -46,14 +46,18 @@ class ScheduleService
             while ($remainingParticipants > 0) {
                 $dateString = $currentDate->format('Y-m-d');
 
-                if (in_array($dateString, $holidayDates)) {
+                // Skip Sunday (tidak ada pelaksanaan) or holidays
+                if ($currentDate->isSunday() || in_array($dateString, $holidayDates)) {
                     $currentDate->addDay();
                     continue;
                 }
 
+                // Hari Jumat maksimal 3 sesi
+                $actualSessionsToday = $currentDate->isFriday() ? min(3, $sessionsCount) : $sessionsCount;
+
                 if (!isset($locationUsage[$dateString])) {
                     $locationUsage[$dateString] = [];
-                    for ($s = 1; $s <= $sessionsCount; $s++) {
+                    for ($s = 1; $s <= $actualSessionsToday; $s++) {
                         $locationUsage[$dateString]["session_$s"] = 0;
                     }
                 }
@@ -61,7 +65,7 @@ class ScheduleService
                 $sessionDistribution = [];
                 $dayTotal = 0;
 
-                for ($s = 1; $s <= $sessionsCount; $s++) {
+                for ($s = 1; $s <= $actualSessionsToday; $s++) {
                     $sessionKey = "session_$s";
                     $alreadyUsed = $locationUsage[$dateString][$sessionKey] ?? 0;
                     $availableSpace = max(0, $pcCapacity - $alreadyUsed);
@@ -127,17 +131,12 @@ class ScheduleService
         $hasOpeningDay = !empty($data['has_opening_day']);
         $holidayDates = array_filter($data['holiday_dates'] ?? []);
 
-        $dailyCapacity = $pcCapacity * $sessionsCount;
-        $totalExamDays = $dailyCapacity > 0 ? (int) ceil($totalParticipants / $dailyCapacity) : 1;
-        if ($totalExamDays < 1) {
-            $totalExamDays = 1;
-        }
-
         $startDateStr = $data['start_date'] ?? now()->format('Y-m-d');
         $currentDate = Carbon::parse($startDateStr);
 
         $examDaysList = [];
-        $daysAdded = 0;
+        $currentDayNumber = 1;
+        $remainingParticipants = $totalParticipants;
 
         // If opening day is enabled, day 0 is opening day
         if ($hasOpeningDay) {
@@ -147,40 +146,47 @@ class ScheduleService
             $openingDate = null;
         }
 
-        while ($daysAdded < $totalExamDays) {
+        while ($remainingParticipants > 0) {
             $dateString = $currentDate->format('Y-m-d');
-            if (in_array($dateString, $holidayDates)) {
+
+            // Skip Sunday (tidak ada pelaksanaan) or holidays
+            if ($currentDate->isSunday() || in_array($dateString, $holidayDates)) {
                 $currentDate->addDay();
                 continue;
             }
 
-            // Calculate participants for this day
-            $remainingParticipants = $totalParticipants - array_sum(array_column($examDaysList, 'day_total'));
-            $dayTotal = min($remainingParticipants, $dailyCapacity);
+            // Hari Jumat maksimal 3 sesi
+            $actualSessionsToday = $currentDate->isFriday() ? min(3, $sessionsCount) : $sessionsCount;
+            $dayCapacity = $pcCapacity * $actualSessionsToday;
+            $dayTotal = min($remainingParticipants, $dayCapacity);
 
             // Calculate per session
             $sessionDistribution = [];
             $remainingForDay = $dayTotal;
-            for ($s = 1; $s <= $sessionsCount; $s++) {
+            for ($s = 1; $s <= $actualSessionsToday; $s++) {
                 $sessionQuota = min($remainingForDay, $pcCapacity);
                 $sessionDistribution["session_$s"] = $sessionQuota;
                 $remainingForDay -= $sessionQuota;
             }
 
             $examDaysList[] = [
-                'day_number' => $daysAdded + 1,
+                'day_number' => $currentDayNumber,
                 'date' => $dateString,
                 'day_total' => $dayTotal,
                 'sessions' => $sessionDistribution,
             ];
 
-            $daysAdded++;
-            if ($daysAdded < $totalExamDays) {
+            $remainingParticipants -= $dayTotal;
+            $currentDayNumber++;
+
+            if ($remainingParticipants > 0) {
                 $currentDate->addDay();
             }
         }
 
         $endDateStr = $currentDate->format('Y-m-d');
+        $totalExamDays = count($examDaysList);
+        $dailyCapacity = $pcCapacity * $sessionsCount;
 
         return [
             'pc_capacity' => $pcCapacity,
@@ -198,42 +204,14 @@ class ScheduleService
 
     /**
      * Store scheduling items into primary Event, EventLocation, and EventLocationInstitution tables.
+     * Groups by location_id and creates 1 dedicated Event per 1 Titik Lokasi.
+     *
+     * @return Event[] Array of created Event models
      */
-    public function saveEventWithSchedules(array $eventData, array $itemsData): Event
+    public function saveEventWithSchedules(array $eventData, array $itemsData): array
     {
         return \Illuminate\Support\Facades\DB::transaction(function () use ($eventData, $itemsData) {
-            // 1. Determine global min start_date and max end_date across all items
-            $minStartDate = null;
-            $maxEndDate = null;
-
-            foreach ($itemsData as $item) {
-                $itemStartDate = $item['start_date'] ?? null;
-                $itemEndDate = $item['end_date'] ?? $itemStartDate;
-
-                if ($itemStartDate) {
-                    if (!$minStartDate || $itemStartDate < $minStartDate) {
-                        $minStartDate = $itemStartDate;
-                    }
-                }
-                if ($itemEndDate) {
-                    if (!$maxEndDate || $itemEndDate > $maxEndDate) {
-                        $maxEndDate = $itemEndDate;
-                    }
-                }
-            }
-
-            // Create or Update Event
-            $event = Event::create([
-                'name' => $eventData['name'],
-                'formation_year' => $eventData['formation_year'] ?? date('Y'),
-                'description' => $eventData['description'] ?? null,
-                'procurement_type_id' => $eventData['procurement_type_id'] ?? null,
-                'status' => $eventData['status'] ?? 'draft',
-                'start_date' => $minStartDate,
-                'end_date' => $maxEndDate,
-            ]);
-
-            // 2. Group items by location_id
+            // 1. Group items by location_id
             $locationsGrouped = [];
             foreach ($itemsData as $item) {
                 $locationId = $item['location_id'];
@@ -258,17 +236,46 @@ class ScheduleService
                     $locationsGrouped[$locationId]['end_date'] = $item['end_date'];
                 }
 
+                $officerIds = $item['officer_ids'] ?? array_merge(
+                    (array) ($item['koordinator_ids'] ?? ($item['koordinator_id'] ? [$item['koordinator_id']] : [])),
+                    (array) ($item['it_ids'] ?? ($item['it_id'] ? [$item['it_id']] : [])),
+                    (array) ($item['pengawas_ids'] ?? ($item['pengawas_id'] ? [$item['pengawas_id']] : []))
+                );
+
                 $locationsGrouped[$locationId]['institutions'][] = [
                     'institution_id' => $item['institution_id'],
-                    'koordinator_id' => $item['koordinator_id'] ?? null,
-                    'it_id' => $item['it_id'] ?? null,
-                    'pengawas_id' => $item['pengawas_id'] ?? null,
+                    'officer_ids' => array_values(array_filter((array) $officerIds)),
+                    'koordinator_ids' => array_values(array_filter((array) ($item['koordinator_ids'] ?? ($item['koordinator_id'] ? [$item['koordinator_id']] : [])))),
+                    'it_ids' => array_values(array_filter((array) ($item['it_ids'] ?? ($item['it_id'] ? [$item['it_id']] : [])))),
+                    'pengawas_ids' => array_values(array_filter((array) ($item['pengawas_ids'] ?? ($item['pengawas_id'] ? [$item['pengawas_id']] : [])))),
                     'participants_count' => (int) ($item['participants_count'] ?? 0),
                 ];
             }
 
-            // Create EventLocations & EventLocationInstitutions
+            $createdEvents = [];
+            $totalLocationsCount = count($locationsGrouped);
+
+            // 2. Create 1 Event per 1 Tilok
             foreach ($locationsGrouped as $locData) {
+                $location = Location::find($locData['location_id']);
+                $locationName = $location?->name ?? 'Tilok #' . $locData['location_id'];
+
+                // Append location name if there are multiple locations or to keep names clear and distinct
+                $eventName = $totalLocationsCount > 1 
+                    ? "{$eventData['name']} - {$locationName}"
+                    : $eventData['name'];
+
+                $event = Event::create([
+                    'name' => $eventName,
+                    'formation_year' => $eventData['formation_year'] ?? date('Y'),
+                    'description' => $eventData['description'] ?? null,
+                    'procurement_type_id' => $eventData['procurement_type_id'] ?? null,
+                    'status' => $eventData['status'] ?? 'draft',
+                    'start_date' => $locData['start_date'],
+                    'end_date' => $locData['end_date'],
+                ]);
+
+                // Create EventLocation
                 $eventLocation = EventLocation::create([
                     'event_id' => $event->id,
                     'location_id' => $locData['location_id'],
@@ -280,6 +287,8 @@ class ScheduleService
                     'holiday_dates' => $locData['holiday_dates'],
                 ]);
 
+                $officersWithRoles = []; // employee_id => [roles]
+
                 foreach ($locData['institutions'] as $instData) {
                     EventLocationInstitution::create([
                         'event_location_id' => $eventLocation->id,
@@ -287,43 +296,38 @@ class ScheduleService
                         'participants_count' => $instData['participants_count'],
                     ]);
 
-                    // Also maintain relation in event_institutions if needed
+                    // Maintain relation in event_institutions
                     \App\Models\EventInstitution::firstOrCreate([
                         'event_id' => $event->id,
                         'institution_id' => $instData['institution_id'],
                     ]);
 
-                    $roleEmpMap = [
-                        'Koordinator' => $instData['koordinator_id'] ?? null,
-                        'IT' => $instData['it_id'] ?? null,
-                        'Pengawas' => $instData['pengawas_id'] ?? null,
-                    ];
-
-                    foreach ($roleEmpMap as $roleName => $empId) {
-                        if ($empId) {
-                            $existing = \App\Models\EventEmployee::where('event_id', $event->id)
-                                ->where('employee_id', $empId)
-                                ->first();
-
-                            if ($existing) {
-                                $currentRoles = is_array($existing->role) ? $existing->role : [];
-                                if (!in_array($roleName, $currentRoles)) {
-                                    $currentRoles[] = $roleName;
-                                    $existing->update(['role' => $currentRoles]);
-                                }
-                            } else {
-                                \App\Models\EventEmployee::create([
-                                    'event_id' => $event->id,
-                                    'employee_id' => $empId,
-                                    'role' => [$roleName],
-                                ]);
-                            }
-                        }
+                    // Collect role-specific assignments
+                    foreach ($instData['koordinator_ids'] ?? [] as $empId) {
+                        if ($empId) $officersWithRoles[$empId][] = 'Koordinator';
+                    }
+                    foreach ($instData['it_ids'] ?? [] as $empId) {
+                        if ($empId) $officersWithRoles[$empId][] = 'IT';
+                    }
+                    foreach ($instData['pengawas_ids'] ?? [] as $empId) {
+                        if ($empId) $officersWithRoles[$empId][] = 'Pengawas';
                     }
                 }
+
+                // Save employees with their roles to event_employees
+                foreach ($officersWithRoles as $empId => $roles) {
+                    $uniqueRoles = array_values(array_unique(array_filter($roles)));
+                    \App\Models\EventEmployee::create([
+                        'event_id' => $event->id,
+                        'employee_id' => $empId,
+                        'role' => $uniqueRoles,
+                    ]);
+                }
+
+                $createdEvents[] = $event;
             }
 
-            return $event;
+            return $createdEvents;
         });
     }
 }
