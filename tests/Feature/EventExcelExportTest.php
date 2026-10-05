@@ -15,6 +15,27 @@ test('authenticated user can download all events excel matrix', function () {
         'status' => 'draft',
     ]);
 
+    $institution = \App\Models\Institution::create([
+        'name' => 'Kementerian Keuangan RI',
+        'code' => 'KEMENKEU',
+    ]);
+
+    $location = \App\Models\Location::create([
+        'name' => 'BKN Pusat',
+        'address' => 'Jl. Mayjen Sutoyo No. 12',
+    ]);
+
+    $eventLocation = $event->eventLocations()->create([
+        'location_id' => $location->id,
+        'start_date' => '2026-05-01',
+        'end_date' => '2026-05-03',
+    ]);
+
+    $eventLocation->eventLocationInstitutions()->create([
+        'institution_id' => $institution->id,
+        'participants_count' => 150,
+    ]);
+
     $response = $this->actingAs($user)->get(route('events.all-excel'));
 
     $response->assertStatus(200);

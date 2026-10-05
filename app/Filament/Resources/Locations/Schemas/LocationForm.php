@@ -146,6 +146,7 @@ class LocationForm
                                                     ->helperText('Upload Berita Acara atau laporan survey dalam format PDF.')
                                                     ->directory('survey-documents')
                                                     ->preserveFilenames()
+                                                    ->maxSize(15360)
                                                     ->openable()
                                                     ->downloadable(),
                                                 FileUpload::make('photos')
@@ -153,6 +154,7 @@ class LocationForm
                                                     ->helperText('Upload foto-foto kondisi ruangan, PC, dan fasilitas lainnya.')
                                                     ->directory('survey-photos')
                                                     ->multiple()
+                                                    ->maxSize(15360)
                                                     ->image()
                                                     ->imageEditor()
                                                     ->reorderable()

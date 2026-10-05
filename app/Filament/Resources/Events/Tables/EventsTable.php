@@ -36,6 +36,7 @@ class EventsTable
                         // Generate structured cards for each Titik Lokasi
                         $locationCards = '';
                         $locations = $record->eventLocations;
+                        $grandTotalParticipants = 0;
 
                         if ($locations->isEmpty()) {
                             $locationCards = "<div class='text-xs italic text-gray-400 py-1'>Belum ada titik lokasi yang ditambahkan.</div>";
@@ -62,6 +63,7 @@ class EventsTable
                                         </div>";
                                 }
 
+                                $grandTotalParticipants += $locParticipants;
                                 $totalLocFormatted = number_format($locParticipants);
 
                                 $locationCards .= "
@@ -84,6 +86,19 @@ class EventsTable
                                 {$procurementTypeName}
                             </span>" : "";
 
+                        // Total Peserta badge
+                        $totalPesertaBadge = '';
+                        if ($grandTotalParticipants > 0) {
+                            $totalFormatted = number_format($grandTotalParticipants);
+                            $totalPesertaBadge = "
+                                <div class='mt-3 pt-2 border-t border-slate-200 dark:border-slate-700'>
+                                    <div class='flex items-baseline gap-1.5'>
+                                        <span class='text-lg font-black text-indigo-600 dark:text-indigo-400 leading-none'>{$totalFormatted}</span>
+                                        <span class='text-[10px] font-bold text-gray-400 uppercase tracking-widest'>Total Peserta</span>
+                                    </div>
+                                </div>";
+                        }
+
                         return new HtmlString("
                             <div class='flex flex-col py-3 min-w-[340px] max-w-[550px]'>
                                 <div>
@@ -92,6 +107,7 @@ class EventsTable
                                 <div class='mt-1'>
                                     {$locationCards}
                                 </div>
+                                {$totalPesertaBadge}
                             </div>
                         ");
                     }),
@@ -120,27 +136,6 @@ class EventsTable
                             </div>
                         ");
                     }),
-
-                TextColumn::make('total_peserta')
-                    ->label('TOTAL PESERTA')
-                    ->html()
-                    ->getStateUsing(fn(Event $record) => $record->eventLocations->flatMap(fn($l) => $l->eventLocationInstitutions)->sum('participants_count'))
-                    ->formatStateUsing(function ($state): HtmlString {
-                        $count = (int) $state;
-                        if ($count === 0) {
-                            return new HtmlString("<span class='text-xs italic text-gray-400'>Belum ada data</span>");
-                        }
-                        
-                        return new HtmlString("
-                            <div class='flex flex-col py-3'>
-                                <div class='flex items-baseline gap-1'>
-                                    <span class='text-lg font-black text-indigo-600 dark:text-indigo-400 leading-none'>" . number_format($count) . "</span>
-                                    <span class='text-[10px] font-bold text-gray-400 uppercase tracking-widest'>Total</span>
-                                </div>
-                            </div>
-                        ");
-                    })
-                    ->sortable(),
 
                 TextColumn::make('laporan_kehadiran')
                     ->label('LAPORAN & KEHADIRAN')
@@ -270,7 +265,7 @@ class EventsTable
                                     ->directory('events/documents')
                                     ->disk('public')
                                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                                    ->maxSize(5120)
+                                    ->maxSize(15360)
                                     ->downloadable()
                                     ->openable()
                                     ->previewable(false),
@@ -279,7 +274,7 @@ class EventsTable
                                     ->directory('events/documents')
                                     ->disk('public')
                                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                                    ->maxSize(5120)
+                                    ->maxSize(15360)
                                     ->downloadable()
                                     ->openable()
                                     ->previewable(false),
@@ -288,7 +283,7 @@ class EventsTable
                                     ->directory('events/documents')
                                     ->disk('public')
                                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                                    ->maxSize(5120)
+                                    ->maxSize(15360)
                                     ->downloadable()
                                     ->openable()
                                     ->previewable(false),
@@ -297,7 +292,7 @@ class EventsTable
                                     ->directory('events/documents')
                                     ->disk('public')
                                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                                    ->maxSize(5120)
+                                    ->maxSize(15360)
                                     ->downloadable()
                                     ->openable()
                                     ->previewable(false),

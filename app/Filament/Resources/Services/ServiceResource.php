@@ -44,7 +44,7 @@ class ServiceResource extends Resource
                     ->acceptedFileTypes(['image/jpg', 'image/jpeg', 'image/png']),
                 TextInput::make('link')->label('Link (opsional)')->url(),
                 FileUpload::make('document')->label('Dokumen Progress')->directory('service_documents')
-                    ->disk('public_uploads')->maxSize(10000)
+                    ->disk('public_uploads')->maxSize(15360)
                     ->acceptedFileTypes(['application/pdf']),
             ])->columns(2),
         ]);

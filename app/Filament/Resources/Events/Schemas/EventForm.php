@@ -844,7 +844,7 @@ class EventForm
                                                     ->directory('events/documents')
                                                     ->disk('public')
                                                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                                                    ->maxSize(5120)
+                                                    ->maxSize(15360)
                                                     ->downloadable()
                                                     ->openable()
                                                     ->previewable(false),
@@ -853,7 +853,7 @@ class EventForm
                                                     ->directory('events/documents')
                                                     ->disk('public')
                                                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                                                    ->maxSize(5120)
+                                                    ->maxSize(15360)
                                                     ->downloadable()
                                                     ->openable()
                                                     ->previewable(false),
@@ -862,7 +862,7 @@ class EventForm
                                                     ->directory('events/documents')
                                                     ->disk('public')
                                                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                                                    ->maxSize(5120)
+                                                    ->maxSize(15360)
                                                     ->downloadable()
                                                     ->openable()
                                                     ->previewable(false),
@@ -871,7 +871,7 @@ class EventForm
                                                     ->directory('events/documents')
                                                     ->disk('public')
                                                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
-                                                    ->maxSize(5120)
+                                                    ->maxSize(15360)
                                                     ->downloadable()
                                                     ->openable()
                                                     ->previewable(false),
@@ -885,7 +885,7 @@ class EventForm
                                                         'application/vnd.ms-powerpoint',
                                                         'application/vnd.openxmlformats-officedocument.presentationml.presentation',
                                                     ])
-                                                    ->maxSize(10240)
+                                                    ->maxSize(15360)
                                                     ->downloadable()
                                                     ->openable()
                                                     ->previewable(false)

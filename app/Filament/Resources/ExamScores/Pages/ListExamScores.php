@@ -52,7 +52,7 @@ class ListExamScores extends ListRecords
                             'application/vnd.ms-powerpoint',
                             'application/vnd.openxmlformats-officedocument.presentationml.presentation',
                         ])
-                        ->maxSize(10240)
+                        ->maxSize(15360)
                         ->downloadable()
                         ->openable()
                         ->previewable(false)

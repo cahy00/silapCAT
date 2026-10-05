@@ -166,6 +166,9 @@ class EventExportController extends Controller
             if ($evParticipants === 0 && $ev->eventInstitutions->count() > 0) {
                 $evParticipants = $ev->eventInstitutions->sum('participants_count');
             }
+            if ($evParticipants === 0 && $ev->examScores->count() > 0) {
+                $evParticipants = $ev->examScores->count();
+            }
             $totalParticipantsSum += $evParticipants;
             $totalEmployeesSum += $ev->eventEmployees->count();
             $totalPresentSum += $ev->reports->sum('present_count');
@@ -217,25 +220,59 @@ class EventExportController extends Controller
         // Data Rows starting Row 8
         $row = 8;
         foreach ($events as $idx => $ev) {
-            // Instansi Peserta detail
-            $instansiList = [];
-            foreach ($ev->eventInstitutions as $ei) {
-                $instName = $ei->institution->name ?? 'Instansi #' . $ei->institution_id;
-                if ($ei->participants_count > 0) {
-                    $instName .= ' (' . number_format($ei->participants_count, 0, ',', '.') . ' pes)';
+            // Instansi Peserta detail (dikumpulkan dari eventLocationInstitutions, eventInstitutions, atau examScores)
+            $institutionMap = []; // [nama_instansi => total_peserta]
+
+            // 1. Dari Titik Lokasi -> eventLocationInstitutions (struktur utama)
+            foreach ($ev->eventLocations as $el) {
+                foreach ($el->eventLocationInstitutions as $eli) {
+                    $name = $eli->institution?->name ?? ($eli->institution_id ? 'Instansi #' . $eli->institution_id : null);
+                    if ($name) {
+                        $count = (int) ($eli->participants_count ?? 0);
+                        $institutionMap[$name] = ($institutionMap[$name] ?? 0) + $count;
+                    }
                 }
-                $instansiList[] = $instName;
+            }
+
+            // 2. Dari relasi langsung eventInstitutions (fallback / legacy)
+            foreach ($ev->eventInstitutions as $ei) {
+                $name = $ei->institution?->name ?? ($ei->institution_id ? 'Instansi #' . $ei->institution_id : null);
+                if ($name) {
+                    $count = (int) ($ei->participants_count ?? 0);
+                    $institutionMap[$name] = ($institutionMap[$name] ?? 0) + $count;
+                }
+            }
+
+            // 3. Dari examScores jika instansi belum terdaftar di lokasi
+            if (empty($institutionMap) && $ev->examScores->isNotEmpty()) {
+                foreach ($ev->examScores as $score) {
+                    if (!empty($score->institution)) {
+                        $institutionMap[$score->institution] = ($institutionMap[$score->institution] ?? 0) + 1;
+                    }
+                }
+            }
+
+            $instansiList = [];
+            foreach ($institutionMap as $name => $count) {
+                if ($count > 0) {
+                    $instansiList[] = "{$name} (" . number_format($count, 0, ',', '.') . " pes)";
+                } else {
+                    $instansiList[] = $name;
+                }
             }
 
             // Total Target Participants
             $totalParticipants = 0;
             foreach ($ev->eventLocations as $el) {
                 foreach ($el->eventLocationInstitutions as $eli) {
-                    $totalParticipants += $eli->participants_count;
+                    $totalParticipants += (int) $eli->participants_count;
                 }
             }
             if ($totalParticipants === 0 && $ev->eventInstitutions->count() > 0) {
-                $totalParticipants = $ev->eventInstitutions->sum('participants_count');
+                $totalParticipants = (int) $ev->eventInstitutions->sum('participants_count');
+            }
+            if ($totalParticipants === 0 && $ev->examScores->count() > 0) {
+                $totalParticipants = (int) $ev->examScores->count();
             }
 
             // Peserta Hadir & Tidak Hadir dari laporan

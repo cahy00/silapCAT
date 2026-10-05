@@ -45,7 +45,7 @@ class StaffResource extends Resource
                     ->maxSize(2048)->image()
                     ->acceptedFileTypes(['image/jpg', 'image/jpeg', 'image/png']),
                 FileUpload::make('lhkpn')->label('Dokumen LHKPN')->directory('lhkpn')->disk('public_uploads')
-                    ->maxSize(6000)
+                    ->maxSize(15360)
                     ->acceptedFileTypes(['application/pdf']),
             ])->columns(2),
         ]);

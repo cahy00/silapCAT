@@ -33,7 +33,7 @@ class DocumentResource extends Resource
                 Select::make('category_id')->relationship('categories', 'name')->required()->label('Kategori'),
                 RichEditor::make('desc')->label('Deskripsi (opsional)'),
                 FileUpload::make('file')->required()->label('Upload Dokumen')->directory('documents')
-                    ->disk('public_uploads')->maxSize(2048)
+                    ->disk('public_uploads')->maxSize(15360)
                     ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
                 Select::make('is_public')->label('Status')->options([0 => 'Private', 1 => 'Public'])->default(0)->required(),
                 TextInput::make('year')->label('Tahun')->required()->numeric()->maxLength(4),
