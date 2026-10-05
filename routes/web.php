@@ -24,6 +24,10 @@ Route::get('/konsultasi/all', [QuestionController::class, 'all'])->name('konsult
 Route::get('/konsultasi/kategori/{id}', [QuestionController::class, 'allCategory'])->name('konsultasi.category');
 Route::get('/konsultasi/kota/{id}', [QuestionController::class, 'allCity'])->name('konsultasi.city');
 
+Route::get('/events/all-excel', [\App\Http\Controllers\EventExportController::class, 'allEventsExcel'])
+    ->name('events.all-excel')
+    ->middleware(['auth']);
+
 Route::get('/events/monthly-pdf', [\App\Http\Controllers\EventExportController::class, 'monthlyPdf'])
     ->name('events.monthly-pdf')
     ->middleware(['auth']);

@@ -38,6 +38,13 @@ class CreateEvent extends CreateRecord
         
         unset($data['employee_koordinator'], $data['employee_it'], $data['employee_pengawas']);
 
+        if (isset($data['eventLocations']) && is_array($data['eventLocations'])) {
+            foreach ($data['eventLocations'] as &$loc) {
+                unset($loc['koordinator_ids'], $loc['it_ids'], $loc['pengawas_ids']);
+            }
+            unset($loc);
+        }
+
         if ($this->isDraft) {
             $data['status'] = 'draft';
         } else {

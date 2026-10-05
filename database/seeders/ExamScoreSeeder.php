@@ -108,5 +108,8 @@ class ExamScoreSeeder extends Seeder
         foreach ($data as $row) {
             ExamScore::create($row);
         }
+
+        // Generate additional random dummy data
+        ExamScore::factory(50)->create();
     }
 }

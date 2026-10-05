@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use App\Traits\NotifiesOnCreate;
 
 class ExamScore extends Model
 {
-    use LogsActivity, NotifiesOnCreate;
+    use HasFactory, LogsActivity, NotifiesOnCreate;
 
     protected $guarded = [];
 
