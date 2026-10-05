@@ -150,10 +150,9 @@ class EventForm
                         ->schema([
                             TextInput::make('name')
                                 ->label('Nama Kegiatan')
-                                ->placeholder('Terisi otomatis berdasarkan Kategori, Jenis Pengadaan, dan Tahun')
+                                ->placeholder('Contoh: Calon Aparatur Sipil Negara CPNS Tahun 2026')
                                 ->required()
-                                ->readOnly()
-                                ->helperText('Nama kegiatan akan digenerate otomatis agar seragam.')
+                                ->helperText('Nama kegiatan terisi otomatis dari pilihan pengadaan & tahun, namun dapat diedit sesuai kebutuhan.')
                                 ->maxLength(255),
                             Textarea::make('description')
                                 ->label('Deskripsi')
