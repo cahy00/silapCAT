@@ -648,6 +648,7 @@ class EventForm
                                                                         ->toArray())
                                                                     ->searchable()
                                                                     ->preload()
+                                                                    ->dehydrated(false)
                                                                     ->placeholder('Pilih Koordinator...'),
 
                                                                 Select::make('it_ids')
@@ -660,6 +661,7 @@ class EventForm
                                                                         ->toArray())
                                                                     ->searchable()
                                                                     ->preload()
+                                                                    ->dehydrated(false)
                                                                     ->placeholder('Pilih Tim IT...'),
 
                                                                 Select::make('pengawas_ids')
@@ -672,6 +674,7 @@ class EventForm
                                                                         ->toArray())
                                                                     ->searchable()
                                                                     ->preload()
+                                                                    ->dehydrated(false)
                                                                     ->placeholder('Pilih Pengawas...'),
                                                             ]),
                                                         ])

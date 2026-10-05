@@ -36,11 +36,12 @@ class EditEvent extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
+        $rawState = $this->form->getRawState();
         $this->employeeDataToSave = [
-            'employee_koordinator' => $data['employee_koordinator'] ?? [],
-            'employee_it' => $data['employee_it'] ?? [],
-            'employee_pengawas' => $data['employee_pengawas'] ?? [],
-            'eventLocations' => $data['eventLocations'] ?? [],
+            'employee_koordinator' => $rawState['employee_koordinator'] ?? ($data['employee_koordinator'] ?? []),
+            'employee_it' => $rawState['employee_it'] ?? ($data['employee_it'] ?? []),
+            'employee_pengawas' => $rawState['employee_pengawas'] ?? ($data['employee_pengawas'] ?? []),
+            'eventLocations' => $rawState['eventLocations'] ?? ($data['eventLocations'] ?? []),
         ];
         
         unset($data['employee_koordinator'], $data['employee_it'], $data['employee_pengawas']);
