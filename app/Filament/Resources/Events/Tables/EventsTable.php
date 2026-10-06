@@ -30,27 +30,36 @@ class EventsTable
                     ->html()
                     ->formatStateUsing(function (Event $record): HtmlString {
                         $name = e($record->name);
-                        $formationYear = e($record->formation_year ?? '-');
                         $procurementTypeName = e($record->procurementType?->name ?? '');
 
-                        // Generate structured cards for each Titik Lokasi
+                        // Status badge
+                        $status = $record->status;
+                        $statusConfig = match ($status) {
+                            'aktif' => ['bg' => '#22c55e', 'text' => '#ffffff', 'label' => '● AKTIF', 'glow' => 'box-shadow: 0 0 10px rgba(34,197,94,0.4);'],
+                            'selesai' => ['bg' => '#64748b', 'text' => '#ffffff', 'label' => '✓ SELESAI', 'glow' => ''],
+                            'cancelled' => ['bg' => '#f43f5e', 'text' => '#ffffff', 'label' => '✕ DIBATALKAN', 'glow' => ''],
+                            default => ['bg' => '#f59e0b', 'text' => '#ffffff', 'label' => '◌ DRAFT', 'glow' => ''],
+                        };
+
+                        $statusBadge = "<span style='display:inline-flex;align-items:center;padding:3px 9px;border-radius:9999px;font-size:10px;font-weight:900;background:{$statusConfig['bg']};color:{$statusConfig['text']};letter-spacing:0.05em;{$statusConfig['glow']}'>{$statusConfig['label']}</span>";
+
+                        $categoryBadge = $procurementTypeName ? "
+                            <span class='sc-cat-badge'>
+                                {$procurementTypeName}
+                            </span>" : "";
+
+                        // Location cards
                         $locationCards = '';
                         $locations = $record->eventLocations;
                         $grandTotalParticipants = 0;
 
                         if ($locations->isEmpty()) {
-                            $locationCards = "<div class='text-xs italic text-gray-400 py-1'>Belum ada titik lokasi yang ditambahkan.</div>";
+                            $locationCards = "<div class='sc-subtext' style='margin-top:6px;font-style:italic;'>📍 Belum ada titik lokasi</div>";
                         } else {
                             foreach ($locations as $el) {
                                 $locName = e($el->location?->name ?? '-');
                                 $locCity = e($el->location?->city ?? '');
-                                
-                                // Schedule per tilok
-                                $locStart = $el->start_date ? \Carbon\Carbon::parse($el->start_date)->translatedFormat('d M Y') : null;
-                                $locEnd = $el->end_date ? \Carbon\Carbon::parse($el->end_date)->translatedFormat('d M Y') : null;
-                                $scheduleText = ($locStart && $locEnd) ? "{$locStart} - {$locEnd}" : ($locStart ?: 'Jadwal belum ditentukan');
-                                
-                                // Institutions & Participants in this tilok
+
                                 $instPills = '';
                                 $locParticipants = 0;
                                 foreach ($el->eventLocationInstitutions as $eli) {
@@ -58,53 +67,93 @@ class EventsTable
                                     $pCount = number_format((int) $eli->participants_count);
                                     $locParticipants += (int) $eli->participants_count;
                                     $instPills .= "
-                                        <div class='text-sm text-slate-700 dark:text-slate-300'>
-                                            {$iName} ({$pCount})
+                                        <div class='sc-subtext' style='display:flex;align-items:center;gap:4px;font-size:11px;'>
+                                            <span>🏢</span>
+                                            <span>{$iName}</span>
+                                            <span style='font-size:11px;font-weight:800;color:#6366f1;'>({$pCount})</span>
                                         </div>";
                                 }
 
                                 $grandTotalParticipants += $locParticipants;
-                                $totalLocFormatted = number_format($locParticipants);
 
                                 $locationCards .= "
-                                    <div class='mt-3 flex flex-col gap-1'>
-                                        <div class='flex items-center gap-1.5'>
-                                            <span class='font-semibold text-sm text-slate-900 dark:text-slate-100'>{$locName}</span>
-                                            " . ($locCity ? "<span class='text-sm text-slate-500 dark:text-slate-400 shrink-0'>({$locCity})</span>" : "") . "
+                                    <div class='sc-border-accent' style='margin-top:6px;padding-left:10px;'>
+                                        <div style='display:flex;align-items:center;gap:5px;'>
+                                            <span style='font-size:12px;'>📍</span>
+                                            <span class='sc-loc-name'>{$locName}</span>
+                                            " . ($locCity ? "<span class='sc-subtext'>· {$locCity}</span>" : "") . "
                                         </div>
-                                        
-                                        <div class='flex flex-col'>
+                                        <div style='margin-top:2px;margin-left:18px;display:flex;flex-direction:column;gap:2px;'>
                                             {$instPills}
                                         </div>
-                                        
                                     </div>";
                             }
                         }
 
-                        $categoryBadge = $procurementTypeName ? "
-                            <span class='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border border-blue-200 dark:border-blue-800 uppercase tracking-wider'>
-                                {$procurementTypeName}
-                            </span>" : "";
-
-                        // Total Peserta badge
+                        // Total Peserta
                         $totalPesertaBadge = '';
                         if ($grandTotalParticipants > 0) {
                             $totalFormatted = number_format($grandTotalParticipants);
                             $totalPesertaBadge = "
-                                <div class='mt-3 pt-2 border-t border-slate-200 dark:border-slate-700'>
-                                    <div class='flex items-baseline gap-1.5'>
-                                        <span class='text-lg font-black text-indigo-600 dark:text-indigo-400 leading-none'>{$totalFormatted}</span>
-                                        <span class='text-[10px] font-bold text-gray-400 uppercase tracking-widest'>Total Peserta</span>
-                                    </div>
+                                <div class='sc-peserta-badge'>
+                                    <span style='font-size:14px;'>👥</span>
+                                    <span class='sc-peserta-num'>{$totalFormatted}</span>
+                                    <span class='sc-peserta-lbl'>Peserta</span>
                                 </div>";
                         }
 
                         return new HtmlString("
-                            <div class='flex flex-col py-3 min-w-[340px] max-w-[550px]'>
-                                <div>
-                                    <h3 class='font-black text-sm md:text-base text-slate-950 dark:text-white uppercase tracking-tight leading-snug'>{$name}</h3>
+                            <style>
+                                .sc-event-title { font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: -0.01em; line-height: 1.35; color: #0f172a; }
+                                .dark .sc-event-title { color: #f8fafc; }
+                                .sc-loc-name { font-weight: 700; font-size: 12px; color: #1e293b; }
+                                .dark .sc-loc-name { color: #f1f5f9; }
+                                .sc-subtext { font-size: 11px; color: #64748b; }
+                                .dark .sc-subtext { color: #94a3b8; }
+                                .sc-border-accent { border-left: 2px solid #818cf8; }
+                                .dark .sc-border-accent { border-left: 2px solid #6366f1; }
+                                .sc-peserta-badge { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; background: #eef2ff; border: 1px solid #e0e7ff; width: fit-content; }
+                                .dark .sc-peserta-badge { background: rgba(99, 102, 241, 0.18); border-color: rgba(99, 102, 241, 0.35); }
+                                .sc-peserta-num { font-size: 14px; font-weight: 900; color: #4f46e5; line-height: 1; }
+                                .dark .sc-peserta-num { color: #818cf8; }
+                                .sc-peserta-lbl { font-size: 10px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.08em; }
+                                .dark .sc-peserta-lbl { color: #c7d2fe; }
+                                .sc-cat-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 700; background: #eef2ff; color: #4338ca; border: 1px solid rgba(99,102,241,0.25); text-transform: uppercase; letter-spacing: 0.05em; }
+                                .dark .sc-cat-badge { background: rgba(99, 102, 241, 0.2); color: #c7d2fe; border-color: rgba(99, 102, 241, 0.4); }
+                                .sc-cal-card { display: flex; flex-direction: column; align-items: center; width: 42px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; flex-shrink: 0; background: #ffffff; }
+                                .dark .sc-cal-card { border-color: #334155; background: #1e293b; }
+                                .sc-cal-day { width: 100%; text-align: center; font-size: 16px; font-weight: 900; color: #1e293b; padding: 2px 0; }
+                                .dark .sc-cal-day { color: #f8fafc; }
+                                .sc-schedule-text { font-size: 12px; font-weight: 700; color: #1e293b; line-height: 1.3; }
+                                .dark .sc-schedule-text { color: #f1f5f9; }
+                                .sc-pill-tag { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 4px; background: #f1f5f9; font-size: 10px; font-weight: 700; color: #475569; }
+                                .dark .sc-pill-tag { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+                                .sc-stat-val { font-size: 11px; font-weight: 900; color: #1e293b; }
+                                .dark .sc-stat-val { color: #f1f5f9; }
+                                .sc-sesi-title { font-size: 11px; font-weight: 700; color: #475569; }
+                                .dark .sc-sesi-title { color: #cbd5e1; }
+                                .sc-track-circle { stroke: #e2e8f0; }
+                                .dark .sc-track-circle { stroke: #334155; }
+                                .sc-doc-label { font-size: 10px; font-weight: 500; color: #334155; }
+                                .dark .sc-doc-label { color: #cbd5e1; }
+                                .sc-doc-label-empty { font-size: 10px; font-weight: 500; color: #94a3b8; }
+                                .dark .sc-doc-label-empty { color: #64748b; }
+                                .sc-doc-badge-complete { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 900; background: #dcfce7; color: #15803d; }
+                                .dark .sc-doc-badge-complete { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.35); }
+                                .sc-doc-badge-partial { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 900; background: #fef3c7; color: #b45309; }
+                                .dark .sc-doc-badge-partial { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); }
+                                .sc-doc-badge-empty { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 900; background: #f1f5f9; color: #64748b; }
+                                .dark .sc-doc-badge-empty { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.25); }
+                                .sc-seg-empty { background: #e2e8f0; }
+                                .dark .sc-seg-empty { background: #334155; }
+                            </style>
+                            <div style='display:flex;flex-direction:column;padding:10px 0;min-width:320px;max-width:550px;'>
+                                <div style='display:flex;align-items:center;gap:6px;flex-wrap:wrap;'>
+                                    {$statusBadge}
+                                    {$categoryBadge}
                                 </div>
-                                <div class='mt-1'>
+                                <h3 class='sc-event-title' style='margin-top:6px;'>{$name}</h3>
+                                <div>
                                     {$locationCards}
                                 </div>
                                 {$totalPesertaBadge}
@@ -119,20 +168,47 @@ class EventsTable
                     ->formatStateUsing(function (Event $record): HtmlString {
                         $startDate = $record->start_date ? \Carbon\Carbon::parse($record->start_date) : null;
                         $endDate = $record->end_date ? \Carbon\Carbon::parse($record->end_date) : null;
-                        
+
                         if (!$startDate || !$endDate) {
-                            return new HtmlString("<span class='text-xs italic text-gray-400'>Belum dijadwalkan</span>");
+                            return new HtmlString("
+                                <div style='display:flex;align-items:center;gap:8px;padding:10px 0;'>
+                                    <span style='font-size:18px;opacity:0.4;'>📅</span>
+                                    <span class='sc-subtext' style='font-style:italic;'>Belum dijadwalkan</span>
+                                </div>
+                            ");
                         }
 
-                        $start = $startDate->translatedFormat('d M Y');
+                        $startDay = $startDate->translatedFormat('d');
+                        $startMonth = $startDate->translatedFormat('M');
                         $end = $endDate->translatedFormat('d M Y');
                         $locCount = $record->eventLocations->count();
                         $duration = $startDate->diffInDays($endDate) + 1;
 
+                        // Determine if event is ongoing, upcoming, or past
+                        $now = now()->startOfDay();
+                        $isOngoing = $now->between($startDate, $endDate);
+                        $isPast = $now->gt($endDate);
+
+                        $timelineBorder = $isOngoing ? '#22c55e' : ($isPast ? '#94a3b8' : '#f59e0b');
+                        $calendarBg = $isOngoing ? '#22c55e' : ($isPast ? '#64748b' : '#f59e0b');
+
                         return new HtmlString("
-                            <div class='flex flex-col py-2 gap-1 min-w-[130px]'>
-                                <div class='text-xs font-bold text-gray-900 dark:text-white leading-tight'>{$start} &mdash; {$end}</div>
-                                <div class='text-[10px] font-bold text-indigo-600 dark:text-indigo-400 tracking-wider uppercase'>{$duration} Hari ({$locCount} Tilok)</div>
+                            <div style='display:flex;align-items:flex-start;gap:8px;padding:10px 0;min-width:150px;'>
+                                <div class='sc-cal-card'>
+                                    <div style='background:{$calendarBg};width:100%;text-align:center;font-size:9px;font-weight:900;color:#ffffff;text-transform:uppercase;letter-spacing:0.05em;padding:2px 0;'>{$startMonth}</div>
+                                    <div class='sc-cal-day'>{$startDay}</div>
+                                </div>
+                                <div style='display:flex;flex-direction:column;gap:4px;border-left:2px solid {$timelineBorder};padding-left:8px;'>
+                                    <div class='sc-schedule-text'>{$startDate->translatedFormat('d M')} — {$end}</div>
+                                    <div style='display:flex;align-items:center;gap:4px;flex-wrap:wrap;'>
+                                        <span class='sc-pill-tag'>
+                                            ⏱️ {$duration} Hari
+                                        </span>
+                                        <span class='sc-pill-tag'>
+                                            📍 {$locCount} Tilok
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         ");
                     }),
@@ -145,38 +221,51 @@ class EventsTable
                         $sesiCount = (int) $state;
                         if ($sesiCount === 0) {
                             return new HtmlString("
-                                <div class='flex flex-col py-3 gap-1'>
-                                    <span class='inline-flex items-center w-fit px-2 py-0.5 rounded-md text-xs font-bold bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400'>0 Sesi Dilaporkan</span>
-                                    <span class='text-[10px] italic text-gray-400'>Belum ada rekap harian</span>
+                                <div style='display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:4px;min-width:140px;'>
+                                    <span style='font-size:24px;opacity:0.3;'>📊</span>
+                                    <span class='sc-subtext' style='font-weight:600;'>Belum ada laporan</span>
                                 </div>
                             ");
                         }
-                        
+
                         $pesertaSesi = $record->reports->sum('total_participants');
                         $hadir = $record->reports->sum('present_count');
                         $absen = $record->reports->sum('absent_count');
                         $persen = $pesertaSesi > 0 ? round(($hadir / $pesertaSesi) * 100, 1) : 0;
-                        
-                        $colorClass = $persen >= 90 
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400' 
-                            : ($persen >= 75 ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-400');
+
+                        // Ring via inline SVG with explicit width/height
+                        $radius = 18;
+                        $circumference = 2 * M_PI * $radius;
+                        $offset = $circumference - ($persen / 100) * $circumference;
+                        $ringColor = $persen >= 90 ? '#22c55e' : ($persen >= 75 ? '#f59e0b' : '#ef4444');
+
+                        $hadirFormatted = number_format($hadir);
+                        $absenFormatted = number_format($absen);
 
                         return new HtmlString("
-                            <div class='flex flex-col py-3 gap-1.5 min-w-[150px]'>
-                                <div class='flex items-center gap-1.5'>
-                                    <span class='inline-flex items-center px-2 py-0.5 rounded text-xs font-black {$colorClass} tracking-wider'>{$persen}% HADIR</span>
-                                    <span class='text-[11px] font-bold text-gray-700 dark:text-gray-300'>({$sesiCount} Sesi)</span>
+                            <div style='display:flex;align-items:center;gap:10px;padding:10px 0;min-width:180px;'>
+                                <div style='position:relative;width:48px;height:48px;flex-shrink:0;'>
+                                    <svg viewBox='0 0 44 44' style='width:48px;height:48px;transform:rotate(-90deg);display:block;'>
+                                        <circle class='sc-track-circle' cx='22' cy='22' r='{$radius}' fill='none' stroke-width='4'/>
+                                        <circle cx='22' cy='22' r='{$radius}' fill='none' stroke-width='4' stroke='{$ringColor}' stroke-linecap='round' stroke-dasharray='{$circumference}' stroke-dashoffset='{$offset}'/>
+                                    </svg>
+                                    <div style='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;'>
+                                        <span class='sc-stat-val'>{$persen}%</span>
+                                    </div>
                                 </div>
-                                <div class='flex items-center gap-2 text-[11px]'>
-                                    <span class='text-emerald-600 dark:text-emerald-400 font-bold'>✔ {$hadir} Hadir</span>
-                                    <span class='text-gray-300 dark:text-gray-600'>|</span>
-                                    <span class='text-rose-600 dark:text-rose-400 font-bold'>✖ {$absen} Absen</span>
+                                <div style='display:flex;flex-direction:column;gap:3px;'>
+                                    <span class='sc-sesi-title'>{$sesiCount} Sesi Laporan</span>
+                                    <div style='display:flex;align-items:center;gap:4px;'>
+                                        <span style='font-size:10px;font-weight:700;color:#22c55e;'>✔ {$hadirFormatted}</span>
+                                        <span class='sc-subtext'>·</span>
+                                        <span style='font-size:10px;font-weight:700;color:#ef4444;'>✖ {$absenFormatted}</span>
+                                    </div>
                                 </div>
                             </div>
                         ");
                     }),
 
-                 TextColumn::make('status_dokumen')
+                TextColumn::make('status_dokumen')
                     ->label('DOKUMEN')
                     ->html()
                     ->getStateUsing(function (Event $record): int {
@@ -186,35 +275,57 @@ class EventsTable
                             $record->doc_ba_catos,
                             $record->doc_institution_announcement,
                         ];
-                        
+
                         return collect($docs)->filter(fn($doc) => !empty($doc))->count();
                     })
                     ->formatStateUsing(function (Event $record, $state): HtmlString {
                         $total = 4;
                         $uploadedCount = (int) $state;
-                        
+
+                        $docNames = ['Laporan', 'SK Tim', 'BA CATOS', 'Pengumuman'];
+                        $docFields = [
+                            $record->doc_implementation_report,
+                            $record->doc_team_decree,
+                            $record->doc_ba_catos,
+                            $record->doc_institution_announcement,
+                        ];
+
+                        // Segmented progress bar
+                        $segments = '';
+                        for ($i = 0; $i < $total; $i++) {
+                            $filled = !empty($docFields[$i]);
+                            $bgClass = $filled ? "style='background:#22c55e;'" : "class='sc-seg-empty'";
+                            $rounded = '';
+                            if ($i === 0) $rounded = 'border-radius: 4px 0 0 4px;';
+                            if ($i === $total - 1) $rounded = 'border-radius: 0 4px 4px 0;';
+                            $segments .= "<div {$bgClass} style='flex:1;height:6px;{$rounded}'></div>";
+                        }
+
+                        // Status label
                         if ($uploadedCount === $total) {
-                            return new HtmlString("
-                                <div class='flex flex-col py-3 gap-1'>
-                                    <span class='inline-flex items-center w-fit px-2 py-0.5 rounded-md text-xs font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 tracking-wider uppercase'>Lengkap</span>
-                                    <span class='text-[10px] font-bold text-gray-500 dark:text-gray-400'>{$uploadedCount}/{$total} Dokumen</span>
-                                </div>
-                            ");
+                            $labelBadge = "<span class='sc-doc-badge-complete'>✅ LENGKAP</span>";
+                        } elseif ($uploadedCount === 0) {
+                            $labelBadge = "<span class='sc-doc-badge-empty'>⭕ BELUM ADA</span>";
+                        } else {
+                            $labelBadge = "<span class='sc-doc-badge-partial'>⚠️ {$uploadedCount}/{$total}</span>";
                         }
-                        
-                        if ($uploadedCount === 0) {
-                            return new HtmlString("
-                                <div class='flex flex-col py-3 gap-1'>
-                                    <span class='inline-flex items-center w-fit px-2 py-0.5 rounded-md text-xs font-black bg-gray-100 text-gray-700 dark:bg-white/5 dark:text-gray-400 tracking-wider uppercase'>Belum Ada</span>
-                                    <span class='text-[10px] font-bold text-gray-500 dark:text-gray-400'>0/{$total} Dokumen</span>
-                                </div>
-                            ");
+
+                        // Individual doc indicators
+                        $docIndicators = '';
+                        for ($i = 0; $i < $total; $i++) {
+                            $filled = !empty($docFields[$i]);
+                            $icon = $filled ? '✅' : '▫️';
+                            $labelClass = $filled ? 'sc-doc-label' : 'sc-doc-label-empty';
+                            $docIndicators .= "<div style='display:flex;align-items:center;gap:4px;'><span style='font-size:10px;'>{$icon}</span><span class='{$labelClass}'>{$docNames[$i]}</span></div>";
                         }
-                        
+
                         return new HtmlString("
-                            <div class='flex flex-col py-3 gap-1'>
-                                <span class='inline-flex items-center w-fit px-2 py-0.5 rounded-md text-xs font-black bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-400 tracking-wider uppercase'>Belum Lengkap</span>
-                                <span class='text-[10px] font-bold text-gray-500 dark:text-gray-400'>{$uploadedCount}/{$total} Dokumen</span>
+                            <div style='display:flex;flex-direction:column;padding:10px 0;gap:6px;min-width:130px;'>
+                                {$labelBadge}
+                                <div style='display:flex;gap:3px;width:100%;'>{$segments}</div>
+                                <div style='display:flex;flex-direction:column;gap:2px;'>
+                                    {$docIndicators}
+                                </div>
                             </div>
                         ");
                     })
