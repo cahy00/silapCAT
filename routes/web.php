@@ -64,6 +64,14 @@ Route::get('/template/institution-import', [\App\Http\Controllers\TemplateExport
 Route::get('/buat-link', [\App\Http\Controllers\PublicShortLinkController::class, 'index'])->name('public.shortlink.create');
 Route::post('/buat-link', [\App\Http\Controllers\PublicShortLinkController::class, 'store'])->name('public.shortlink.store')->middleware('throttle:5,1');
 
+// Google SSO Routes
+Route::get('/auth/google', [\App\Http\Controllers\Auth\GoogleSsoController::class, 'redirect'])
+    ->name('auth.google')
+    ->middleware('guest');
+Route::get('/auth/google/callback', [\App\Http\Controllers\Auth\GoogleSsoController::class, 'callback'])
+    ->name('auth.google.callback')
+    ->middleware('guest');
+
 // Short Link Redirect
 Route::get('/{shortCode}', [\App\Http\Controllers\ShortLinkController::class, 'redirect'])
     ->name('shortlink.redirect')

@@ -8,10 +8,17 @@ use Filament\Forms\Components\Checkbox;
 
 class Login extends BaseLogin
 {
+    protected string $view = 'filament.pages.auth.login';
+
     protected function getRememberFormComponent(): Component
     {
         return Checkbox::make('remember')
             ->label(__('filament-panels::auth/pages/login.form.remember.label'))
             ->default(true);
+    }
+
+    protected function hasFullWidthFormActions(): bool
+    {
+        return true;
     }
 }

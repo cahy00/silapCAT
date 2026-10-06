@@ -318,6 +318,9 @@ class EventsTable
                                 ->send();
                         })
                         ->visible(function (Event $record): bool {
+                            if (! auth()->user()?->can('Update:Event')) {
+                                return false;
+                            }
                             $docs = [
                                 $record->doc_implementation_report,
                                 $record->doc_team_decree,
@@ -326,6 +329,10 @@ class EventsTable
                             ];
                             return collect($docs)->filter(fn($doc) => !empty($doc))->count() < 4;
                         }),
+                    \Filament\Actions\ViewAction::make()
+                        ->label('Lihat Detail')
+                        ->icon(null)
+                        ->color('gray'),
                     \Filament\Actions\ReplicateAction::make()
                         ->label('Duplikasi Kegiatan')
                         ->icon(null)

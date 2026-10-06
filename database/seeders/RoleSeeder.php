@@ -17,6 +17,11 @@ class RoleSeeder extends Seeder
         $operatorRole = Role::firstOrCreate(['name' => 'operator']);
         $pimpinanRole = Role::firstOrCreate(['name' => 'pimpinan']);
         $adminInstansiRole = Role::firstOrCreate(['name' => 'admin_instansi']);
+        $tamuRole = Role::firstOrCreate(['name' => 'tamu']);
+
+        $viewAnyEvent = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'ViewAny:Event']);
+        $viewEvent = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'View:Event']);
+        $tamuRole->syncPermissions([$viewAnyEvent, $viewEvent]);
 
         // Create initial Admin User
         $admin = User::firstOrCreate(
