@@ -43,18 +43,29 @@ class LocationForm
                                         ->required()
                                         ->columnSpan(1),
                                 ]),
-                                Grid::make(3)->schema([
+                                Grid::make(4)->schema([
                                     TextInput::make('city')
                                         ->label('Kota/Kabupaten')
-                                        ->placeholder('Contoh: Jakarta Pusat')
+                                        ->placeholder('Contoh: Manokwari / Sorong')
                                         ->prefixIcon('heroicon-o-map')
-                                        ->default(null),
-                                    Textarea::make('address')
-                                        ->label('Alamat Lengkap')
-                                        ->placeholder('Jl. Jend. Sudirman No. 86...')
-                                        ->rows(3)
-                                        ->default(null),
+                                        ->default(null)
+                                        ->columnSpan(2),
+                                    TextInput::make('latitude')
+                                        ->label('Latitude')
+                                        ->placeholder('Contoh: -0.861453')
+                                        ->numeric()
+                                        ->columnSpan(1),
+                                    TextInput::make('longitude')
+                                        ->label('Longitude')
+                                        ->placeholder('Contoh: 134.062042')
+                                        ->numeric()
+                                        ->columnSpan(1),
                                 ]),
+                                Textarea::make('address')
+                                    ->label('Alamat Lengkap')
+                                    ->placeholder('Jl. Jend. Sudirman No. 86...')
+                                    ->rows(3)
+                                    ->default(null),
                             ]),
 
                         Tabs::make('Detail Survey & Dokumentasi')

@@ -14,7 +14,7 @@ class Login extends BaseLogin
     {
         return Checkbox::make('remember')
             ->label(__('filament-panels::auth/pages/login.form.remember.label'))
-            ->default(true);
+            ->default(false);
     }
 
     protected function hasFullWidthFormActions(): bool

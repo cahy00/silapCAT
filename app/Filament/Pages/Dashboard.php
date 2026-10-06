@@ -15,10 +15,12 @@ class Dashboard extends BaseDashboard
     {
         return [
             \App\Filament\Widgets\WelcomeBanner::class,
+            \App\Filament\Widgets\ExecutiveKpiWidget::class,
+            \App\Filament\Widgets\LiveExamMonitoringWidget::class,
+            \App\Filament\Widgets\LocationMapWidget::class,
             \App\Filament\Widgets\StatsOverview::class,
             \App\Filament\Widgets\EventParticipantStats::class,
             \App\Filament\Widgets\ExamScorePassFailChart::class,
-            \App\Filament\Widgets\ReportParticipantChart::class,
             \App\Filament\Widgets\AverageScoreByEventChart::class,
             \App\Filament\Widgets\MonthlyEventChart::class,
             \App\Filament\Widgets\ProcurementTrendChart::class,

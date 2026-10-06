@@ -24,7 +24,7 @@ class ListEvents extends ListRecords
                 ->modalDescription('Unduh spreadsheet Excel lengkap yang berisi semua bidang data event beserta seluruh relasinya (Instansi, Titik Lokasi, Petugas SDM, Delegasi, Laporan, dan Skor).')
                 ->modalSubmitActionLabel('Unduh Excel Matriks')
                 ->form([
-                    \Filament\Schemas\Components\Grid::make(2)->schema([
+                    \Filament\Schemas\Components\Grid::make(3)->schema([
                         \Filament\Forms\Components\Select::make('status')
                             ->label('Filter Status Event')
                             ->options([
@@ -36,8 +36,18 @@ class ListEvents extends ListRecords
                             ])
                             ->default('all')
                             ->required(),
+                        \Filament\Forms\Components\Select::make('month')
+                            ->label('Filter Bulan Kegiatan')
+                            ->options([
+                                'all' => 'Semua Bulan',
+                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                            ])
+                            ->default('all')
+                            ->required(),
                         \Filament\Forms\Components\Select::make('year')
-                            ->label('Filter Tahun Formasi')
+                            ->label('Filter Tahun Formasi / Pelaksanaan')
                             ->options(function () {
                                 $currentYear = now()->year;
                                 $years = ['all' => 'Semua Tahun'];
@@ -51,7 +61,11 @@ class ListEvents extends ListRecords
                     ])
                 ])
                 ->action(function (array $data) {
-                    $url = route('events.all-excel', ['status' => $data['status'], 'year' => $data['year']]);
+                    $url = route('events.all-excel', [
+                        'status' => $data['status'],
+                        'month' => $data['month'],
+                        'year' => $data['year'],
+                    ]);
                     return redirect()->to($url);
                 }),
             \Filament\Actions\Action::make('exportMonthlyPdf')

@@ -27,6 +27,34 @@ class ScheduleGenerator extends Page
 
     protected string $view = 'filament.pages.schedule-generator';
 
+    public static function canAccess(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        // Super Admin always has full access
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Check if user has explicit permission via Shield / Spatie
+        if (
+            $user->can('page_ScheduleGenerator') || 
+            $user->can('view_ScheduleGenerator') || 
+            $user->can('View:ScheduleGenerator') ||
+            $user->can('page_App\Filament\Pages\ScheduleGenerator')
+        ) {
+            return true;
+        }
+
+        // Restrict to roles that have access to scheduling (admin, operator)
+        return $user->hasAnyRole(['admin', 'operator']);
+    }
+
     // Header Form Data
     public string $eventName = '';
 

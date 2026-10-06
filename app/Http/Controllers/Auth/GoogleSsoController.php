@@ -76,7 +76,7 @@ class GoogleSsoController extends Controller
             $user->assignRole($tamuRole);
         }
 
-        Auth::login($user, remember: true);
+        Auth::login($user, remember: false);
 
         return redirect()->intended(route('filament.admin.pages.dashboard'));
     }

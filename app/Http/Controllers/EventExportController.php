@@ -108,8 +108,73 @@ class EventExportController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('year') && $request->year !== 'all') {
-            $query->where('formation_year', $request->year);
+        $filterMonth = $request->filled('month') && $request->month !== 'all' ? (int) $request->month : null;
+        $filterYear = $request->filled('year') && $request->year !== 'all' ? (int) $request->year : null;
+
+        if ($filterMonth && $filterYear) {
+            $startDate = sprintf('%04d-%02d-01', $filterYear, $filterMonth);
+            $endDate = Carbon::createFromDate($filterYear, $filterMonth, 1)->endOfMonth()->format('Y-m-d');
+
+            $query->where(function ($q) use ($filterMonth, $filterYear, $startDate, $endDate) {
+                $q->where(function ($q1) use ($filterMonth, $filterYear) {
+                    $q1->whereMonth('start_date', $filterMonth)->whereYear('start_date', $filterYear);
+                })
+                ->orWhere(function ($q2) use ($filterMonth, $filterYear) {
+                    $q2->whereMonth('end_date', $filterMonth)->whereYear('end_date', $filterYear);
+                })
+                ->orWhere(function ($q3) use ($startDate, $endDate) {
+                    $q3->where('start_date', '<=', $endDate)->where('end_date', '>=', $startDate);
+                })
+                ->orWhereHas('eventLocations', function ($q4) use ($filterMonth, $filterYear, $startDate, $endDate) {
+                    $q4->where(function ($lq) use ($filterMonth, $filterYear, $startDate, $endDate) {
+                        $lq->whereMonth('start_date', $filterMonth)->whereYear('start_date', $filterYear)
+                           ->orWhereMonth('end_date', $filterMonth)->whereYear('end_date', $filterYear)
+                           ->orWhere(function ($spanQ) use ($startDate, $endDate) {
+                               $spanQ->where('start_date', '<=', $endDate)->where('end_date', '>=', $startDate);
+                           });
+                    });
+                })
+                ->orWhere(function ($qFallback) use ($filterMonth, $filterYear) {
+                    $qFallback->where(function ($fb) use ($filterMonth, $filterYear) {
+                        $fb->whereNull('start_date')
+                           ->whereDoesntHave('eventLocations', function ($lq) {
+                               $lq->whereNotNull('start_date');
+                           })
+                           ->whereMonth('created_at', $filterMonth)
+                           ->whereYear('created_at', $filterYear);
+                    })
+                    ->orWhere(function ($fb2) use ($filterMonth, $filterYear) {
+                        $fb2->where('formation_year', (string) $filterYear)
+                            ->whereMonth('created_at', $filterMonth);
+                    });
+                });
+            });
+        } elseif ($filterMonth) {
+            $query->where(function ($q) use ($filterMonth) {
+                $q->whereMonth('start_date', $filterMonth)
+                  ->orWhereMonth('end_date', $filterMonth)
+                  ->orWhereHas('eventLocations', function ($lq) use ($filterMonth) {
+                      $lq->whereMonth('start_date', $filterMonth)
+                         ->orWhereMonth('end_date', $filterMonth);
+                  })
+                  ->orWhere(function ($qFallback) use ($filterMonth) {
+                      $qFallback->whereNull('start_date')
+                                ->whereDoesntHave('eventLocations', function ($lq) {
+                                    $lq->whereNotNull('start_date');
+                                })
+                                ->whereMonth('created_at', $filterMonth);
+                  });
+            });
+        } elseif ($filterYear) {
+            $query->where(function ($q) use ($filterYear) {
+                $q->where('formation_year', (string) $filterYear)
+                  ->orWhereYear('start_date', $filterYear)
+                  ->orWhereYear('end_date', $filterYear)
+                  ->orWhereHas('eventLocations', function ($lq) use ($filterYear) {
+                      $lq->whereYear('start_date', $filterYear)
+                         ->orWhereYear('end_date', $filterYear);
+                  });
+            });
         }
 
         if ($request->filled('search')) {
@@ -135,12 +200,21 @@ class EventExportController extends Controller
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
         ]);
 
+        $monthNames = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+
         $filterText = 'Total Event: ' . $events->count() . ' Data';
         if ($request->filled('status') && $request->status !== 'all') {
             $filterText .= ' | Status: ' . strtoupper($request->status);
         }
-        if ($request->filled('year') && $request->year !== 'all') {
-            $filterText .= ' | Tahun Formasi: ' . $request->year;
+        if ($filterMonth && isset($monthNames[$filterMonth])) {
+            $filterText .= ' | Bulan: ' . $monthNames[$filterMonth];
+        }
+        if ($filterYear) {
+            $filterText .= ' | Tahun: ' . $filterYear;
         }
         $filterText .= ' | Tanggal Cetak: ' . now()->translatedFormat('d F Y H:i');
 
