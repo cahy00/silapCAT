@@ -325,8 +325,23 @@ class EventResource extends Resource
                                         $minReports = $reports->whereNotNull('lowest_score')->where('lowest_score', '>', 0);
                                         $lowestScore = $minReports->isNotEmpty() ? $minReports->min('lowest_score') : ($reports->min('lowest_score') ?? 0);
 
+                                        $grandTotalParticipants = 0;
+                                        foreach ($record->eventLocations as $el) {
+                                            $grandTotalParticipants += (int) $el->eventLocationInstitutions->sum('participants_count');
+                                        }
+                                        if ($grandTotalParticipants === 0) {
+                                            $grandTotalParticipants = (int) $record->eventInstitutions->sum('participants_count');
+                                        }
+                                        if ($grandTotalParticipants === 0) {
+                                            $grandTotalParticipants = (int) $totalParticipants;
+                                        }
+
                                         $statsGrid = "
-                                            <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px;'>
+                                            <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px;'>
+                                                <div style='background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 10px; padding: 12px 16px;'>
+                                                    <div style='font-size: 11px; font-weight: 700; color: #6d28d9; text-transform: uppercase;'>Total Peserta</div>
+                                                    <div style='font-size: 20px; font-weight: 900; color: #4c1d95; margin-top: 4px;'>" . number_format($grandTotalParticipants) . " <span style='font-size: 12px; font-weight: 600;'>Peserta</span></div>
+                                                </div>
                                                 <div style='background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 10px; padding: 12px 16px;'>
                                                     <div style='font-size: 11px; font-weight: 700; color: #4338ca; text-transform: uppercase;'>Total Laporan</div>
                                                     <div style='font-size: 20px; font-weight: 900; color: #312e81; margin-top: 4px;'>" . number_format($totalReports) . " <span style='font-size: 12px; font-weight: 600;'>Sesi</span></div>

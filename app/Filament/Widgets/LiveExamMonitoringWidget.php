@@ -19,8 +19,8 @@ class LiveExamMonitoringWidget extends Widget
     {
         $today = Carbon::today();
 
-        // 1. Get events that are active or scheduled today, ordered by newest start_date
-        $events = Event::with([
+        // 1. Get events that are ongoing today or explicitly active
+        $activeEvents = Event::with([
             'procurementType',
             'eventLocations.location.locationSurvey',
             'eventLocations.eventLocationInstitutions.institution',
@@ -28,21 +28,26 @@ class LiveExamMonitoringWidget extends Widget
             'eventEmployees.employee',
             'reports',
         ])
-        ->where('status', 'active')
-        ->orWhere(function ($q) use ($today) {
-            $q->whereDate('start_date', '<=', $today)
-              ->whereDate('end_date', '>=', $today);
-        })
-        ->orWhereHas('eventLocations', function ($lq) use ($today) {
-            $lq->whereDate('start_date', '<=', $today)
-               ->whereDate('end_date', '>=', $today);
+        ->where(function ($q) use ($today) {
+            $q->where('status', 'active')
+              ->orWhere('status', 'aktif')
+              ->orWhere(function ($sub) use ($today) {
+                  $sub->whereDate('start_date', '<=', $today)
+                      ->whereDate('end_date', '>=', $today);
+              })
+              ->orWhereHas('eventLocations', function ($lq) use ($today) {
+                  $lq->whereDate('start_date', '<=', $today)
+                     ->whereDate('end_date', '>=', $today);
+              });
         })
         ->orderBy('start_date', 'desc')
         ->orderBy('created_at', 'desc')
         ->get();
 
-        // If no active events today, get 3 most recent active/draft events ordered by newest start_date
-        if ($events->isEmpty()) {
+        // If there are active events today, show them. Otherwise, show the most recent events (newest start_date first)
+        if ($activeEvents->isNotEmpty()) {
+            $events = $activeEvents;
+        } else {
             $events = Event::with([
                 'procurementType',
                 'eventLocations.location.locationSurvey',
@@ -51,10 +56,9 @@ class LiveExamMonitoringWidget extends Widget
                 'eventEmployees.employee',
                 'reports',
             ])
-            ->whereIn('status', ['active', 'draft'])
             ->orderBy('start_date', 'desc')
             ->orderBy('created_at', 'desc')
-            ->take(3)
+            ->take(6)
             ->get();
         }
 
