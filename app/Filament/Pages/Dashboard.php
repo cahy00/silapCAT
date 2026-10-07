@@ -17,6 +17,7 @@ class Dashboard extends BaseDashboard
             \App\Filament\Widgets\WelcomeBanner::class,
             \App\Filament\Widgets\ExecutiveKpiWidget::class,
             \App\Filament\Widgets\LiveExamMonitoringWidget::class,
+            \App\Filament\Widgets\ScoreDistributionMapWidget::class,
             \App\Filament\Widgets\LocationMapWidget::class,
             \App\Filament\Widgets\StatsOverview::class,
             \App\Filament\Widgets\EventParticipantStats::class,
