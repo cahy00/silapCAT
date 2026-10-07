@@ -478,55 +478,17 @@
                     </div>
 
                     <div class="sdm-grade-panel">
-                        <div class="sdm-grade-row">
-                            <div class="sdm-grade-info">
-                                <span style="font-weight: 800; color: #1e3a8a;">💎 ≥ 400 (Sangat Memuaskan)</span>
-                                <span style="font-weight: 900; color: #1e3a8a;">{{ $data['range_a'] }} org ({{ $data['pct_a'] }}%)</span>
+                        @foreach ($data['bands'] as $band)
+                            <div class="sdm-grade-row">
+                                <div class="sdm-grade-info">
+                                    <span style="font-weight: 800; color: {{ $band['color'] }};">{{ $band['icon'] }} {{ $band['range_label'] }} ({{ $band['label'] }})</span>
+                                    <span style="font-weight: 900; color: {{ $band['color'] }};">{{ $band['count'] }} org ({{ $band['pct'] }}%)</span>
+                                </div>
+                                <div class="sdm-grade-bar-bg">
+                                    <div class="sdm-grade-bar-fill" style="width: {{ $band['pct'] }}%; background: {{ $band['color'] }};"></div>
+                                </div>
                             </div>
-                            <div class="sdm-grade-bar-bg">
-                                <div class="sdm-grade-bar-fill" style="width: {{ $data['pct_a'] }}%; background: #1e3a8a;"></div>
-                            </div>
-                        </div>
-
-                        <div class="sdm-grade-row">
-                            <div class="sdm-grade-info">
-                                <span style="font-weight: 800; color: #0284c7;">⭐ 350 - 399 (Memuaskan)</span>
-                                <span style="font-weight: 900; color: #0284c7;">{{ $data['range_b'] }} org ({{ $data['pct_b'] }}%)</span>
-                            </div>
-                            <div class="sdm-grade-bar-bg">
-                                <div class="sdm-grade-bar-fill" style="width: {{ $data['pct_b'] }}%; background: #0284c7;"></div>
-                            </div>
-                        </div>
-
-                        <div class="sdm-grade-row">
-                            <div class="sdm-grade-info">
-                                <span style="font-weight: 800; color: #059669;">✔️ 300 - 349 (Standar / Cukup)</span>
-                                <span style="font-weight: 900; color: #059669;">{{ $data['range_c'] }} org ({{ $data['pct_c'] }}%)</span>
-                            </div>
-                            <div class="sdm-grade-bar-bg">
-                                <div class="sdm-grade-bar-fill" style="width: {{ $data['pct_c'] }}%; background: #059669;"></div>
-                            </div>
-                        </div>
-
-                        <div class="sdm-grade-row">
-                            <div class="sdm-grade-info">
-                                <span style="font-weight: 800; color: #d97706;">⚠️ 250 - 299 (Di Bawah Standar)</span>
-                                <span style="font-weight: 900; color: #d97706;">{{ $data['range_d'] }} org ({{ $data['pct_d'] }}%)</span>
-                            </div>
-                            <div class="sdm-grade-bar-bg">
-                                <div class="sdm-grade-bar-fill" style="width: {{ $data['pct_d'] }}%; background: #d97706;"></div>
-                            </div>
-                        </div>
-
-                        <div class="sdm-grade-row">
-                            <div class="sdm-grade-info">
-                                <span style="font-weight: 800; color: #dc2626;">❌ < 250 (Tidak Lolos PG)</span>
-                                <span style="font-weight: 900; color: #dc2626;">{{ $data['range_e'] }} org ({{ $data['pct_e'] }}%)</span>
-                            </div>
-                            <div class="sdm-grade-bar-bg">
-                                <div class="sdm-grade-bar-fill" style="width: {{ $data['pct_e'] }}%; background: #dc2626;"></div>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 

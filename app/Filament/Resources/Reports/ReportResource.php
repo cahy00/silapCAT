@@ -80,7 +80,7 @@ class ReportResource extends Resource
                     $sub->whereDate('end_date', '>=', now()->startOfDay())
                         ->orWhereNull('end_date');
                 })->where(function($sub) {
-                    $sub->where('status', '!=', 'selesai')
+                    $sub->whereNotIn('status', [\App\Enums\EventStatus::Completed->value, \App\Enums\EventStatus::Cancelled->value])
                         ->orWhereNull('status');
                 });
             });

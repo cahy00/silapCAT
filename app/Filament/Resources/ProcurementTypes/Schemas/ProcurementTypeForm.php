@@ -17,6 +17,13 @@ class ProcurementTypeForm
                     ->required(),
                 TextInput::make('name')
                     ->required(),
+                TextInput::make('passing_grade')
+                    ->label('Passing Grade Skor CAT')
+                    ->numeric()
+                    ->minValue(0)
+                    ->step(0.01)
+                    ->placeholder((string) config('scoring.default_passing_grade'))
+                    ->helperText('Kosongkan untuk memakai nilai default ('.config('scoring.default_passing_grade').'). Dipakai pada peta distribusi skor & Executive Summary.'),
             ]);
     }
 }

@@ -31,18 +31,9 @@ class ScoreDistributionMapWidget extends Widget
         $avgInterview = $totalScores > 0 ? round($scores->avg('interview_score') ?? 0, 2) : 0;
         $avgTotal = $totalScores > 0 ? round($scores->avg('total_score') ?? 0, 2) : 0;
 
-        // Distribusi Rentang Skor CAT
-        $rangeA = $scores->where('cat_score', '>=', 400)->count();
-        $rangeB = $scores->whereBetween('cat_score', [350, 399.99])->count();
-        $rangeC = $scores->whereBetween('cat_score', [300, 349.99])->count();
-        $rangeD = $scores->whereBetween('cat_score', [250, 299.99])->count();
-        $rangeE = $scores->where('cat_score', '<', 250)->count();
-
-        $pctA = $totalScores > 0 ? round(($rangeA / $totalScores) * 100, 1) : 0;
-        $pctB = $totalScores > 0 ? round(($rangeB / $totalScores) * 100, 1) : 0;
-        $pctC = $totalScores > 0 ? round(($rangeC / $totalScores) * 100, 1) : 0;
-        $pctD = $totalScores > 0 ? round(($rangeD / $totalScores) * 100, 1) : 0;
-        $pctE = $totalScores > 0 ? round(($rangeE / $totalScores) * 100, 1) : 0;
+        // Distribusi Rentang Skor CAT (standar terpusat: config/scoring.php)
+        $passingGrade = \App\Support\ScoreBands::passingGrade();
+        $bands = \App\Support\ScoreBands::distribute($scores->pluck('cat_score'), $passingGrade);
 
         // 2. Data Peta Sebaran & Statistik per Titik Lokasi
         $locations = Location::with([
@@ -168,16 +159,18 @@ class ScoreDistributionMapWidget extends Widget
             'avg_cat' => $avgCat,
             'avg_interview' => $avgInterview,
             'avg_total' => $avgTotal,
-            'range_a' => $rangeA,
-            'range_b' => $rangeB,
-            'range_c' => $rangeC,
-            'range_d' => $rangeD,
-            'range_e' => $rangeE,
-            'pct_a' => $pctA,
-            'pct_b' => $pctB,
-            'pct_c' => $pctC,
-            'pct_d' => $pctD,
-            'pct_e' => $pctE,
+            'bands' => $bands,
+            'passing_grade' => $passingGrade,
+            'range_a' => $bands[0]['count'] ?? 0,
+            'range_b' => $bands[1]['count'] ?? 0,
+            'range_c' => $bands[2]['count'] ?? 0,
+            'range_d' => $bands[3]['count'] ?? 0,
+            'range_e' => $bands[4]['count'] ?? 0,
+            'pct_a' => $bands[0]['pct'] ?? 0,
+            'pct_b' => $bands[1]['pct'] ?? 0,
+            'pct_c' => $bands[2]['pct'] ?? 0,
+            'pct_d' => $bands[3]['pct'] ?? 0,
+            'pct_e' => $bands[4]['pct'] ?? 0,
             'map_markers' => $mapMarkers,
             'tilok_rankings' => $tilokRankings,
         ];

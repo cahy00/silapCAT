@@ -35,8 +35,8 @@ class EventsTable
                         // Status badge
                         $status = $record->status;
                         $statusConfig = match ($status) {
-                            'aktif' => ['bg' => '#22c55e', 'text' => '#ffffff', 'label' => '● AKTIF', 'glow' => 'box-shadow: 0 0 10px rgba(34,197,94,0.4);'],
-                            'selesai' => ['bg' => '#64748b', 'text' => '#ffffff', 'label' => '✓ SELESAI', 'glow' => ''],
+                            'active' => ['bg' => '#22c55e', 'text' => '#ffffff', 'label' => '● AKTIF', 'glow' => 'box-shadow: 0 0 10px rgba(34,197,94,0.4);'],
+                            'completed' => ['bg' => '#64748b', 'text' => '#ffffff', 'label' => '✓ SELESAI', 'glow' => ''],
                             'cancelled' => ['bg' => '#f43f5e', 'text' => '#ffffff', 'label' => '✕ DIBATALKAN', 'glow' => ''],
                             default => ['bg' => '#f59e0b', 'text' => '#ffffff', 'label' => '◌ DRAFT', 'glow' => ''],
                         };

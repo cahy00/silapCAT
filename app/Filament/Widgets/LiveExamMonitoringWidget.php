@@ -29,8 +29,7 @@ class LiveExamMonitoringWidget extends Widget
             'reports',
         ])
         ->where(function ($q) use ($today) {
-            $q->where('status', 'active')
-              ->orWhere('status', 'aktif')
+            $q->where('status', \App\Enums\EventStatus::Active->value)
               ->orWhere(function ($sub) use ($today) {
                   $sub->whereDate('start_date', '<=', $today)
                       ->whereDate('end_date', '>=', $today);

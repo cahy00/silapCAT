@@ -33,19 +33,24 @@ class Event extends Model
 
     public function getStatusAttribute($value)
     {
-        if ($this->start_date && $this->end_date) {
-            $now = now()->startOfDay();
-            $start = \Carbon\Carbon::parse($this->start_date)->startOfDay();
-            $end = \Carbon\Carbon::parse($this->end_date)->startOfDay();
+        return \App\Enums\EventStatus::resolve($value, $this->start_date, $this->end_date);
+    }
 
-            if ($now->between($start, $end)) {
-                return 'aktif';
-            } elseif ($now->gt($end)) {
-                return 'selesai';
-            }
-        }
+    protected static function booted(): void
+    {
+        // Simpan status efektif ke DB agar query where('status', ...) konsisten dengan tampilan.
+        static::saving(function (Event $event) {
+            $event->attributes['status'] = \App\Enums\EventStatus::resolve(
+                $event->attributes['status'] ?? null,
+                $event->start_date,
+                $event->end_date,
+            );
+        });
+    }
 
-        return $value;
+    public function getStatusLabelAttribute(): string
+    {
+        return \App\Enums\EventStatus::tryFrom((string) $this->status)?->getLabel() ?? (string) $this->status;
     }
 
     protected $attributes = [

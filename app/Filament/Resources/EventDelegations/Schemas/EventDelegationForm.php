@@ -30,7 +30,7 @@ class EventDelegationForm
                                             $sub->whereDate('start_date', '<=', now()->startOfDay())
                                                 ->whereDate('end_date', '>=', now()->startOfDay());
                                         })->orWhere(function($sub) {
-                                            $sub->whereNull('start_date')->where('status', 'aktif');
+                                            $sub->whereNull('start_date')->where('status', \App\Enums\EventStatus::Active->value);
                                         });
                                     })
                                     ->get();

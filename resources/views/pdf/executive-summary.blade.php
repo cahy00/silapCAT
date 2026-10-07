@@ -200,7 +200,7 @@
             <th>Jenis Pengadaan</th>
             <td>{{ $event->procurementType?->name ?? 'Seleksi CAT' }}</td>
             <th>Status Kegiatan</th>
-            <td style="font-weight: bold; text-transform: uppercase;">{{ $event->status }}</td>
+            <td style="font-weight: bold; text-transform: uppercase;">{{ $event->status_label ?? strtoupper($event->status) }}</td>
         </tr>
         <tr>
             <th>Jadwal Pelaksanaan</th>
@@ -288,6 +288,10 @@
 
     {{-- Distribusi Skor & Kelulusan (Khusus jika ada data exam scores / UD / UPKP) --}}
     @if ($examScoresCount > 0)
+        @php
+            $eventPg = \App\Support\ScoreBands::passingGrade($event);
+            $eventBands = \App\Support\ScoreBands::distribute($event->examScores->pluck('cat_score'), $eventPg);
+        @endphp
         <div class="section-title">Distribusi Skor & Kelulusan Peserta</div>
         <table>
             <thead>
@@ -295,7 +299,7 @@
                     <th>Kategori Hasil</th>
                     <th style="text-align: center;">Jumlah Peserta</th>
                     <th style="text-align: center;">Persentase</th>
-                    <th>Keterangan Standar Kelulusan</th>
+                    <th>Keterangan Standar Kelulusan (Passing Grade: {{ number_format($eventPg, 0) }})</th>
                 </tr>
             </thead>
             <tbody>
@@ -303,13 +307,13 @@
                     <td style="font-weight: bold; color: #15803d;">LULUS (Memenuhi Standar)</td>
                     <td style="text-align: center; font-weight: bold; color: #15803d;">{{ number_format($passedCount) }}</td>
                     <td style="text-align: center; font-weight: bold; color: #15803d;">{{ $passRate }}%</td>
-                    <td>Nilai Akhir &ge; 70.00 / Passing Grade Terpenuhi</td>
+                    <td>Memenuhi Ambang Batas Nilai / Status Lulus Terverifikasi</td>
                 </tr>
                 <tr>
                     <td style="font-weight: bold; color: #b91c1c;">TIDAK LULUS</td>
                     <td style="text-align: center; font-weight: bold; color: #b91c1c;">{{ number_format($failedCount) }}</td>
                     <td style="text-align: center; font-weight: bold; color: #b91c1c;">{{ round(100 - $passRate, 1) }}%</td>
-                    <td>Nilai Akhir &lt; 70.00 / Tidak Hadir</td>
+                    <td>Di Bawah Ambang Batas Nilai / Tidak Hadir</td>
                 </tr>
                 <tr style="background-color: #f8fafc; font-weight: bold;">
                     <td>TOTAL TERDATA</td>
@@ -317,6 +321,28 @@
                     <td style="text-align: center;">100%</td>
                     <td>Rekapitulasi Hasil Penilaian Terverifikasi</td>
                 </tr>
+            </tbody>
+        </table>
+
+        {{-- Rincian Rentang Skor CAT Terstandarisasi --}}
+        <table style="margin-top: 6px;">
+            <thead>
+                <tr>
+                    <th>Rentang Skor CAT</th>
+                    <th>Predikat Mutu</th>
+                    <th style="text-align: center;">Jumlah</th>
+                    <th style="text-align: center;">Persentase</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($eventBands as $band)
+                    <tr>
+                        <td style="font-weight: bold; color: {{ $band['color'] }};">{{ $band['range_label'] }}</td>
+                        <td>{{ $band['label'] }}</td>
+                        <td style="text-align: center; font-weight: bold;">{{ number_format($band['count']) }}</td>
+                        <td style="text-align: center;">{{ $band['pct'] }}%</td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     @endif
