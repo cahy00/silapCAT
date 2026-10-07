@@ -47,6 +47,20 @@ class ActivityResource extends Resource
         return ActivitiesTable::configure($table);
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+
+        return $user && method_exists($user, 'hasRole') && $user->hasRole('super_admin');
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+
+        return $user && method_exists($user, 'hasRole') && $user->hasRole('super_admin');
+    }
+
     public static function getRelations(): array
     {
         return [
