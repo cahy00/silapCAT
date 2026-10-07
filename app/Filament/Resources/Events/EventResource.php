@@ -551,6 +551,200 @@ class EventResource extends Resource
                                         return new \Illuminate\Support\HtmlString("<div>{$statsGrid}{$table}</div>");
                                     }),
                             ]),
+
+                        SchemaTab::make('Executive Summary')
+                            ->icon('heroicon-o-document-chart-bar')
+                            ->schema([
+                                TextEntry::make('dashboard_executive_summary')
+                                    ->hiddenLabel()
+                                    ->html()
+                                    ->state(function (Event $record) {
+                                        // 1. Calculations
+                                        $totalTarget = 0;
+                                        foreach ($record->eventLocations as $el) {
+                                            $totalTarget += (int) $el->eventLocationInstitutions->sum('participants_count');
+                                        }
+                                        if ($totalTarget === 0) {
+                                            $totalTarget = (int) $record->eventInstitutions->sum('participants_count');
+                                        }
+                                        if ($totalTarget === 0) {
+                                            $totalTarget = (int) $record->reports->sum('total_participants');
+                                        }
+
+                                        $present = (int) $record->reports->sum('present_count');
+                                        $absent = (int) $record->reports->sum('absent_count');
+                                        $attendanceRate = $totalTarget > 0 ? round(($present / $totalTarget) * 100, 1) : ($present > 0 ? 100 : 0);
+                                        $absentRate = $totalTarget > 0 ? round(($absent / $totalTarget) * 100, 1) : 0;
+
+                                        $highestScore = $record->reports->max('highest_score') ?? 0;
+                                        $minReports = $record->reports->whereNotNull('lowest_score')->where('lowest_score', '>', 0);
+                                        $lowestScore = $minReports->isNotEmpty() ? $minReports->min('lowest_score') : ($record->reports->min('lowest_score') ?? 0);
+
+                                        $scores = $record->examScores;
+                                        $examScoresCount = $scores->count();
+                                        $passedCount = $scores->where('status', 'Lulus')->count();
+                                        $failedCount = $scores->where('status', '!=', 'Lulus')->count();
+                                        $passRate = $examScoresCount > 0 ? round(($passedCount / $examScoresCount) * 100, 1) : 0;
+
+                                        $pdfUrl = route('events.executive-summary-pdf', $record);
+
+                                        // 2. Action Header Banner
+                                        $actionBanner = "
+                                            <div style='margin-bottom: 20px; padding: 16px 20px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 14px rgba(30, 58, 138, 0.25); color: #ffffff;'>
+                                                <div style='display: flex; align-items: center; gap: 14px;'>
+                                                    <div style='width: 44px; height: 44px; border-radius: 10px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 22px;'>
+                                                        📊
+                                                    </div>
+                                                    <div>
+                                                        <div style='font-size: 16px; font-weight: 800; letter-spacing: -0.01em;'>Ringkasan Eksekutif (Executive Summary)</div>
+                                                        <div style='font-size: 12px; opacity: 0.9; margin-top: 2px;'>Rangkuman komprehensif kehadiran, kendala operasional, distribusi nilai, dan galeri dokumentasi kegiatan.</div>
+                                                    </div>
+                                                </div>
+                                                <div style='display: flex; align-items: center; gap: 8px;'>
+                                                    <a href='{$pdfUrl}' target='_blank' style='display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 8px; background: #ffffff; color: #1e3a8a; font-size: 13px; font-weight: 800; text-decoration: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.2s;'>
+                                                        <svg style='width: 16px; height: 16px;' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z'></path></svg>
+                                                        Cetak Executive Summary (PDF)
+                                                    </a>
+                                                </div>
+                                            </div>";
+
+                                        // 3. KPI Cards
+                                        $kpiCards = "
+                                            <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 22px;'>
+                                                <div style='background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 14px 18px;'>
+                                                    <div style='font-size: 11px; font-weight: 800; color: #4338ca; text-transform: uppercase; letter-spacing: 0.05em;'>Target Kuota</div>
+                                                    <div style='font-size: 24px; font-weight: 900; color: #312e81; margin-top: 4px; line-height: 1.1;'>" . number_format($totalTarget) . "</div>
+                                                    <div style='font-size: 11px; color: #6366f1; font-weight: 600; margin-top: 4px;'>Peserta Terjadwal</div>
+                                                </div>
+                                                <div style='background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 14px 18px;'>
+                                                    <div style='font-size: 11px; font-weight: 800; color: #15803d; text-transform: uppercase; letter-spacing: 0.05em;'>Total Kehadiran</div>
+                                                    <div style='font-size: 24px; font-weight: 900; color: #14532d; margin-top: 4px; line-height: 1.1;'>" . number_format($present) . "</div>
+                                                    <div style='font-size: 11px; color: #16a34a; font-weight: 700; margin-top: 4px;'>{$attendanceRate}% Tingkat Hadir</div>
+                                                </div>
+                                                <div style='background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px 18px;'>
+                                                    <div style='font-size: 11px; font-weight: 800; color: #b91c1c; text-transform: uppercase; letter-spacing: 0.05em;'>Total Tidak Hadir</div>
+                                                    <div style='font-size: 24px; font-weight: 900; color: #7f1d1d; margin-top: 4px; line-height: 1.1;'>" . number_format($absent) . "</div>
+                                                    <div style='font-size: 11px; color: #dc2626; font-weight: 700; margin-top: 4px;'>{$absentRate}% Tingkat Absen</div>
+                                                </div>
+                                                <div style='background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 14px 18px;'>
+                                                    <div style='font-size: 11px; font-weight: 800; color: #0369a1; text-transform: uppercase; letter-spacing: 0.05em;'>Nilai Tertinggi</div>
+                                                    <div style='font-size: 24px; font-weight: 900; color: #0c4a6e; margin-top: 4px; line-height: 1.1;'>" . number_format($highestScore) . "</div>
+                                                    <div style='font-size: 11px; color: #0284c7; font-weight: 600; margin-top: 4px;'>Skor CAT Maksimum</div>
+                                                </div>
+                                                <div style='background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 14px 18px;'>
+                                                    <div style='font-size: 11px; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: 0.05em;'>Nilai Terendah</div>
+                                                    <div style='font-size: 24px; font-weight: 900; color: #78350f; margin-top: 4px; line-height: 1.1;'>" . number_format($lowestScore) . "</div>
+                                                    <div style='font-size: 11px; color: #d97706; font-weight: 600; margin-top: 4px;'>Skor CAT Minimum</div>
+                                                </div>
+                                            </div>";
+
+                                        // 4. Score & Passing Grade Section
+                                        $scoreSection = '';
+                                        if ($examScoresCount > 0) {
+                                            $failRate = round(100 - $passRate, 1);
+                                            $scoreSection = "
+                                                <div style='margin-bottom: 22px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);'>
+                                                    <div style='padding: 14px 18px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;'>
+                                                        <div style='font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em;'>🎯 Distribusi Kelulusan & Passing Grade</div>
+                                                        <span style='font-size: 12px; font-weight: 700; color: #475569;'>Total: " . number_format($examScoresCount) . " Peserta</span>
+                                                    </div>
+                                                    <div style='padding: 16px 18px;'>
+                                                        <div style='display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap;'>
+                                                            <div style='flex: 1; min-width: 200px; padding: 12px 16px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; display: flex; align-items: center; justify-content: space-between;'>
+                                                                <div>
+                                                                    <div style='font-size: 11px; font-weight: 800; color: #065f46;'>LULUS (MEMENUHI PG)</div>
+                                                                    <div style='font-size: 20px; font-weight: 900; color: #047857; margin-top: 2px;'>" . number_format($passedCount) . " <span style='font-size: 12px; font-weight: 600;'>Peserta</span></div>
+                                                                </div>
+                                                                <div style='font-size: 22px; font-weight: 900; color: #059669;'>{$passRate}%</div>
+                                                            </div>
+                                                            <div style='flex: 1; min-width: 200px; padding: 12px 16px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; display: flex; align-items: center; justify-content: space-between;'>
+                                                                <div>
+                                                                    <div style='font-size: 11px; font-weight: 800; color: #991b1b;'>TIDAK LULUS</div>
+                                                                    <div style='font-size: 20px; font-weight: 900; color: #b91c1c; margin-top: 2px;'>" . number_format($failedCount) . " <span style='font-size: 12px; font-weight: 600;'>Peserta</span></div>
+                                                                </div>
+                                                                <div style='font-size: 22px; font-weight: 900; color: #dc2626;'>{$failRate}%</div>
+                                                            </div>
+                                                        </div>
+                                                        <div style='width: 100%; height: 10px; background: #fee2e2; border-radius: 5px; overflow: hidden; display: flex;'>
+                                                            <div style='height: 100%; width: {$passRate}%; background: #10b981; transition: width 0.4s;'></div>
+                                                        </div>
+                                                    </div>
+                                                </div>";
+                                        }
+
+                                        // 5. Technical Issues & Executive Notes
+                                        $techIssues = !empty($record->technical_issues) 
+                                            ? nl2br(e($record->technical_issues)) 
+                                            : "<span style='color: #9ca3af; font-style: italic;'>Seluruh pelaksanaan ujian berjalan tertib, aman, dan lancar tanpa kendala teknis yang signifikan.</span>";
+
+                                        $execNotes = !empty($record->executive_notes) 
+                                            ? nl2br(e($record->executive_notes)) 
+                                            : "<span style='color: #9ca3af; font-style: italic;'>Kegiatan terlaksana sesuai POS Seleksi CAT BKN dengan integritas dan akuntabilitas terjaga secara menyeluruh.</span>";
+
+                                        $notesGrid = "
+                                            <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 22px;'>
+                                                <div style='background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);'>
+                                                    <div style='padding: 12px 16px; background: #fefce8; border-bottom: 1px solid #fef08a; display: flex; align-items: center; gap: 8px;'>
+                                                        <span style='font-size: 16px;'>⚠️</span>
+                                                        <span style='font-size: 12px; font-weight: 800; color: #854d0e; text-transform: uppercase; letter-spacing: 0.05em;'>Kendala Teknis & Langkah Mitigasi</span>
+                                                    </div>
+                                                    <div style='padding: 14px 16px; font-size: 13px; color: #374151; line-height: 1.6; min-height: 80px;'>
+                                                        {$techIssues}
+                                                    </div>
+                                                </div>
+                                                <div style='background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);'>
+                                                    <div style='padding: 12px 16px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; display: flex; align-items: center; gap: 8px;'>
+                                                        <span style='font-size: 16px;'>📝</span>
+                                                        <span style='font-size: 12px; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.05em;'>Catatan Eksekutif & Evaluasi</span>
+                                                    </div>
+                                                    <div style='padding: 14px 16px; font-size: 13px; color: #374151; line-height: 1.6; min-height: 80px;'>
+                                                        {$execNotes}
+                                                    </div>
+                                                </div>
+                                            </div>";
+
+                                        // 6. Photo Gallery Section
+                                        $photos = is_array($record->documentation_photos) ? $record->documentation_photos : [];
+                                        $photoCards = '';
+                                        if (empty($photos)) {
+                                            $photoCards = "<div style='text-align: center; padding: 28px; color: #9ca3af; font-style: italic; font-size: 13px; background: #f9fafb; border: 1px dashed #e5e7eb; border-radius: 10px;'>Belum ada foto dokumentasi pelaksanaan yang diunggah. Tambahkan melalui tombol Kelola Catatan / Ubah Kegiatan.</div>";
+                                        } else {
+                                            $photoItems = '';
+                                            foreach ($photos as $idx => $photoPath) {
+                                                $imgUrl = asset('storage/' . $photoPath);
+                                                $photoItems .= "
+                                                    <div style='border-radius: 10px; overflow: hidden; border: 1px solid #e5e7eb; background: #000000; position: relative; aspect-ratio: 4/3; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>
+                                                        <img src='{$imgUrl}' style='width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;' alt='Dokumentasi " . ($idx + 1) . "' />
+                                                        <div style='position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 8px 10px; color: #ffffff; font-size: 11px; font-weight: 600;'>
+                                                            Foto Dokumentasi #" . ($idx + 1) . "
+                                                        </div>
+                                                    </div>";
+                                            }
+                                            $photoCards = "<div style='display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px;'>{$photoItems}</div>";
+                                        }
+
+                                        $gallerySection = "
+                                            <div style='background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);'>
+                                                <div style='padding: 14px 18px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;'>
+                                                    <div style='font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em;'>📸 Foto Dokumentasi Pelaksanaan</div>
+                                                    <span style='font-size: 12px; font-weight: 700; color: #64748b;'>" . count($photos) . " Foto Tersedia</span>
+                                                </div>
+                                                <div style='padding: 18px;'>
+                                                    {$photoCards}
+                                                </div>
+                                            </div>";
+
+                                        return new \Illuminate\Support\HtmlString("
+                                            <div>
+                                                {$actionBanner}
+                                                {$kpiCards}
+                                                {$scoreSection}
+                                                {$notesGrid}
+                                                {$gallerySection}
+                                            </div>
+                                        ");
+                                    }),
+                            ]),
                     ])->columnSpanFull(),
             ]);
     }

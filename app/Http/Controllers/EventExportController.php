@@ -467,5 +467,24 @@ class EventExportController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
+
+    public function executiveSummaryPdf(Event $event)
+    {
+        $event->load([
+            'procurementType',
+            'eventLocations.location.locationSurvey',
+            'eventLocations.eventLocationInstitutions.institution',
+            'eventInstitutions.institution',
+            'eventEmployees.employee',
+            'reports',
+            'examScores',
+        ]);
+
+        $pdf = Pdf::loadView('pdf.executive-summary', ['event' => $event])
+            ->setPaper('a4', 'portrait');
+
+        $safeName = \Illuminate\Support\Str::slug($event->name);
+        return $pdf->stream("Executive_Summary_{$safeName}.pdf");
+    }
 }
 

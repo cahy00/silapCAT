@@ -28,6 +28,7 @@ class Event extends Model
         'status' => 'string',
         'start_date' => 'date',
         'end_date' => 'date',
+        'documentation_photos' => 'array',
     ];
 
     public function getStatusAttribute($value)

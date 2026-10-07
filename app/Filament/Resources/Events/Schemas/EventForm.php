@@ -893,6 +893,31 @@ class EventForm
                                                     ->columnSpanFull(),
                                             ]),
                                         ]),
+                                    Tab::make('Executive Summary & Dokumentasi')
+                                        ->icon('heroicon-o-document-chart-bar')
+                                        ->schema([
+                                            Textarea::make('technical_issues')
+                                                ->label('Kendala Teknis & Mitigasi Lapangan')
+                                                ->placeholder('Contoh: Sesi 2 mengalami pemadaman listrik PLN selama 5 menit, langsung dimitigasi dengan genset otomatis. Sesi dilanjutkan tanpa kehilangan data jawaban...')
+                                                ->rows(3)
+                                                ->helperText('Catat kendala perangkat, jaringan, kelistrikan, atau insiden operasional beserta solusinya (jika ada).'),
+                                            Textarea::make('executive_notes')
+                                                ->label('Catatan Eksekutif / Evaluasi Pelaksanaan')
+                                                ->placeholder('Contoh: Pelaksanaan seleksi berjalan tertib, aman, dan mematuhi POS CAT BKN. Koordinasi instansi dan panitia lokal sangat solid...')
+                                                ->rows(3)
+                                                ->helperText('Catatan kesimpulan, evaluasi umum pelaksanaan, atau rekomendasi untuk pimpinan.'),
+                                            FileUpload::make('documentation_photos')
+                                                ->label('Foto Dokumentasi Pelaksanaan Ujian')
+                                                ->multiple()
+                                                ->reorderable()
+                                                ->directory('events/documentation')
+                                                ->disk('public')
+                                                ->image()
+                                                ->imageEditor()
+                                                ->maxFiles(8)
+                                                ->maxSize(10240)
+                                                ->helperText('Unggah hingga 8 foto dokumentasi kegiatan (suasana registrasi, ruang CAT, arahan panitia, dll).'),
+                                        ]),
                                 ])->columnSpanFull()
                         ]),
                         

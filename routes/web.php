@@ -40,6 +40,10 @@ Route::get('/events/{event}/documents-zip', [\App\Http\Controllers\DocumentZipEx
     ->name('events.documents-zip')
     ->middleware(['auth']);
 
+Route::get('/events/{event}/executive-summary-pdf', [\App\Http\Controllers\EventExportController::class, 'executiveSummaryPdf'])
+    ->name('events.executive-summary-pdf')
+    ->middleware(['auth']);
+
 Route::get('/events/{event}/pdf', function (\App\Models\Event $event) {
     $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.event-report', ['event' => $event]);
     return $pdf->stream("Laporan_Kegiatan_{$event->id}.pdf");
