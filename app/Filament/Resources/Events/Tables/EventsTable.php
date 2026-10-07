@@ -441,6 +441,12 @@ class EventsTable
                             ];
                             return collect($docs)->filter(fn($doc) => !empty($doc))->count() < 4;
                         }),
+                    \Filament\Actions\Action::make('download_zip')
+                        ->label('Unduh ZIP Dokumen')
+                        ->icon(null)
+                        ->color('warning')
+                        ->url(fn (Event $record) => route('events.documents-zip', $record))
+                        ->openUrlInNewTab(),
                     \Filament\Actions\ViewAction::make()
                         ->label('Lihat Detail')
                         ->icon(null)
@@ -479,6 +485,14 @@ class EventsTable
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\BulkAction::make('export_zip_bulk')
+                        ->label('Ekspor ZIP Dokumen Terpilih')
+                        ->icon('heroicon-m-arrow-down-tray')
+                        ->color('success')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $ids = $records->pluck('id')->join(',');
+                            return redirect()->to(route('events.bulk-documents-zip', ['ids' => $ids]));
+                        }),
                     \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

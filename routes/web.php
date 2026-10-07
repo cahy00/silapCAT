@@ -32,6 +32,14 @@ Route::get('/events/monthly-pdf', [\App\Http\Controllers\EventExportController::
     ->name('events.monthly-pdf')
     ->middleware(['auth']);
 
+Route::get('/events/bulk-documents-zip', [\App\Http\Controllers\DocumentZipExportController::class, 'exportBulk'])
+    ->name('events.bulk-documents-zip')
+    ->middleware(['auth']);
+
+Route::get('/events/{event}/documents-zip', [\App\Http\Controllers\DocumentZipExportController::class, 'exportSingleEvent'])
+    ->name('events.documents-zip')
+    ->middleware(['auth']);
+
 Route::get('/events/{event}/pdf', function (\App\Models\Event $event) {
     $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.event-report', ['event' => $event]);
     return $pdf->stream("Laporan_Kegiatan_{$event->id}.pdf");

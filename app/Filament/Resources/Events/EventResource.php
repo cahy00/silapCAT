@@ -302,6 +302,27 @@ class EventResource extends Resource
                                                 ->url(fn ($record) => $record->doc_institution_announcement ? asset('storage/' . $record->doc_institution_announcement) : null, true),
                                         ]),
                                 ]),
+                                TextEntry::make('download_zip_banner')
+                                    ->hiddenLabel()
+                                    ->html()
+                                    ->state(function (Event $record) {
+                                        $url = route('events.documents-zip', $record);
+                                        return new \Illuminate\Support\HtmlString("
+                                            <div style='margin-top: 12px; padding: 14px 18px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;'>
+                                                <div style='display: flex; align-items: center; gap: 10px;'>
+                                                    <span style='font-size: 20px;'>📦</span>
+                                                    <div>
+                                                        <div style='font-size: 13px; font-weight: 700; color: #166534;'>Unduh Arsip Dokumen Kegiatan</div>
+                                                        <div style='font-size: 11px; color: #15803d;'>Kemas seluruh berkas (Laporan, SK Tim, BA CATOS, Pengumuman) dan Ringkasan PDF ke dalam satu file .ZIP</div>
+                                                    </div>
+                                                </div>
+                                                <a href='{$url}' target='_blank' style='display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; background: #16a34a; color: #ffffff; font-size: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 1px 3px rgba(22, 163, 74, 0.3);'>
+                                                    <svg style='width: 15px; height: 15px;' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'></path></svg>
+                                                    Unduh Semua Dokumen (.ZIP)
+                                                </a>
+                                            </div>
+                                        ");
+                                    }),
                             ]),
 
                         SchemaTab::make('Rekapitulasi Laporan & Nilai')

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Events\Pages;
 
 use App\Filament\Resources\Events\EventResource;
+use App\Models\Event;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -102,6 +103,51 @@ class ListEvents extends ListRecords
                 ])
                 ->action(function (array $data) {
                     $url = route('events.monthly-pdf', ['month' => $data['month'], 'year' => $data['year']]);
+                    return redirect()->to($url);
+                }),
+            \Filament\Actions\Action::make('exportZipDocuments')
+                ->label('Ekspor ZIP Dokumen')
+                ->icon('heroicon-m-arrow-down-tray')
+                ->color('primary')
+                ->modalHeading('Ekspor Paket Dokumen Kegiatan (.ZIP)')
+                ->modalDescription('Pilih filter periode atau kegiatan untuk mengunduh seluruh berkas dokumen dalam format arsip ZIP.')
+                ->modalSubmitActionLabel('Unduh ZIP')
+                ->form([
+                    \Filament\Schemas\Components\Grid::make(2)->schema([
+                        \Filament\Forms\Components\Select::make('event_id')
+                            ->label('Pilih Kegiatan (Opsional)')
+                            ->options(fn() => Event::orderBy('start_date', 'desc')->pluck('name', 'id'))
+                            ->placeholder('Semua Kegiatan')
+                            ->searchable()
+                            ->columnSpan(2),
+                        \Filament\Forms\Components\Select::make('month')
+                            ->label('Bulan')
+                            ->options([
+                                '' => 'Semua Bulan',
+                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                            ])
+                            ->default(null),
+                        \Filament\Forms\Components\Select::make('year')
+                            ->label('Tahun')
+                            ->options(function () {
+                                $currentYear = now()->year;
+                                $years = ['' => 'Semua Tahun'];
+                                for ($y = $currentYear - 3; $y <= $currentYear + 3; $y++) {
+                                    $years[$y] = $y;
+                                }
+                                return $years;
+                            })
+                            ->default(now()->year),
+                    ])
+                ])
+                ->action(function (array $data) {
+                    $url = route('events.bulk-documents-zip', [
+                        'event_id' => $data['event_id'] ?? null,
+                        'month' => $data['month'] ?? null,
+                        'year' => $data['year'] ?? null,
+                    ]);
                     return redirect()->to($url);
                 }),
             CreateAction::make(),

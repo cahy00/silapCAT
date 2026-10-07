@@ -111,7 +111,7 @@
                 @foreach($event->eventInstitutions as $ei)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $ei->institution->name }}</td>
+                    <td>{{ $ei->institution?->name ?? '-' }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -132,13 +132,13 @@
             <tbody>
                 @foreach($event->eventLocations as $el)
                 <tr>
-                    <td><strong>{{ $el->location->name }}</strong></td>
-                    <td>{{ number_format($el->participants_count) }}</td>
+                    <td><strong>{{ $el->location?->name ?? '-' }}</strong></td>
+                    <td>{{ number_format((int) $el->participants_count) }}</td>
                     <td>
                         {{ $el->start_date?->format('d/m/Y') ?? '-' }} s/d<br>
                         {{ $el->end_date?->format('d/m/Y') ?? '-' }}
                     </td>
-                    <td><small>{{ $el->location->city }}, {{ $el->location->address }}</small></td>
+                    <td><small>{{ $el->location?->city ?? '-' }}, {{ $el->location?->address ?? '-' }}</small></td>
                 </tr>
                 @endforeach
             </tbody>
@@ -158,8 +158,8 @@
             <tbody>
                 @foreach($event->eventEmployees as $ee)
                 <tr>
-                    <td>{{ $ee->employee->name }}</td>
-                    <td>{{ $ee->employee->employee_number }}</td>
+                    <td>{{ $ee->employee?->name ?? '-' }}</td>
+                    <td>{{ $ee->employee?->employee_number ?? '-' }}</td>
                     <td>{{ is_array($ee->role) ? implode(', ', $ee->role) : $ee->role }}</td>
                 </tr>
                 @endforeach
@@ -188,7 +188,7 @@
                 @foreach($event->reports->sortBy('report_date') as $report)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $report->eventLocation->location->name ?? '-' }}</td>
+                    <td>{{ $report->eventLocation?->location?->name ?? '-' }}</td>
                     <td>{{ $report->report_date ? $report->report_date->format('d/m/Y') : '-' }}</td>
                     <td>{{ $report->session_name }}</td>
                     <td>{{ $report->total_participants }}</td>
@@ -207,7 +207,7 @@
 
     <div class="footer">
         Dicetak pada: {{ now()->translatedFormat('l, d F Y H:i') }} WIB<br>
-        Oleh: {{ auth()->user()->name }}
+        Oleh: {{ auth()->user()?->name ?? 'Sistem SILAPCAT' }}
     </div>
 </body>
 </html>
