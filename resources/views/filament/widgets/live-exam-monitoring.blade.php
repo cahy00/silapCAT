@@ -399,9 +399,16 @@
                             <!-- Card Header -->
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.75rem;">
                                 <div>
-                                    <span class="lem-proc-badge">
-                                        {{ $item['procurement_type'] }} • T.A {{ $item['formation_year'] ?? '-' }}
-                                    </span>
+                                    <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
+                                        <span class="lem-proc-badge" style="margin-bottom: 0;">
+                                            {{ $item['procurement_type'] }} • T.A {{ $item['formation_year'] ?? '-' }}
+                                        </span>
+                                        @if (!empty($item['date_range']))
+                                            <span class="lem-proc-badge" style="margin-bottom: 0; background: rgba(14, 165, 233, 0.1); color: #0284c7; border-color: rgba(14, 165, 233, 0.25);">
+                                                📅 {{ $item['date_range'] }}
+                                            </span>
+                                        @endif
+                                    </div>
                                     <h3 class="lem-card-title">
                                         {{ $item['name'] }}
                                     </h3>
@@ -442,21 +449,44 @@
                                 </div>
                             </div>
 
-                            <!-- Titik Lokasi & Jadwal -->
-                            <div style="font-size: 0.75rem; margin-bottom: 0.6rem;">
+                            <!-- Titik Lokasi & Instansi -->
+                            <div style="font-size: 0.75rem; margin-bottom: 0.65rem;">
                                 <div class="lem-section-label">
                                     <svg style="width: 0.85rem; height: 0.85rem; color: #f59e0b;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     </svg>
-                                    Titik Lokasi (Tilok):
+                                    Titik Lokasi & Instansi:
                                 </div>
                                 @foreach ($item['locations'] as $loc)
-                                    <div class="lem-loc-item">
-                                        <span>• <strong>{{ $loc['name'] }}</strong> {{ $loc['city'] ? "({$loc['city']})" : "" }}</span>
-                                        <span class="lem-loc-pc">{{ $loc['pc_count'] > 0 ? "{$loc['pc_count']} PC" : "" }}</span>
+                                    <div style="margin-bottom: 0.35rem; padding-left: 0.25rem;">
+                                        <div class="lem-loc-item" style="padding-left: 0.85rem; font-weight: 700;">
+                                            <span>📍 {{ $loc['name'] }} {{ $loc['city'] ? "· {$loc['city']}" : "" }}</span>
+                                            <span class="lem-loc-pc">{{ $loc['pc_count'] > 0 ? "{$loc['pc_count']} PC" : "" }}</span>
+                                        </div>
+                                        @if (!empty($loc['institutions']))
+                                            <div style="padding-left: 1.6rem; display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.15rem;">
+                                                @foreach ($loc['institutions'] as $inst)
+                                                    <div style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.72rem;">
+                                                        <span class="lem-subtitle" style="font-weight: 600;">🏢 {{ $inst['name'] }}</span>
+                                                        <span style="font-weight: 800; color: #6366f1; font-size: 0.7rem;">({{ number_format($inst['participants_count']) }})</span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </div>
                                 @endforeach
+
+                                @if (empty($item['locations']) && !empty($item['all_institutions']))
+                                    <div style="padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.2rem;">
+                                        @foreach ($item['all_institutions'] as $inst)
+                                            <div style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.72rem;">
+                                                <span class="lem-subtitle" style="font-weight: 600;">🏢 {{ $inst['name'] }}</span>
+                                                <span style="font-weight: 800; color: #6366f1; font-size: 0.7rem;">({{ number_format($inst['participants_count']) }})</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Petugas Lapangan -->

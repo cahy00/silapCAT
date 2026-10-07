@@ -18,7 +18,7 @@ class EventsTable
     {
         return $table
             ->striped()
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('start_date', 'desc')
             ->emptyStateHeading('Belum Ada Kegiatan')
             ->emptyStateDescription('Daftar kegiatan yang Anda buat akan muncul di sini.')
             ->emptyStateIcon(null)
@@ -161,8 +161,9 @@ class EventsTable
                         ");
                     }),
 
-                TextColumn::make('jadwal_pelaksanaan')
+                TextColumn::make('start_date')
                     ->label('JADWAL EVENT')
+                    ->sortable()
                     ->html()
                     ->getStateUsing(fn (Event $record) => $record->id)
                     ->formatStateUsing(function (Event $record): HtmlString {

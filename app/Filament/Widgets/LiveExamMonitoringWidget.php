@@ -19,12 +19,12 @@ class LiveExamMonitoringWidget extends Widget
     {
         $today = Carbon::today();
 
-        // 1. Get events that are active or scheduled today
+        // 1. Get events that are active or scheduled today, ordered by newest start_date
         $events = Event::with([
             'procurementType',
             'eventLocations.location.locationSurvey',
             'eventLocations.eventLocationInstitutions.institution',
-            'eventInstitutions',
+            'eventInstitutions.institution',
             'eventEmployees.employee',
             'reports',
         ])
@@ -37,20 +37,22 @@ class LiveExamMonitoringWidget extends Widget
             $lq->whereDate('start_date', '<=', $today)
                ->whereDate('end_date', '>=', $today);
         })
+        ->orderBy('start_date', 'desc')
         ->orderBy('created_at', 'desc')
         ->get();
 
-        // If no active events today, get 3 most recent active/draft events to display upcoming schedule
+        // If no active events today, get 3 most recent active/draft events ordered by newest start_date
         if ($events->isEmpty()) {
             $events = Event::with([
                 'procurementType',
                 'eventLocations.location.locationSurvey',
                 'eventLocations.eventLocationInstitutions.institution',
-                'eventInstitutions',
+                'eventInstitutions.institution',
                 'eventEmployees.employee',
                 'reports',
             ])
             ->whereIn('status', ['active', 'draft'])
+            ->orderBy('start_date', 'desc')
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();
@@ -84,20 +86,50 @@ class LiveExamMonitoringWidget extends Widget
                 if (in_array('Pengawas', $roles)) $pengawas[] = $empName;
             }
 
-            // Locations summary
+            // Locations and their institutions
             $locations = [];
             foreach ($event->eventLocations as $el) {
                 $locName = $el->location?->name ?? 'Lokasi #' . $el->location_id;
                 $locCity = $el->location?->city ?? '';
                 $pcCount = $el->location?->locationSurvey?->pc_count ?? 0;
+
+                $instList = [];
+                foreach ($el->eventLocationInstitutions as $eli) {
+                    if ($eli->institution) {
+                        $instList[] = [
+                            'name' => $eli->institution->name,
+                            'participants_count' => (int) $eli->participants_count,
+                        ];
+                    }
+                }
+
                 $locations[] = [
                     'name' => $locName,
                     'city' => $locCity,
                     'pc_count' => $pcCount,
+                    'institutions' => $instList,
                     'dates' => ($el->start_date && $el->end_date)
                         ? $el->start_date->translatedFormat('d M') . ' - ' . $el->end_date->translatedFormat('d M Y')
                         : 'Jadwal fleksibel',
                 ];
+            }
+
+            // Fallback institutions if not assigned per location
+            $allInstitutions = [];
+            foreach ($event->eventInstitutions as $ei) {
+                if ($ei->institution) {
+                    $allInstitutions[] = [
+                        'name' => $ei->institution->name,
+                        'participants_count' => (int) $ei->participants_count,
+                    ];
+                }
+            }
+
+            $dateRange = null;
+            if ($event->start_date && $event->end_date) {
+                $dateRange = $event->start_date->translatedFormat('d M') . ' — ' . $event->end_date->translatedFormat('d M Y');
+            } elseif ($event->start_date) {
+                $dateRange = $event->start_date->translatedFormat('d M Y');
             }
 
             $cards[] = [
@@ -107,6 +139,7 @@ class LiveExamMonitoringWidget extends Widget
                 'is_live_today' => ($event->start_date && $event->end_date && $today->between($event->start_date, $event->end_date)) || $event->status === 'active',
                 'procurement_type' => $event->procurementType?->name ?? 'Seleksi CAT',
                 'formation_year' => $event->formation_year,
+                'date_range' => $dateRange,
                 'start_date' => $event->start_date ? $event->start_date->translatedFormat('d M Y') : '-',
                 'end_date' => $event->end_date ? $event->end_date->translatedFormat('d M Y') : '-',
                 'total_target' => $totalTarget,
@@ -114,6 +147,7 @@ class LiveExamMonitoringWidget extends Widget
                 'absent' => $absent,
                 'attendance_rate' => $attendanceRate,
                 'locations' => $locations,
+                'all_institutions' => $allInstitutions,
                 'koordinators' => $koordinators,
                 'it_staff' => $itStaff,
                 'pengawas' => $pengawas,
