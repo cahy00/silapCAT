@@ -752,7 +752,7 @@ class EventResource extends Resource
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()
-            ->with(['eventInstitutions.institution', 'eventLocations.location', 'reports.eventLocation.location', 'reports.user', 'examScores', 'procurementType.procurementCategory']);
+            ->with(['eventInstitutions.institution', 'eventLocations.location', 'eventLocations.eventLocationInstitutions.institution', 'reports.eventLocation.location', 'reports.user', 'examScores', 'procurementType.procurementCategory']);
     }
 
     public static function getRelations(): array

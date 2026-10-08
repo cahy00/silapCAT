@@ -39,9 +39,20 @@ class Dashboard extends BaseDashboard
                     ->placeholder('Semua Kegiatan')
                     ->searchable()
                     ->options(function () {
-                        return Event::query()
+                        return Event::with('eventLocations.location')
                             ->orderBy('start_date', 'desc')
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->mapWithKeys(function ($event) {
+                                $locations = $event->eventLocations
+                                    ->map(fn ($el) => $el->location?->name)
+                                    ->filter()
+                                    ->unique()
+                                    ->join(', ');
+
+                                $locText = $locations ? " [Tilok: {$locations}]" : '';
+
+                                return [$event->id => "{$event->name}{$locText}"];
+                            })
                             ->toArray();
                     }),
             ]);
