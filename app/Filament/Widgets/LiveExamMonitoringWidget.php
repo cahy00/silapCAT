@@ -67,7 +67,7 @@ class LiveExamMonitoringWidget extends Widget
                 $events = (clone $baseQuery)
                     ->orderBy('start_date', 'desc')
                     ->orderBy('created_at', 'desc')
-                    ->take(6)
+                    ->take(3)
                     ->get();
             }
 

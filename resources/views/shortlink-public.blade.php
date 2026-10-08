@@ -14,7 +14,7 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -25,8 +25,10 @@
   <link href="{{ asset('assets/css/main.css') }}" rel="stylesheet">
   
   <style>
+    body, h1, h2, h3, h4, h5, h6, .sitename, nav {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
     body {
-        font-family: 'Poppins', sans-serif;
         background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url("{{ asset('assets/img/hero-bg.jpg') }}") center center no-repeat;
         background-size: cover;
         background-attachment: fixed;

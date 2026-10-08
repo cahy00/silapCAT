@@ -53,7 +53,10 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Indigo,
                 'gray' => Color::Slate,
             ])
-            ->font('Inter')
+            ->font(
+                'Plus Jakarta Sans',
+                'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap'
+            )
             ->favicon(asset('assets/bkn/logo_bkn.png'))
             ->brandName('SILAPCAT')
             ->brandLogo(fn () => view('filament.components.brand-logo'))
