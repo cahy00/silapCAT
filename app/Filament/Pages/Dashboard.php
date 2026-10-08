@@ -13,6 +13,18 @@ class Dashboard extends BaseDashboard
 {
     use HasFiltersForm;
 
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-home';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Halaman Utama';
+    }
+
+    public function getTitle(): string | \Illuminate\Contracts\Support\Htmlable
+    {
+        return 'Halaman Utama';
+    }
+
     public function getHeading(): string
     {
         return '';

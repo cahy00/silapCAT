@@ -54,8 +54,9 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Slate,
             ])
             ->font('Inter')
+            ->favicon(asset('assets/bkn/logo_bkn.png'))
             ->brandName('SILAPCAT')
-            ->brandLogo(asset('assets/bkn/logo_bkn.png'))
+            ->brandLogo(fn () => view('filament.components.brand-logo'))
             ->brandLogoHeight('2.5rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
