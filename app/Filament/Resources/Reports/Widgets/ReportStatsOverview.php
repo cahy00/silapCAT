@@ -29,8 +29,8 @@ class ReportStatsOverview extends StatsOverviewWidget
         $totalSessions = (clone $query)->count();
 
         return [
-            Stat::make('Total Peserta', number_format($totalParticipants))
-                ->description('Akumulasi kuota peserta')
+            Stat::make('Total Peserta Terdaftar', number_format($totalParticipants))
+                ->description('Akumulasi peserta pada sesi dilaporkan')
                 ->descriptionIcon('heroicon-m-users')
                 ->chart([10, 15, 12, 18, 14, 20, 18])
                 ->color('primary'),

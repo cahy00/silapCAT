@@ -10,18 +10,29 @@ use Illuminate\Database\Eloquent\Model;
 
 use App\Models\Event;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 class LatestEvents extends TableWidget
 {
+    use InteractsWithPageFilters;
+
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
     protected static ?string $heading = 'Kegiatan Terbaru';
 
     public function table(Table $table): Table
     {
+        $year = $this->filters['formation_year'] ?? null;
+        $eventId = $this->filters['event_id'] ?? null;
+
         return $table
             ->query(
-                Event::query()->latest()->limit(5)
+                Event::query()
+                    ->with('procurementType:id,name')
+                    ->when($eventId, fn ($q) => $q->where('id', $eventId))
+                    ->when(!$eventId && $year, fn ($q) => $q->where('formation_year', $year))
+                    ->latest()
+                    ->limit(5)
             )
             ->columns([
                 TextColumn::make('name')

@@ -3,6 +3,8 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
+use App\Models\Employee;
+use Illuminate\Support\Facades\Cache;
 
 class StaffCompositionChart extends ChartWidget
 {
@@ -12,31 +14,34 @@ class StaffCompositionChart extends ChartWidget
 
     protected function getData(): array
     {
-        $employees = \App\Models\Employee::all();
-        $counts = [
-            'Koordinator' => 0,
-            'IT' => 0,
-            'Pengawas' => 0,
-        ];
+        $counts = Cache::remember('staff_composition_counts', 120, function () {
+            $counts = [
+                'Koordinator' => 0,
+                'IT' => 0,
+                'Pengawas' => 0,
+            ];
 
-        $employees = \App\Models\Employee::all();
+            $employees = Employee::select(['id', 'status'])->get();
 
-        foreach ($employees as $employee) {
-            $status = $employee->status ?? [];
-            if (!is_array($status)) {
-                $status = [$status]; // Handle if it was stored as string
-            }
+            foreach ($employees as $employee) {
+                $status = $employee->status ?? [];
+                if (!is_array($status)) {
+                    $status = [$status];
+                }
 
-            foreach ($status as $s) {
-                if (isset($counts[$s])) {
-                    $counts[$s]++;
-                } elseif ($s === 'coordinator' || str_contains($s, 'coordinator')) {
-                    $counts['Koordinator']++;
-                } elseif ($s === 'supervisor' || str_contains($s, 'supervisor')) {
-                    $counts['Pengawas']++;
+                foreach ($status as $s) {
+                    if (isset($counts[$s])) {
+                        $counts[$s]++;
+                    } elseif ($s === 'coordinator' || str_contains($s, 'coordinator')) {
+                        $counts['Koordinator']++;
+                    } elseif ($s === 'supervisor' || str_contains($s, 'supervisor')) {
+                        $counts['Pengawas']++;
+                    }
                 }
             }
-        }
+
+            return $counts;
+        });
 
         return [
             'datasets' => [

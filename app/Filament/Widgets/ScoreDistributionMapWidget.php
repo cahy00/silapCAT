@@ -3,13 +3,17 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\Widget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use App\Models\Event;
 use App\Models\ExamScore;
 use App\Models\Report;
 use App\Models\Location;
+use Illuminate\Support\Facades\Cache;
 
 class ScoreDistributionMapWidget extends Widget
 {
+    use InteractsWithPageFilters;
+
     protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = 5;
@@ -18,29 +22,67 @@ class ScoreDistributionMapWidget extends Widget
 
     public function getScoreDistributionDataProperty(): array
     {
-        // 1. Ambil data nilai ujian CAT (ExamScore)
-        $scores = ExamScore::all();
-        $totalScores = $scores->count();
+        $year = $this->filters['formation_year'] ?? null;
+        $eventId = $this->filters['event_id'] ?? null;
 
-        $passedCount = $scores->where('status', 'Lulus')->count();
-        $failedCount = $scores->where('status', '!=', 'Lulus')->count();
-        $passRate = $totalScores > 0 ? round(($passedCount / $totalScores) * 100, 1) : 0;
-        $failRate = $totalScores > 0 ? round(($failedCount / $totalScores) * 100, 1) : 0;
+        $cacheKey = 'score_dist_data_' . md5(json_encode([$year, $eventId]));
 
-        $avgCat = $totalScores > 0 ? round($scores->avg('cat_score') ?? 0, 2) : 0;
-        $avgInterview = $totalScores > 0 ? round($scores->avg('interview_score') ?? 0, 2) : 0;
-        $avgTotal = $totalScores > 0 ? round($scores->avg('total_score') ?? 0, 2) : 0;
+        return Cache::remember($cacheKey, 60, function () use ($year, $eventId) {
+            $eventIds = null;
+            $targetEvent = null;
 
-        // Distribusi Rentang Skor CAT (standar terpusat: config/scoring.php)
-        $passingGrade = \App\Support\ScoreBands::passingGrade();
-        $bands = \App\Support\ScoreBands::distribute($scores->pluck('cat_score'), $passingGrade);
+            if ($eventId) {
+                $eventIds = [(int) $eventId];
+                $targetEvent = Event::with('procurementType')->find($eventId);
+            } elseif ($year) {
+                $eventIds = Event::where('formation_year', $year)->pluck('id')->toArray();
+            }
 
-        // 2. Data Peta Sebaran & Statistik per Titik Lokasi
-        $locations = Location::with([
-            'locationSurvey',
-            'eventLocations.event.reports',
-            'eventLocations.eventLocationInstitutions',
-        ])->get();
+            // 1. Ambil data nilai ujian CAT (ExamScore)
+            $scoresQuery = ExamScore::query();
+            if ($eventIds !== null) {
+                $scoresQuery->whereIn('event_id', $eventIds);
+            }
+
+            $scores = $scoresQuery->get(['id', 'event_id', 'cat_score', 'interview_score', 'total_score', 'status']);
+            $totalScores = $scores->count();
+
+            $passedCount = $scores->where('status', 'Lulus')->count();
+            $failedCount = $scores->where('status', '!=', 'Lulus')->count();
+            $passRate = $totalScores > 0 ? round(($passedCount / $totalScores) * 100, 1) : 0;
+            $failRate = $totalScores > 0 ? round(($failedCount / $totalScores) * 100, 1) : 0;
+
+            $avgCat = $totalScores > 0 ? round($scores->avg('cat_score') ?? 0, 2) : 0;
+            $avgInterview = $totalScores > 0 ? round($scores->avg('interview_score') ?? 0, 2) : 0;
+            $avgTotal = $totalScores > 0 ? round($scores->avg('total_score') ?? 0, 2) : 0;
+
+            // Distribusi Rentang Skor CAT (standar terpusat: config/scoring.php)
+            $passingGrade = \App\Support\ScoreBands::passingGrade($targetEvent);
+            $bands = \App\Support\ScoreBands::distribute($scores->pluck('cat_score'), $passingGrade);
+
+            // 2. Data Peta Sebaran & Statistik per Titik Lokasi
+            $locations = Location::with([
+                'locationSurvey:id,location_id,pc_count',
+                'eventLocations' => function ($q) use ($eventIds) {
+                    if ($eventIds !== null) {
+                        $q->whereIn('event_id', $eventIds);
+                    }
+                    $q->select('id', 'event_id', 'location_id');
+                },
+            ])->get(['id', 'name', 'city', 'latitude', 'longitude']);
+
+            // Eager fetch reports aggregated per location_id
+            $reportsQuery = Report::query()->select([
+                'id', 'event_location_id', 'total_participants', 'present_count', 'absent_count', 'highest_score', 'lowest_score'
+            ]);
+
+            if ($eventIds !== null) {
+                $reportsQuery->whereHas('eventLocation', fn ($q) => $q->whereIn('event_id', $eventIds));
+            }
+
+            $reportsByLocation = $reportsQuery->with(['eventLocation:id,location_id'])
+                ->get()
+                ->groupBy(fn ($r) => $r->eventLocation?->location_id);
 
         $cityCoordinates = [
             'manokwari' => [-0.861453, 134.062042],
@@ -99,10 +141,8 @@ class ScoreDistributionMapWidget extends Widget
                 }
             }
 
-            // Agregasi laporan ujian pada titik lokasi ini
-            $reports = Report::whereHas('eventLocation', function ($q) use ($loc) {
-                $q->where('location_id', $loc->id);
-            })->get();
+            // Agregasi laporan ujian pada titik lokasi ini dari collection in-memory
+            $reports = $reportsByLocation->get($loc->id, collect());
 
             $totalParticipants = (int) $reports->sum('total_participants');
             $presentCount = (int) $reports->sum('present_count');
@@ -174,5 +214,6 @@ class ScoreDistributionMapWidget extends Widget
             'map_markers' => $mapMarkers,
             'tilok_rankings' => $tilokRankings,
         ];
+        });
     }
 }

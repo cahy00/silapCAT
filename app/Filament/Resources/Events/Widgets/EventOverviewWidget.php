@@ -14,8 +14,9 @@ class EventOverviewWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         $totalEvents = Event::count();
-        $activeEvents = Event::where('status', 'active')->count();
-        $totalParticipants = EventLocationInstitution::sum('participants_count');
+        $activeEvents = Event::where('status', \App\Enums\EventStatus::Active->value)->count();
+        $metrics = \App\Support\ParticipantMetrics::aggregate();
+        $totalParticipants = $metrics['target_quota'] ?: $metrics['effective_total'];
         $locationsCount = EventLocation::distinct('location_id')->count('location_id');
 
         return [

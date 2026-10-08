@@ -3,12 +3,48 @@
 namespace App\Filament\Pages;
 
 use Filament\Pages\Dashboard as BaseDashboard;
+use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
+use App\Models\Event;
 
 class Dashboard extends BaseDashboard
 {
+    use HasFiltersForm;
+
     public function getHeading(): string
     {
         return '';
+    }
+
+    public function filtersForm(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Select::make('formation_year')
+                    ->label('Tahun Formasi')
+                    ->placeholder('Semua Tahun')
+                    ->options(function () {
+                        return Event::query()
+                            ->whereNotNull('formation_year')
+                            ->distinct()
+                            ->orderBy('formation_year', 'desc')
+                            ->pluck('formation_year', 'formation_year')
+                            ->toArray();
+                    }),
+
+                Select::make('event_id')
+                    ->label('Kegiatan Tertentu')
+                    ->placeholder('Semua Kegiatan')
+                    ->searchable()
+                    ->options(function () {
+                        return Event::query()
+                            ->orderBy('start_date', 'desc')
+                            ->pluck('name', 'id')
+                            ->toArray();
+                    }),
+            ]);
     }
 
     public function getWidgets(): array

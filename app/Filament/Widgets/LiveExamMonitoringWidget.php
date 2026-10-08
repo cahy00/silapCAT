@@ -3,12 +3,16 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\Widget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use App\Models\Event;
 use App\Models\EventLocation;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class LiveExamMonitoringWidget extends Widget
 {
+    use InteractsWithPageFilters;
+
     protected int|string|array $columnSpan = 'full';
 
     protected static ?int $sort = 3;
@@ -17,49 +21,55 @@ class LiveExamMonitoringWidget extends Widget
 
     public function getActiveTiloksProperty()
     {
-        $today = Carbon::today();
+        $year = $this->filters['formation_year'] ?? null;
+        $eventId = $this->filters['event_id'] ?? null;
 
-        // 1. Get events that are ongoing today or explicitly active
-        $activeEvents = Event::with([
-            'procurementType',
-            'eventLocations.location.locationSurvey',
-            'eventLocations.eventLocationInstitutions.institution',
-            'eventInstitutions.institution',
-            'eventEmployees.employee',
-            'reports',
-        ])
-        ->where(function ($q) use ($today) {
-            $q->where('status', \App\Enums\EventStatus::Active->value)
-              ->orWhere(function ($sub) use ($today) {
-                  $sub->whereDate('start_date', '<=', $today)
-                      ->whereDate('end_date', '>=', $today);
-              })
-              ->orWhereHas('eventLocations', function ($lq) use ($today) {
-                  $lq->whereDate('start_date', '<=', $today)
-                     ->whereDate('end_date', '>=', $today);
-              });
-        })
-        ->orderBy('start_date', 'desc')
-        ->orderBy('created_at', 'desc')
-        ->get();
+        $cacheKey = 'live_exam_mon_' . md5(json_encode([$year, $eventId]));
 
-        // If there are active events today, show them. Otherwise, show the most recent events (newest start_date first)
-        if ($activeEvents->isNotEmpty()) {
-            $events = $activeEvents;
-        } else {
-            $events = Event::with([
-                'procurementType',
-                'eventLocations.location.locationSurvey',
-                'eventLocations.eventLocationInstitutions.institution',
-                'eventInstitutions.institution',
-                'eventEmployees.employee',
-                'reports',
-            ])
-            ->orderBy('start_date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->take(6)
-            ->get();
-        }
+        return Cache::remember($cacheKey, 60, function () use ($year, $eventId) {
+            $today = Carbon::today();
+
+            $baseQuery = Event::with([
+                'procurementType:id,name',
+                'eventLocations.location.locationSurvey:id,location_id,pc_count',
+                'eventLocations.eventLocationInstitutions.institution:id,name',
+                'eventInstitutions.institution:id,name',
+                'eventEmployees.employee:id,name',
+                'reports:id,event_location_id,present_count,absent_count,highest_score,lowest_score',
+            ]);
+
+            if ($eventId) {
+                $baseQuery->where('id', $eventId);
+            } elseif ($year) {
+                $baseQuery->where('formation_year', $year);
+            }
+
+            // 1. Get events that are ongoing today or explicitly active
+            $activeEvents = (clone $baseQuery)
+                ->where(function ($q) use ($today) {
+                    $q->where('status', \App\Enums\EventStatus::Active->value)
+                      ->orWhere(function ($sub) use ($today) {
+                          $sub->whereDate('start_date', '<=', $today)
+                              ->whereDate('end_date', '>=', $today);
+                      })
+                      ->orWhereHas('eventLocations', function ($lq) use ($today) {
+                          $lq->whereDate('start_date', '<=', $today)
+                             ->whereDate('end_date', '>=', $today);
+                      });
+                })
+                ->orderBy('start_date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            if ($activeEvents->isNotEmpty()) {
+                $events = $activeEvents;
+            } else {
+                $events = (clone $baseQuery)
+                    ->orderBy('start_date', 'desc')
+                    ->orderBy('created_at', 'desc')
+                    ->take(6)
+                    ->get();
+            }
 
         $cards = [];
 
@@ -159,5 +169,6 @@ class LiveExamMonitoringWidget extends Widget
         }
 
         return $cards;
+        });
     }
 }
