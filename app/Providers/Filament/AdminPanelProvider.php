@@ -38,8 +38,10 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()->label('Manajemen Kegiatan'),
                 NavigationGroup::make()->label('Laporan & Nilai'),
                 NavigationGroup::make()->label('Master Data'),
+                NavigationGroup::make()->label('Tools'),
                 NavigationGroup::make()->label('Manajemen Website'),
                 NavigationGroup::make()->label('Pengaturan Sistem'),
+                NavigationGroup::make()->label('Filament Shield'),
             ])
             ->renderHook(
                 PanelsRenderHook::GLOBAL_SEARCH_BEFORE,

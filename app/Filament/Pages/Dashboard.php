@@ -14,6 +14,7 @@ class Dashboard extends BaseDashboard
     use HasFiltersForm;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-home';
+    protected static ?int $navigationSort = -10;
 
     public static function getNavigationLabel(): string
     {
