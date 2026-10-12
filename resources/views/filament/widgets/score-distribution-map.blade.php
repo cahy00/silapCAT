@@ -17,10 +17,10 @@
             transition: all 0.2s ease;
         }
         .dark .sdm-container {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border-color: #334155;
+            background: #121a2d !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
             color: #ffffff;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.07), 0 10px 25px -5px rgba(0, 0, 0, 0.45) !important;
         }
 
         .sdm-header {

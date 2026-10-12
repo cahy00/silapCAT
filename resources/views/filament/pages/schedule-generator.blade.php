@@ -45,14 +45,18 @@
             background: #fff; border-radius: 1rem; padding: 1.5rem;
             border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
-        .dark .sg-card { background: #0f172a; border-color: #1e293b; }
+        .dark .sg-card {
+            background: #121a2d;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.07), 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+        }
 
         .sg-card-header {
             display: flex; align-items: center; gap: 12px;
             padding-bottom: 1rem; margin-bottom: 1.25rem;
             border-bottom: 1px solid #f1f5f9;
         }
-        .dark .sg-card-header { border-bottom-color: #1e293b; }
+        .dark .sg-card-header { border-bottom-color: rgba(255, 255, 255, 0.07); }
 
         .sg-card-icon {
             width: 36px; height: 36px; border-radius: 10px;

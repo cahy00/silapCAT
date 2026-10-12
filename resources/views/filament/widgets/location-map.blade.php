@@ -134,7 +134,7 @@
             }
         }"
         style="background: #ffffff; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); color: #0f172a;"
-        class="dark:!bg-slate-900 dark:!border-slate-800 dark:!text-slate-100"
+        class="dark:!bg-[#121a2d] dark:!border-[rgba(255,255,255,0.08)] dark:!text-slate-100 dark:!shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07),0_10px_25px_-5px_rgba(0,0,0,0.45)]"
     >
         {{-- Header --}}
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">

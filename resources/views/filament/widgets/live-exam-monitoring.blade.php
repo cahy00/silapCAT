@@ -10,10 +10,10 @@
             transition: all 0.2s ease;
         }
         .dark .lem-container {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border-color: #334155;
-            color: #ffffff;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            background: #121a2d !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            color: #cbd5e1 !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
         }
 
         .lem-header-divider {
@@ -27,7 +27,7 @@
             gap: 0.75rem;
         }
         .dark .lem-header-divider {
-            border-bottom-color: rgba(255, 255, 255, 0.1);
+            border-bottom-color: rgba(255, 255, 255, 0.07) !important;
         }
 
         .lem-icon-box {
@@ -42,8 +42,8 @@
             border-radius: 0.75rem;
         }
         .dark .lem-icon-box {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
         }
 
         .lem-icon {
@@ -52,7 +52,7 @@
             color: #2563eb;
         }
         .dark .lem-icon {
-            color: #60a5fa;
+            color: #818cf8;
         }
 
         .lem-title {
@@ -64,7 +64,7 @@
             letter-spacing: -0.01em;
         }
         .dark .lem-title {
-            color: #f8fafc;
+            color: #ffffff !important;
         }
 
         .lem-subtitle {
@@ -73,7 +73,7 @@
             margin: 0.2rem 0 0 0;
         }
         .dark .lem-subtitle {
-            color: #94a3b8;
+            color: #94a3b8 !important;
         }
 
         .lem-badge-active {
@@ -89,9 +89,9 @@
             border: 1px solid #a7f3d0;
         }
         .dark .lem-badge-active {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #34d399 !important;
+            border-color: rgba(16, 185, 129, 0.3) !important;
         }
 
         .lem-card {
@@ -102,11 +102,21 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: all 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .lem-card:hover {
+            transform: translateY(-2px);
+            border-color: #cbd5e1;
+            box-shadow: 0 8px 16px -4px rgba(15, 23, 42, 0.08);
         }
         .dark .lem-card {
-            background: rgba(30, 41, 59, 0.75);
-            border-color: rgba(148, 163, 184, 0.15);
+            background: #0e1424 !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        }
+        .dark .lem-card:hover {
+            border-color: rgba(99, 102, 241, 0.35) !important;
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(99, 102, 241, 0.15) !important;
         }
 
         .lem-proc-badge {
@@ -123,9 +133,9 @@
             margin-bottom: 0.35rem;
         }
         .dark .lem-proc-badge {
-            background: rgba(99, 102, 241, 0.2);
-            color: #a5b4fc;
-            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(99, 102, 241, 0.15) !important;
+            color: #a5b4fc !important;
+            border-color: rgba(99, 102, 241, 0.3) !important;
         }
 
         .lem-card-title {
@@ -136,7 +146,7 @@
             line-height: 1.3;
         }
         .dark .lem-card-title {
-            color: #ffffff;
+            color: #ffffff !important;
         }
 
         .lem-progress-box {
@@ -147,8 +157,8 @@
             border: 1px solid #e2e8f0;
         }
         .dark .lem-progress-box {
-            background: rgba(15, 23, 42, 0.6);
-            border-color: rgba(255, 255, 255, 0.05);
+            background: #121a2d !important;
+            border-color: rgba(255, 255, 255, 0.06) !important;
         }
 
         .lem-progress-title {
@@ -157,7 +167,7 @@
             color: #64748b;
         }
         .dark .lem-progress-title {
-            color: #94a3b8;
+            color: #94a3b8 !important;
         }
 
         .lem-progress-pct {
@@ -166,7 +176,7 @@
             color: #0284c7;
         }
         .dark .lem-progress-pct {
-            color: #38bdf8;
+            color: #38bdf8 !important;
         }
 
         .lem-progress-track {
@@ -346,8 +356,8 @@
             border: 1px dashed #cbd5e1;
         }
         .dark .lem-empty-state {
-            background: rgba(15, 23, 42, 0.5);
-            border-color: #334155;
+            background: rgba(14, 20, 36, 0.6) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
         }
     </style>
 

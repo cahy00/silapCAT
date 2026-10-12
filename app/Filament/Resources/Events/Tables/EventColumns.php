@@ -32,14 +32,22 @@ class EventColumns
 .ev-wrap{display:flex;flex-direction:column;gap:8px;padding:8px 0;min-width:340px;max-width:520px;white-space:normal}
 .ev-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .ev-status{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.04em}
+.ev-status.st-active{background:#ecfdf5;color:#047857}
+.ev-status.st-active .ev-dot{background:#10b981}
+.ev-status.st-completed{background:#f1f5f9;color:#475569}
+.ev-status.st-completed .ev-dot{background:#94a3b8}
+.ev-status.st-draft{background:#fffbeb;color:#b45309}
+.ev-status.st-draft .ev-dot{background:#f59e0b}
+.ev-status.st-cancelled{background:#fef2f2;color:#b91c1c}
+.ev-status.st-cancelled .ev-dot{background:#ef4444}
 .ev-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
 .ev-dot.pulse{animation:evpulse 1.6s infinite}
-@keyframes evpulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.55)}70%{box-shadow:0 0 0 6px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
-.ev-cat{font-size:10.5px;font-weight:600;color:#4f46e5;background:#eef2ff;padding:3px 10px;border-radius:999px}
+@keyframes evpulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.6)}70%{box-shadow:0 0 0 6px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+.ev-cat{font-size:10.5px;font-weight:600;color:#4338ca;background:#eef2ff;border:1px solid #e0e7ff;padding:3px 10px;border-radius:999px}
 .ev-year{font-size:10.5px;font-weight:600;color:#64748b;background:#f1f5f9;padding:3px 8px;border-radius:999px}
 .ev-title{font-size:14.5px;font-weight:700;color:#0f172a;line-height:1.35;letter-spacing:-.01em}
 .ev-stats{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:#64748b}
-.ev-stats b{color:#0f172a;font-weight:700}
+.ev-stats b{color:#4f46e5;font-weight:700}
 .ev-loc-list{display:flex;flex-direction:column;gap:8px;border-top:1px dashed #e2e8f0;padding-top:8px}
 .ev-loc{display:flex;flex-direction:column;gap:5px}
 .ev-loc-head{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#1e293b}
@@ -58,6 +66,9 @@ class EventColumns
 .ev-range{font-size:12px;font-weight:600;color:#0f172a;white-space:nowrap}
 .ev-sub{font-size:11px;color:#64748b;margin-top:2px}
 .ev-rel{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;margin-top:4px;padding:2px 8px;border-radius:999px}
+.ev-rel.rel-active{background:#ecfdf5;color:#047857}
+.ev-rel.rel-upcoming{background:#fffbeb;color:#b45309}
+.ev-rel.rel-completed{background:#f1f5f9;color:#475569}
 
 .ev-att{min-width:180px;display:flex;flex-direction:column;gap:6px;padding:8px 0}
 .ev-att-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
@@ -76,20 +87,37 @@ class EventColumns
 .ev-doc.ok{background:#ecfdf5;color:#047857}
 .ev-doc.no{background:transparent;color:#94a3b8;border:1px dashed #cbd5e1}
 
-.dark .ev-title,.dark .ev-stats b,.dark .ev-range,.dark .ev-cal-d{color:#f1f5f9}
-.dark .ev-loc-head{color:#e2e8f0}
-.dark .ev-stats,.dark .ev-sub,.dark .ev-att-sesi,.dark .ev-att-foot,.dark .ev-docs-top{color:#94a3b8}
-.dark .ev-cat{background:rgba(99,102,241,.18);color:#a5b4fc}
-.dark .ev-year{background:rgba(148,163,184,.15);color:#cbd5e1}
-.dark .ev-loc-list{border-top-color:#334155}
-.dark .ev-loc-pin{background:rgba(239,68,68,.15)}
-.dark .ev-chip{background:rgba(30,41,59,.7);border-color:#334155;color:#cbd5e1}
-.dark .ev-chip b{color:#a5b4fc}
-.dark .ev-chip.more{background:rgba(99,102,241,.18);border-color:rgba(99,102,241,.4);color:#c7d2fe}
-.dark .ev-cal{background:#1e293b;border-color:#334155}
-.dark .ev-bar{background:#334155}
-.dark .ev-doc.ok{background:rgba(16,185,129,.15);color:#6ee7b7}
-.dark .ev-doc.no{border-color:#475569;color:#64748b}
+/* DARK MODE LUXURY PALETTE (MIDNIGHT SLATE & ELECTRIC INDIGO) */
+.dark .ev-status.st-active{background:rgba(16,185,129,.15)!important;color:#34d399!important;border:1px solid rgba(16,185,129,.35)}
+.dark .ev-status.st-active .ev-dot{background:#10b981!important}
+.dark .ev-status.st-completed{background:rgba(255,255,255,.06)!important;color:#94a3b8!important;border:1px solid rgba(255,255,255,.1)}
+.dark .ev-status.st-completed .ev-dot{background:#64748b!important}
+.dark .ev-status.st-draft{background:rgba(245,158,11,.15)!important;color:#fbbf24!important;border:1px solid rgba(245,158,11,.3)}
+.dark .ev-status.st-draft .ev-dot{background:#f59e0b!important}
+.dark .ev-status.st-cancelled{background:rgba(239,68,68,.15)!important;color:#f87171!important;border:1px solid rgba(239,68,68,.3)}
+.dark .ev-status.st-cancelled .ev-dot{background:#ef4444!important}
+
+.dark .ev-title{color:#ffffff!important;font-weight:700}
+.dark .ev-stats b{color:#818cf8!important}
+.dark .ev-stats{color:#94a3b8!important}
+.dark .ev-range{color:#ffffff!important}
+.dark .ev-cal-d{color:#ffffff!important}
+.dark .ev-cal{background:#0e1424!important;border-color:rgba(255,255,255,.1)!important;box-shadow:0 4px 12px rgba(0,0,0,.4)!important}
+.dark .ev-loc-head{color:#e2e8f0!important}
+.dark .ev-sub,.dark .ev-att-sesi,.dark .ev-att-foot,.dark .ev-docs-top{color:#94a3b8!important}
+.dark .ev-cat{background:rgba(99,102,241,.15)!important;color:#a5b4fc!important;border:1px solid rgba(99,102,241,.3)!important}
+.dark .ev-year{background:rgba(255,255,255,.06)!important;color:#94a3b8!important}
+.dark .ev-loc-list{border-top-color:rgba(255,255,255,.08)!important}
+.dark .ev-loc-pin{background:rgba(239,68,68,.15)!important}
+.dark .ev-chip{background:#121a2d!important;border-color:rgba(255,255,255,.08)!important;color:#cbd5e1!important}
+.dark .ev-chip b{color:#818cf8!important}
+.dark .ev-chip.more{background:rgba(99,102,241,.15)!important;border-color:rgba(99,102,241,.35)!important;color:#a5b4fc!important}
+.dark .ev-bar{background:#1e293b!important}
+.dark .ev-doc.ok{background:rgba(16,185,129,.15)!important;color:#34d399!important;border:1px solid rgba(16,185,129,.3)!important}
+.dark .ev-doc.no{border-color:rgba(255,255,255,.12)!important;color:#64748b!important}
+.dark .ev-rel.rel-active{background:rgba(16,185,129,.15)!important;color:#34d399!important;border:1px solid rgba(16,185,129,.3)!important}
+.dark .ev-rel.rel-upcoming{background:rgba(245,158,11,.15)!important;color:#fbbf24!important;border:1px solid rgba(245,158,11,.3)!important}
+.dark .ev-rel.rel-completed{background:rgba(255,255,255,.06)!important;color:#94a3b8!important;border:1px solid rgba(255,255,255,.1)!important}
 </style>
 CSS;
     }
@@ -102,15 +130,15 @@ CSS;
             ->sortable()
             ->html()
             ->formatStateUsing(function (Event $record): HtmlString {
-                $status = [
-                    'active' => ['Berlangsung', '#ecfdf5', '#047857', '#10b981', true],
-                    'completed' => ['Selesai', '#f1f5f9', '#475569', '#94a3b8', false],
-                    'cancelled' => ['Dibatalkan', '#fef2f2', '#b91c1c', '#ef4444', false],
-                ][$record->status] ?? ['Draft', '#fffbeb', '#b45309', '#f59e0b', false];
-
-                [$sLabel, $sBg, $sText, $sDot, $pulse] = $status;
-                $statusPill = "<span class='ev-status' style='background:{$sBg};color:{$sText};'>"
-                    . "<span class='ev-dot" . ($pulse ? ' pulse' : '') . "' style='background:{$sDot};'></span>{$sLabel}</span>";
+                $statusKey = $record->status ?? 'draft';
+                $statusConfig = [
+                    'active' => ['Berlangsung', true],
+                    'completed' => ['Selesai', false],
+                    'cancelled' => ['Dibatalkan', false],
+                ];
+                [$sLabel, $pulse] = $statusConfig[$statusKey] ?? ['Draft', false];
+                $statusPill = "<span class='ev-status st-{$statusKey}'>"
+                    . "<span class='ev-dot" . ($pulse ? ' pulse' : '') . "'></span>{$sLabel}</span>";
 
                 $type = $record->procurementType?->name;
                 $catPill = $type ? "<span class='ev-cat'>" . e($type) . "</span>" : '';
@@ -190,13 +218,13 @@ CSS;
                 $duration = (int) $start->diffInDays($end) + 1;
 
                 if ($now->between($start, $end)) {
-                    [$color, $relBg, $relText, $rel] = ['#10b981', '#ecfdf5', '#047857', 'Sedang berlangsung'];
+                    [$color, $relClass, $rel] = ['#10b981', 'rel-active', 'Sedang berlangsung'];
                 } elseif ($now->lt($start)) {
                     $days = (int) abs($now->diffInDays($start));
-                    [$color, $relBg, $relText, $rel] = ['#f59e0b', '#fffbeb', '#b45309', "Mulai {$days} hari lagi"];
+                    [$color, $relClass, $rel] = ['#f59e0b', 'rel-upcoming', "Mulai {$days} hari lagi"];
                 } else {
                     $days = (int) abs($end->diffInDays($now));
-                    [$color, $relBg, $relText, $rel] = ['#64748b', '#f1f5f9', '#475569', "Selesai {$days} hari lalu"];
+                    [$color, $relClass, $rel] = ['#64748b', 'rel-completed', "Selesai {$days} hari lalu"];
                 }
 
                 $range = $start->isSameDay($end)
@@ -212,7 +240,7 @@ CSS;
                         <div>
                             <div class='ev-range'>{$range}</div>
                             <div class='ev-sub'>{$duration} hari pelaksanaan</div>
-                            <span class='ev-rel' style='background:{$relBg};color:{$relText};'>{$rel}</span>
+                            <span class='ev-rel {$relClass}'>{$rel}</span>
                         </div>
                     </div>");
             });

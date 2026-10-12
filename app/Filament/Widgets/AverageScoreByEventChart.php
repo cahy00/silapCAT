@@ -59,7 +59,7 @@ class AverageScoreByEventChart extends ChartWidget
                     [
                         'label' => 'Rata-rata CAT',
                         'data' => $avgCat,
-                        'backgroundColor' => '#3b82f6',
+                        'backgroundColor' => '#6366f1',
                     ],
                     [
                         'label' => 'Rata-rata Wawancara',
