@@ -12,6 +12,18 @@ class CreateReport extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = auth()->id();
+
+        if (empty($data['event_location_id']) && !empty($data['event_id'])) {
+            $user = auth()->user();
+            $locationId = null;
+            if ($user && $user->hasRole('operator')) {
+                $locationId = \App\Models\EventDelegation::where('user_id', $user->id)
+                    ->where('event_id', $data['event_id'])
+                    ->value('event_location_id');
+            }
+            $data['event_location_id'] = $locationId ?: \App\Models\EventLocation::where('event_id', $data['event_id'])->value('id');
+        }
+
         return $data;
     }
 
@@ -23,7 +35,19 @@ class CreateReport extends CreateRecord
         $firstRecord = null;
         
         foreach ($sessions as $sessionData) {
+            $sessionData['total_participants'] = (int)($sessionData['present_count'] ?? 0) + (int)($sessionData['absent_count'] ?? 0);
             $recordData = array_merge($data, $sessionData);
+            
+            if (empty($recordData['event_location_id']) && !empty($recordData['event_id'])) {
+                $user = auth()->user();
+                $locationId = null;
+                if ($user && $user->hasRole('operator')) {
+                    $locationId = \App\Models\EventDelegation::where('user_id', $user->id)
+                        ->where('event_id', $recordData['event_id'])
+                        ->value('event_location_id');
+                }
+                $recordData['event_location_id'] = $locationId ?: \App\Models\EventLocation::where('event_id', $recordData['event_id'])->value('id');
+            }
             
             // Cek duplikasi agar tidak terjadi error SQL Unique Constraint
             $exists = static::getModel()::where('event_id', $recordData['event_id'])
