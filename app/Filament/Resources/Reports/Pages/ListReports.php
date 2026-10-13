@@ -10,6 +10,16 @@ class ListReports extends ListRecords
 {
     protected static string $resource = ReportResource::class;
 
+    public function getDefaultTableSortColumn(): ?string
+    {
+        return 'report_date';
+    }
+
+    public function getDefaultTableSortDirection(): ?string
+    {
+        return 'desc';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

@@ -58,6 +58,7 @@ class ReportsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('report_date', 'desc')
             ->filters([
                 //
             ])
@@ -65,6 +66,20 @@ class ReportsTable
                 \Filament\Tables\Grouping\Group::make('event_location_id')
                     ->label('Kegiatan & Lokasi')
                     ->getTitleFromRecordUsing(fn (\App\Models\Report $record) => ($record->event?->name ?? '-') . ' - ' . ($record->eventLocation?->location?->name ?? '-'))
+                    ->orderQueryUsing(function ($query, string $direction) {
+                        return $query->orderBy(
+                            \App\Models\Report::selectRaw('COALESCE(MAX(report_date), "1970-01-01")')
+                                ->where(function ($q) {
+                                    $q->whereColumn('event_location_id', 'reports.event_location_id')
+                                      ->orWhere(function ($nullQ) {
+                                          $nullQ->whereNull('reports.event_location_id')
+                                                ->whereNull('event_location_id')
+                                                ->whereColumn('event_id', 'reports.event_id');
+                                      });
+                                }),
+                            $direction === 'asc' ? 'desc' : 'asc'
+                        );
+                    }),
             ])
             ->defaultGroup('event_location_id')
             ->recordActions([
