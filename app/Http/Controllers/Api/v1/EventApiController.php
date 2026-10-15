@@ -105,9 +105,9 @@ class EventApiController extends Controller
         $scores = $event->examScores;
 
         if ($reports && $reports->isNotEmpty()) {
-            $totalParticipants = (int) $reports->sum('total_participants');
             $presentCount = (int) $reports->sum('present_count');
             $absentCount = (int) $reports->sum('absent_count');
+            $totalParticipants = (int) ($reports->sum('total_participants') ?: ($presentCount + $absentCount));
             $highestScore = (float) ($reports->max('highest_score') ?? 0);
             
             $validLowest = $reports->whereNotNull('lowest_score')->where('lowest_score', '>', 0);
@@ -225,18 +225,22 @@ class EventApiController extends Controller
             'city' => $el->location?->city?->name ?? null,
         ]);
 
-        $base['session_reports'] = $event->reports->map(fn ($rep) => [
-            'id' => $rep->id,
-            'report_date' => $rep->report_date ? Carbon::parse($rep->report_date)->format('Y-m-d') : null,
-            'session_name' => $rep->session_name,
-            'location_name' => $rep->eventLocation?->location?->name ?? $rep->eventLocation?->name ?? null,
-            'total_participants' => (int) $rep->total_participants,
-            'present_count' => (int) $rep->present_count,
-            'absent_count' => (int) $rep->absent_count,
-            'highest_score' => (float) $rep->highest_score,
-            'lowest_score' => (float) $rep->lowest_score,
-            'reporter_name' => $rep->user?->name ?? null,
-        ]);
+        $base['session_reports'] = $event->reports
+            ->sortByDesc(fn ($rep) => ($rep->report_date ? Carbon::parse($rep->report_date)->format('Y-m-d') : '0000-00-00') . '_' . $rep->session_name)
+            ->values()
+            ->map(fn ($rep) => [
+                'id' => $rep->id,
+                'report_date' => $rep->report_date ? Carbon::parse($rep->report_date)->format('Y-m-d') : null,
+                'session_name' => $rep->session_name,
+                'event_location_id' => $rep->event_location_id,
+                'location_name' => $rep->eventLocation?->location?->name ?? $rep->eventLocation?->name ?? null,
+                'total_participants' => (int) ($rep->total_participants ?: ((int) $rep->present_count + (int) $rep->absent_count)),
+                'present_count' => (int) $rep->present_count,
+                'absent_count' => (int) $rep->absent_count,
+                'highest_score' => (float) $rep->highest_score,
+                'lowest_score' => (float) $rep->lowest_score,
+                'reporter_name' => $rep->user?->name ?? null,
+            ]);
 
         $base['documents'] = [
             'implementation_report' => $event->doc_implementation_report ? asset('storage/' . $event->doc_implementation_report) : null,

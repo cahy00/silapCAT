@@ -64,7 +64,7 @@ class EventDelegationForm
                             }),
                         Select::make('user_id')
                             ->label('User (Operator)')
-                            ->relationship('user', 'name', fn ($query) => $query->role('operator'))
+                            ->relationship('user', 'name', fn ($query) => $query->whereHas('roles', fn ($rq) => $rq->where('name', 'operator')))
                             ->searchable()
                             ->preload()
                             ->required(),

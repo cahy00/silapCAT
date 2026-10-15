@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\EventApiController;
+use App\Http\Controllers\Api\v1\ReportApiController;
 use App\Http\Controllers\Api\v1\ExamScoreApiController;
 use App\Http\Controllers\Api\v1\EmployeeApiController;
 use App\Http\Controllers\Api\v1\InstitutionApiController;
@@ -24,6 +25,8 @@ Route::get('/events', [EventApiController::class, 'index']);
 Route::prefix('v1')->middleware('api.key')->group(function () {
     Route::get('/events', [EventApiController::class, 'index']);
     Route::get('/events/{id}', [EventApiController::class, 'show']);
+    Route::get('/reports', [ReportApiController::class, 'index']);
+    Route::get('/reports/{id}', [ReportApiController::class, 'show']);
     Route::get('/exam-scores', [ExamScoreApiController::class, 'index']);
     Route::get('/employees', [EmployeeApiController::class, 'index']);
     Route::get('/institutions', [InstitutionApiController::class, 'index']);
